@@ -1,0 +1,95 @@
+import 'package:flutter/material.dart';
+
+import '../errors/app_exception.dart';
+import '../l10n/l10n.dart';
+
+/// Localizes any thrown object into a user-facing message.
+String errorMessage(BuildContext context, Object error) {
+  final mapped = ExceptionMapper.map(error);
+  final l10n = context.l10n;
+  return switch (mapped.code) {
+    AppErrorCode.network => l10n.error_network,
+    AppErrorCode.timeout => l10n.error_timeout,
+    AppErrorCode.invalidCredentials => l10n.error_invalid_credentials,
+    AppErrorCode.emailExists => l10n.error_email_exists,
+    AppErrorCode.emailNotConfirmed => l10n.error_email_not_confirmed,
+    AppErrorCode.weakPassword => l10n.error_weak_password,
+    AppErrorCode.invalidEmail => l10n.error_invalid_email,
+    AppErrorCode.tooManyRequests => l10n.error_too_many_requests,
+    AppErrorCode.inviteNotFound => l10n.error_invite_not_found,
+    AppErrorCode.inviteUsed => l10n.error_invite_used,
+    AppErrorCode.inviteExpired => l10n.error_invite_expired,
+    AppErrorCode.alreadyMember => l10n.error_already_member,
+    AppErrorCode.notMember => l10n.error_not_member,
+    AppErrorCode.forbidden => l10n.error_forbidden,
+    AppErrorCode.invalidName => l10n.error_invalid_name,
+    AppErrorCode.invalidCurrency => l10n.error_invalid_currency,
+    AppErrorCode.invalidRole => l10n.error_invalid_role,
+    AppErrorCode.membershipImmutable => l10n.error_membership_immutable,
+    AppErrorCode.unknown => l10n.error_unknown,
+  };
+}
+
+/// Full-screen error state with an optional retry action.
+class ErrorView extends StatelessWidget {  const ErrorView({super.key, required this.error, this.onRetry});
+
+  final Object error;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline_rounded, size: 48, color: Theme.of(context).colorScheme.error),
+            const SizedBox(height: 12),
+            Text(
+              errorMessage(context, error),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            if (onRetry != null) ...[
+              const SizedBox(height: 20),
+              FilledButton.tonal(onPressed: onRetry, child: Text(context.l10n.retry)),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Inline banner used at the top of forms.
+class ErrorBanner extends StatelessWidget {
+  const ErrorBanner({super.key, required this.error});
+
+  final Object error;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: scheme.errorContainer,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline_rounded, color: scheme.onErrorContainer),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              errorMessage(context, error),
+              style: TextStyle(color: scheme.onErrorContainer),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
