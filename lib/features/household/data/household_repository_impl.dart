@@ -68,6 +68,7 @@ class HouseholdRepositoryImpl implements HouseholdRepository {
     required String householdId,
     required MemberRole role,
     int ttlDays = 7,
+    String? memberId,
   }) async {
     try {
       final result = await _client.rpc(
@@ -76,6 +77,7 @@ class HouseholdRepositoryImpl implements HouseholdRepository {
           'p_household_id': householdId,
           'p_role': role.dbValue,
           'p_ttl_days': ttlDays,
+          'p_member_id': ?memberId,
         },
       );
       return result as String;

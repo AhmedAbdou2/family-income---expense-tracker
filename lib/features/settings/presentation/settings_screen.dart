@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/l10n/l10n.dart';
@@ -9,6 +10,7 @@ import '../../../core/widgets/error_view.dart';
 import '../../auth/presentation/providers.dart';
 import '../../household/domain/entities.dart';
 import '../../household/presentation/providers.dart';
+import '../../members/presentation/providers.dart';
 
 String _roleLabel(BuildContext context, MemberRole role) => switch (role) {
       MemberRole.owner => context.l10n.role_owner,
@@ -24,6 +26,12 @@ class SettingsScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final settings = ref.watch(settingsProvider);
     final scheme = Theme.of(context).colorScheme;
+    // Invites and category management are adult/owner capabilities; the
+    // RPCs reject children anyway, so don't even show the controls.
+    final isAdult = switch (ref.watch(membershipProvider).value?.role) {
+      MemberRole.owner || MemberRole.adult => true,
+      _ => false,
+    };
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settings_title)),
@@ -115,30 +123,46 @@ class SettingsScreen extends ConsumerWidget {
           _SectionHeader(title: l10n.household_section),
           const _HouseholdCard(),
 
-          // ----------------------------------------------------------------
-          // Invite codes
-          // ----------------------------------------------------------------
-          _SectionHeader(title: l10n.invites_section),
-          Padding(
-            padding: const EdgeInsetsDirectional.only(start: 16, end: 16, bottom: 8),
-            child: Text(
-              l10n.invite_code_hint_share,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: scheme.onSurfaceVariant),
+          if (isAdult) ...[
+            // ------------------------------------------------------------
+            // Category management
+            // ------------------------------------------------------------
+            _SectionHeader(title: l10n.manage_categories),
+            Card(
+              child: ListTile(
+                leading: Icon(Icons.category_outlined, color: scheme.primary),
+                title: Text(l10n.manage_categories),
+                subtitle: Text(l10n.categories_title),
+                onTap: () => context.push('/categories'),
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
-            child: FilledButton.tonalIcon(
-              icon: const Icon(Icons.add_rounded),
-              label: Text(l10n.create_invite_action),
-              onPressed: () => _createInvite(context, ref),
+
+            // ------------------------------------------------------------
+            // Invite codes
+            // ------------------------------------------------------------
+            _SectionHeader(title: l10n.invites_section),
+            Padding(
+              padding:
+                  const EdgeInsetsDirectional.only(start: 16, end: 16, bottom: 8),
+              child: Text(
+                l10n.invite_code_hint_share,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: scheme.onSurfaceVariant),
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          const _InvitesList(),
+            Padding(
+              padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+              child: FilledButton.tonalIcon(
+                icon: const Icon(Icons.add_rounded),
+                label: Text(l10n.create_invite_action),
+                onPressed: () => _createInvite(context, ref),
+              ),
+            ),
+            const SizedBox(height: 12),
+            const _InvitesList(),
+          ],
 
           // ----------------------------------------------------------------
           // Sign out
@@ -193,10 +217,65 @@ class SettingsScreen extends ConsumerWidget {
     );
     if (role == null || !context.mounted) return;
 
+    // Optional: bind the invite to an existing person so that accepting it
+    // links the login to that members row (member-bound invite). Absent
+    // link, the login joins with no person of its own - that's what
+    // 'Join only' means.
+    String? memberId;
+    final members = await ref.read(membersProvider.future);
+    if (!context.mounted) return;
+    final unlinked =
+        members.where((member) => member.isActive && !member.isLinked).toList();
+    if (unlinked.isNotEmpty) {
+      final choice = await showDialog<Object?>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(dialogContext.l10n.invite_link_title),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                dialogContext.l10n.invite_link_hint,
+                style: Theme.of(dialogContext)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(
+                        color: Theme.of(dialogContext)
+                            .colorScheme
+                            .onSurfaceVariant),
+              ),
+              const SizedBox(height: 8),
+              ListTile(
+                leading: const Icon(Icons.person_off_outlined),
+                title: Text(dialogContext.l10n.invite_link_none),
+                onTap: () => Navigator.of(dialogContext).pop('none'),
+              ),
+              for (final member in unlinked)
+                ListTile(
+                  leading: const Icon(Icons.person_add_alt_outlined),
+                  title: Text(member.name),
+                  onTap: () => Navigator.of(dialogContext).pop(member.id),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(dialogContext.l10n.cancel),
+            ),
+          ],
+        ),
+      );
+      if (!context.mounted || choice == null) return;
+      memberId = choice == 'none' ? null : choice as String;
+    }
+
     try {
       final code = await ref.read(householdRepositoryProvider).createInvite(
             householdId: membership.household.id,
             role: role,
+            memberId: memberId,
           );
       ref.invalidate(invitesProvider);
       if (!context.mounted) return;

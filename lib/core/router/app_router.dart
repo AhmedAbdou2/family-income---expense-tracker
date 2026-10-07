@@ -6,6 +6,7 @@ import '../../features/auth/presentation/forgot_password_screen.dart';
 import '../../features/auth/presentation/providers.dart';
 import '../../features/auth/presentation/sign_in_screen.dart';
 import '../../features/auth/presentation/sign_up_screen.dart';
+import '../../features/categories/presentation/categories_screen.dart';
 import '../../features/household/presentation/create_household_screen.dart';
 import '../../features/household/presentation/dashboard_screen.dart';
 import '../../features/household/presentation/home_shell.dart';
@@ -13,8 +14,10 @@ import '../../features/household/presentation/join_household_screen.dart';
 import '../../features/household/presentation/providers.dart';
 import '../../features/household/presentation/setup_screen.dart';
 import '../../features/household/presentation/splash_screen.dart';
-import '../../features/household/presentation/transactions_screen.dart';
+import '../../features/members/presentation/members_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
+import '../../features/transactions/presentation/transaction_form_screen.dart';
+import '../../features/transactions/presentation/transactions_screen.dart';
 import 'redirect.dart';
 
 export 'redirect.dart';
@@ -73,6 +76,23 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const JoinHouseholdScreen(),
       ),
 
+      // Detail routes: declared before the shell so '/transactions/new'
+      // and '/transactions/edit/:id' win over the plain branch path.
+      GoRoute(
+        path: '/transactions/new',
+        builder: (context, state) => const TransactionFormScreen(),
+      ),
+      GoRoute(
+        path: '/transactions/edit/:id',
+        builder: (context, state) => TransactionFormScreen(
+          transactionId: state.pathParameters['id'],
+        ),
+      ),
+      GoRoute(
+        path: '/categories',
+        builder: (context, state) => const CategoriesScreen(),
+      ),
+
       // Main shell: bottom nav on mobile, side rail on web/desktop
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
@@ -85,6 +105,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(
               path: '/transactions',
               builder: (context, state) => const TransactionsScreen(),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/members',
+              builder: (context, state) => const MembersScreen(),
             ),
           ]),
           StatefulShellBranch(routes: [

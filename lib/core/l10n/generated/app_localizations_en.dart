@@ -302,4 +302,218 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get error_membership_immutable =>
       'Membership details can\'t be changed here.';
+
+  @override
+  String get nav_people => 'People';
+
+  @override
+  String get members_title => 'People';
+
+  @override
+  String get member_add => 'Add person';
+
+  @override
+  String get member_name => 'Person name';
+
+  @override
+  String get member_name_hint => 'e.g. Sara';
+
+  @override
+  String get member_rename => 'Rename';
+
+  @override
+  String get member_delete => 'Delete person';
+
+  @override
+  String get member_delete_confirm_title => 'Delete this person?';
+
+  @override
+  String get member_delete_confirm_body =>
+      'You can only delete people who have no transactions.';
+
+  @override
+  String get delete_action => 'Delete';
+
+  @override
+  String get member_active => 'Active';
+
+  @override
+  String get member_inactive => 'Inactive';
+
+  @override
+  String get member_linked_badge => 'Linked';
+
+  @override
+  String get member_you => 'You';
+
+  @override
+  String get member_empty_title => 'No people yet';
+
+  @override
+  String get member_empty_body =>
+      'Add the people in your family so spending can be tracked per person.';
+
+  @override
+  String get member_in_use =>
+      'This person has transactions and can\'t be deleted.';
+
+  @override
+  String get categories_title => 'Categories';
+
+  @override
+  String get manage_categories => 'Manage categories';
+
+  @override
+  String get category_add => 'Add category';
+
+  @override
+  String get category_edit => 'Edit category';
+
+  @override
+  String get category_name_en => 'Name (English)';
+
+  @override
+  String get category_name_ar => 'Name (Arabic)';
+
+  @override
+  String get category_group => 'Group';
+
+  @override
+  String get category_icon => 'Icon';
+
+  @override
+  String get category_color => 'Color';
+
+  @override
+  String get category_delete_confirm_title => 'Delete this category?';
+
+  @override
+  String get category_delete_confirm_body =>
+      'You can only delete categories that have no transactions.';
+
+  @override
+  String get group_general => 'General expenses';
+
+  @override
+  String get group_car => 'Car expenses';
+
+  @override
+  String get group_fixed => 'Fixed commitments';
+
+  @override
+  String get group_income => 'Income';
+
+  @override
+  String get type_expense => 'Expense';
+
+  @override
+  String get type_income => 'Income';
+
+  @override
+  String get amount => 'Amount';
+
+  @override
+  String get amount_invalid => 'Enter a valid amount.';
+
+  @override
+  String get amount_zero => 'The amount must be greater than zero.';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get person => 'Person';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get note => 'Note (optional)';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get transaction_new_title => 'New transaction';
+
+  @override
+  String get transaction_edit_title => 'Edit transaction';
+
+  @override
+  String get transaction_saved => 'Transaction saved.';
+
+  @override
+  String get transaction_delete => 'Delete transaction';
+
+  @override
+  String get transaction_delete_confirm_title => 'Delete this transaction?';
+
+  @override
+  String get transaction_delete_confirm_body => 'This can\'t be undone.';
+
+  @override
+  String get transaction_deleted => 'Transaction deleted.';
+
+  @override
+  String get month_no_data => 'No transactions this month.';
+
+  @override
+  String get month_prev => 'Previous month';
+
+  @override
+  String get month_next => 'Next month';
+
+  @override
+  String get filter_everyone => 'Everyone';
+
+  @override
+  String get select_category => 'Select a category';
+
+  @override
+  String get select_person => 'Select a person';
+
+  @override
+  String get quick_add_title => 'Quick add';
+
+  @override
+  String get quick_add_more => 'More options';
+
+  @override
+  String get dashboard_expenses => 'Expenses';
+
+  @override
+  String get dashboard_balance => 'Balance';
+
+  @override
+  String get dashboard_recent => 'Recent';
+
+  @override
+  String get invite_link_title => 'Link to a person';
+
+  @override
+  String get invite_link_none => 'Join only (no link)';
+
+  @override
+  String get invite_link_hint =>
+      'When someone accepts, their login becomes this person\'s account.';
+
+  @override
+  String get error_member_linked =>
+      'That person is already linked to an account.';
+
+  @override
+  String get error_login_linked =>
+      'This account is already linked to a person.';
+
+  @override
+  String get error_invalid_member =>
+      'That person doesn\'t belong to this household.';
+
+  @override
+  String get error_category_in_use =>
+      'That category has transactions and can\'t be deleted.';
+
+  @override
+  String get error_member_in_use =>
+      'That person has transactions and can\'t be deleted.';
 }

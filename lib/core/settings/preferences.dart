@@ -17,6 +17,12 @@ class AppPreferences {
   static const _kThemeMode = 'pref_theme_mode';
   static const _kArabicDigits = 'pref_arabic_digits';
 
+  // Quick-add defaults: remember the last person/category/type so a repeat
+  // entry takes three taps (+, digits, save).
+  static const _kQuickType = 'quick_add_type';
+  static const _kQuickCategory = 'quick_add_category';
+  static const _kQuickMember = 'quick_add_member';
+
   final SharedPreferences _prefs;
 
   /// null = follow the device language.
@@ -41,6 +47,20 @@ class AppPreferences {
       _prefs.setString(_kThemeMode, value.name);
 
   Future<void> setArabicDigits(bool value) => _prefs.setBool(_kArabicDigits, value);
+
+  String? get quickAddType => _prefs.getString(_kQuickType);
+  String? get quickAddCategoryId => _prefs.getString(_kQuickCategory);
+  String? get quickAddMemberId => _prefs.getString(_kQuickMember);
+
+  Future<void> setQuickAddDefaults({
+    required String type,
+    required String categoryId,
+    required String memberId,
+  }) async {
+    await _prefs.setString(_kQuickType, type);
+    await _prefs.setString(_kQuickCategory, categoryId);
+    await _prefs.setString(_kQuickMember, memberId);
+  }
 }
 
 final preferencesProvider = Provider<AppPreferences>(

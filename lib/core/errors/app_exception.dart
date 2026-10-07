@@ -23,6 +23,11 @@ enum AppErrorCode {
   invalidCurrency,
   invalidRole,
   membershipImmutable,
+  memberLinked,
+  loginLinked,
+  invalidMember,
+  categoryInUse,
+  memberInUse,
   unknown,
 }
 
@@ -123,9 +128,26 @@ abstract final class ExceptionMapper {
         return const AppException(AppErrorCode.invalidRole);
       case 'not_authenticated':
         return const AppException(AppErrorCode.invalidCredentials);
+      case 'member_linked':
+        return const AppException(AppErrorCode.memberLinked);
+      case 'login_linked':
+        return const AppException(AppErrorCode.loginLinked);
+      case 'invalid_member':
+        return const AppException(AppErrorCode.invalidMember);
     }
 
     final message = error.message.toLowerCase();
+    if (error.code == '23503') {
+      // FK violations: transactions/ budgets/ recurring_rules keep the row
+      // they point at (on delete restrict). Distinguish by constraint name.
+      if (error.message.contains('category')) {
+        return const AppException(AppErrorCode.categoryInUse);
+      }
+      if (error.message.contains('member')) {
+        return const AppException(AppErrorCode.memberInUse);
+      }
+      return const AppException(AppErrorCode.forbidden);
+    }
     if (message.contains('row-level security')) {
       return const AppException(AppErrorCode.forbidden);
     }

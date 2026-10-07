@@ -175,5 +175,38 @@ void main() {
         isNull,
       );
     });
+
+    test('signed in with a household keeps Phase 2 routes', () {
+      for (final location in [
+        '/members',
+        '/transactions',
+        '/transactions/new',
+        '/transactions/edit/00000000-0000-0000-0000-000000000000',
+        '/categories',
+      ]) {
+        expect(
+          appRedirect(
+            authLoading: false,
+            signedIn: true,
+            membershipLoading: false,
+            hasMembership: true,
+            location: location,
+          ),
+          isNull,
+          reason: location,
+        );
+        expect(
+          appRedirect(
+            authLoading: false,
+            signedIn: false,
+            membershipLoading: false,
+            hasMembership: false,
+            location: location,
+          ),
+          '/sign-in',
+          reason: 'signed out: $location',
+        );
+      }
+    });
   });
 }

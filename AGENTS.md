@@ -32,7 +32,7 @@ Flutter (Riverpod 3, go_router 18, Supabase) + Postgres with RLS.
 ```sh
 flutter gen-l10n        # only if .arb files changed
 flutter analyze         # must be clean
-flutter test            # must pass (21 tests)
+flutter test            # must pass (34 tests)
 flutter build web --release   # compile check; ~3-4 min
 ```
 
@@ -53,9 +53,19 @@ lib/features  auth/  domain (AuthRepository, SignUpOutcome), data
               household/ domain (entities: Household, Membership, MemberRole,
                    Invite; HouseholdRepository), data (RPC + embed query),
                    presentation (membershipProvider, invitesProvider, splash,
-                   setup, create, join, home shell, dashboard, transactions)
-              settings/  settings screen (language/theme/digits, invites,
-                   sign out)
+                   setup, create, join, home shell (4 tabs + quick-add FAB),
+                   dashboard (month summary + recent 5))
+              members/  domain (Member, MembersRepository), data,
+                   presentation (membersProvider, People tab: add / rename /
+                   deactivate / delete; children read-only)
+              categories/ domain (Category, CategoryGroup), data, presentation
+                   (categoriesProvider, category_visuals icon/color maps,
+                   grouped list + editor dialog)
+              transactions/ domain (Transaction, TransactionType), data,
+                   presentation (month/member-filtered list, create/edit form,
+                   QuickAddAmountController + quick-add sheet, month providers)
+              settings/  settings screen (language/theme/digits, invites with
+                   optional person link, manage categories, sign out)
 ```
 
 - Providers: Riverpod 3 `NotifierProvider`/`StreamProvider`/`FutureProvider`.
@@ -63,7 +73,10 @@ lib/features  auth/  domain (AuthRepository, SignUpOutcome), data
   (`routerProvider` + `_RouterRefresh`).
 - Routing: go_router `redirect` = `appRedirect(location, auth, membership)`
   (pure, unit-tested). Paths: `/splash`, `/sign-in`, `/sign-up`,
-  `/forgot-password`, `/setup`, `/create-household`, `/join`, `/home/*`.
+  `/forgot-password`, `/setup`, `/setup/create`, `/setup/join`,
+  `/` (dashboard), `/transactions`, `/transactions/new`,
+  `/transactions/edit/:id`, `/members`, `/categories`, `/settings`.
+  Detail routes are declared before the shell.
 - Environment: `flutter_dotenv`, keys read in `lib/core/config/env.dart`.
 
 ## Database
@@ -72,9 +85,15 @@ Migrations in `supabase/migrations/` — run **in filename order** in the
 Supabase SQL Editor (user does this manually):
 
 1. extensions → 2. households (adds `created_by`) → 3. members
-   (nullable `user_id`, unique per household) → 4. categories (31 seeded
-   bilingual defaults) → 5. vehicles → 6. recurring_rules + budgets →
-   7. transactions → 8. invites → 9. RPCs → 10. RLS + grants.
+   (nullable `user_id`, unique per household per user) → 4. categories
+   (31 seeded bilingual defaults) → 5. vehicles → 6. recurring_rules +
+   budgets → 7. transactions → 8. invites → 9. RPCs → 10. RLS + grants
+   → 11. invite member link (`invites.member_id`, 4-arg `create_invite`
+   with `set search_path = public, extensions`, `accept_invite` auto-links
+   `members.user_id`, REVOKE/GRANT hardening of every definer function).
+
+Migration 11 is **frozen** (run green on the cloud DB together with the
+isolation test). Any further DB change must be a NEW migration file.
 
 Indexes: `household_id` on every table; `(household_id, date)` on
 transactions.
@@ -102,11 +121,12 @@ RLS design (full plain-language comments in migration 10):
 Test: `supabase/tests/20261006900001_household_isolation.sql` (single
 transaction, rolls back, prints `ALL RLS ISOLATION TESTS PASSED`).
 
-### Known Phase-2 item
+### Known item
 
-Joining via invite creates a `household_users` row only. Linking a login
-to a person (`members.user_id`) happens later in member management; until
-then child-role logins have no linked member row.
+Joining via invite with a person link auto-links `members.user_id` at
+accept time (member-bound invites, migration 11). Join-only invites
+still create a login with no person of its own — that's intentional and
+the settings dialog says so.
 
 ## Phase status
 
@@ -115,6 +135,13 @@ then child-role logins have no linked member row.
   screens, create/join household, home shell + dashboard placeholder,
   settings (language/theme/digits/invites/sign-out), README.md, tests
   (redirect, money, l10n parity, error mapping), web release build OK.
-- Phase 2: member management, transaction CRUD, categories UI.
+- **Phase 2 (done, awaiting approval)**: migration 11 + extended
+  isolation test (run green on cloud), members CRUD, categories UI,
+  transaction list + create/edit + delete, quick-add keypad (FAB on all
+  tabs, last-used type/category/person), month dashboard summary,
+  invite person picker (member-bound invites), child-role UI gating
+  (no manage controls, invites/categories sections hidden), new error
+  codes (member_linked / login_linked / invalid_member / category_in_use
+  / member_in_use), routes + tests (34), web release build OK.
 - Phase 3: vehicles, budgets, recurring rules.
 - Phase 4: reports/charts/CSV export/polish.

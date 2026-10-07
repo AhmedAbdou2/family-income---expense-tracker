@@ -655,6 +655,414 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Membership details can\'t be changed here.'**
   String get error_membership_immutable;
+
+  /// No description provided for @nav_people.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get nav_people;
+
+  /// No description provided for @members_title.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get members_title;
+
+  /// No description provided for @member_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add person'**
+  String get member_add;
+
+  /// No description provided for @member_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Person name'**
+  String get member_name;
+
+  /// No description provided for @member_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Sara'**
+  String get member_name_hint;
+
+  /// No description provided for @member_rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get member_rename;
+
+  /// No description provided for @member_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete person'**
+  String get member_delete;
+
+  /// No description provided for @member_delete_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this person?'**
+  String get member_delete_confirm_title;
+
+  /// No description provided for @member_delete_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'You can only delete people who have no transactions.'**
+  String get member_delete_confirm_body;
+
+  /// No description provided for @delete_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete_action;
+
+  /// No description provided for @member_active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get member_active;
+
+  /// No description provided for @member_inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get member_inactive;
+
+  /// No description provided for @member_linked_badge.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked'**
+  String get member_linked_badge;
+
+  /// No description provided for @member_you.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get member_you;
+
+  /// No description provided for @member_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No people yet'**
+  String get member_empty_title;
+
+  /// No description provided for @member_empty_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the people in your family so spending can be tracked per person.'**
+  String get member_empty_body;
+
+  /// No description provided for @member_in_use.
+  ///
+  /// In en, this message translates to:
+  /// **'This person has transactions and can\'t be deleted.'**
+  String get member_in_use;
+
+  /// No description provided for @categories_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get categories_title;
+
+  /// No description provided for @manage_categories.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage categories'**
+  String get manage_categories;
+
+  /// No description provided for @category_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add category'**
+  String get category_add;
+
+  /// No description provided for @category_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit category'**
+  String get category_edit;
+
+  /// No description provided for @category_name_en.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (English)'**
+  String get category_name_en;
+
+  /// No description provided for @category_name_ar.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (Arabic)'**
+  String get category_name_ar;
+
+  /// No description provided for @category_group.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get category_group;
+
+  /// No description provided for @category_icon.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get category_icon;
+
+  /// No description provided for @category_color.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get category_color;
+
+  /// No description provided for @category_delete_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this category?'**
+  String get category_delete_confirm_title;
+
+  /// No description provided for @category_delete_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'You can only delete categories that have no transactions.'**
+  String get category_delete_confirm_body;
+
+  /// No description provided for @group_general.
+  ///
+  /// In en, this message translates to:
+  /// **'General expenses'**
+  String get group_general;
+
+  /// No description provided for @group_car.
+  ///
+  /// In en, this message translates to:
+  /// **'Car expenses'**
+  String get group_car;
+
+  /// No description provided for @group_fixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed commitments'**
+  String get group_fixed;
+
+  /// No description provided for @group_income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get group_income;
+
+  /// No description provided for @type_expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get type_expense;
+
+  /// No description provided for @type_income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get type_income;
+
+  /// No description provided for @amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get amount;
+
+  /// No description provided for @amount_invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid amount.'**
+  String get amount_invalid;
+
+  /// No description provided for @amount_zero.
+  ///
+  /// In en, this message translates to:
+  /// **'The amount must be greater than zero.'**
+  String get amount_zero;
+
+  /// No description provided for @category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get category;
+
+  /// No description provided for @person.
+  ///
+  /// In en, this message translates to:
+  /// **'Person'**
+  String get person;
+
+  /// No description provided for @date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get date;
+
+  /// No description provided for @note.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get note;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @transaction_new_title.
+  ///
+  /// In en, this message translates to:
+  /// **'New transaction'**
+  String get transaction_new_title;
+
+  /// No description provided for @transaction_edit_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit transaction'**
+  String get transaction_edit_title;
+
+  /// No description provided for @transaction_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction saved.'**
+  String get transaction_saved;
+
+  /// No description provided for @transaction_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete transaction'**
+  String get transaction_delete;
+
+  /// No description provided for @transaction_delete_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this transaction?'**
+  String get transaction_delete_confirm_title;
+
+  /// No description provided for @transaction_delete_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'This can\'t be undone.'**
+  String get transaction_delete_confirm_body;
+
+  /// No description provided for @transaction_deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction deleted.'**
+  String get transaction_deleted;
+
+  /// No description provided for @month_no_data.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions this month.'**
+  String get month_no_data;
+
+  /// No description provided for @month_prev.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get month_prev;
+
+  /// No description provided for @month_next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get month_next;
+
+  /// No description provided for @filter_everyone.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone'**
+  String get filter_everyone;
+
+  /// No description provided for @select_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a category'**
+  String get select_category;
+
+  /// No description provided for @select_person.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a person'**
+  String get select_person;
+
+  /// No description provided for @quick_add_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick add'**
+  String get quick_add_title;
+
+  /// No description provided for @quick_add_more.
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get quick_add_more;
+
+  /// No description provided for @dashboard_expenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get dashboard_expenses;
+
+  /// No description provided for @dashboard_balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get dashboard_balance;
+
+  /// No description provided for @dashboard_recent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get dashboard_recent;
+
+  /// No description provided for @invite_link_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Link to a person'**
+  String get invite_link_title;
+
+  /// No description provided for @invite_link_none.
+  ///
+  /// In en, this message translates to:
+  /// **'Join only (no link)'**
+  String get invite_link_none;
+
+  /// No description provided for @invite_link_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'When someone accepts, their login becomes this person\'s account.'**
+  String get invite_link_hint;
+
+  /// No description provided for @error_member_linked.
+  ///
+  /// In en, this message translates to:
+  /// **'That person is already linked to an account.'**
+  String get error_member_linked;
+
+  /// No description provided for @error_login_linked.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is already linked to a person.'**
+  String get error_login_linked;
+
+  /// No description provided for @error_invalid_member.
+  ///
+  /// In en, this message translates to:
+  /// **'That person doesn\'t belong to this household.'**
+  String get error_invalid_member;
+
+  /// No description provided for @error_category_in_use.
+  ///
+  /// In en, this message translates to:
+  /// **'That category has transactions and can\'t be deleted.'**
+  String get error_category_in_use;
+
+  /// No description provided for @error_member_in_use.
+  ///
+  /// In en, this message translates to:
+  /// **'That person has transactions and can\'t be deleted.'**
+  String get error_member_in_use;
 }
 
 class _AppLocalizationsDelegate

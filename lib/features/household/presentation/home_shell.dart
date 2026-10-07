@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n.dart';
+import '../../transactions/presentation/quick_add_sheet.dart';
 
 /// Adaptive navigation: bottom [NavigationBar] on phones/tablets, side
-/// [NavigationRail] on wide (web/desktop) layouts.
+/// [NavigationRail] on wide (web/desktop) layouts. The FAB opens the
+/// quick-add keypad on every tab.
 class HomeShell extends StatelessWidget {
   const HomeShell({super.key, required this.shell});
 
@@ -14,13 +16,30 @@ class HomeShell extends StatelessWidget {
     shell.goBranch(index, initialLocation: index == shell.currentIndex);
   }
 
+  Future<void> _quickAdd(BuildContext context) async {
+    final result = await showQuickAddSheet(context);
+    if (!context.mounted || result == null) return;
+    if (result == 'saved') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.transaction_saved)),
+      );
+    } else if (result == 'more') {
+      context.push('/transactions/new');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     // (icon, selectedIcon, label)
     final destinations = <(IconData, IconData, String)>[
       (Icons.dashboard_outlined, Icons.dashboard_rounded, l10n.nav_dashboard),
-      (Icons.receipt_long_outlined, Icons.receipt_long_rounded, l10n.nav_transactions),
+      (
+        Icons.receipt_long_outlined,
+        Icons.receipt_long_rounded,
+        l10n.nav_transactions,
+      ),
+      (Icons.people_outline, Icons.people_rounded, l10n.nav_people),
       (Icons.settings_outlined, Icons.settings_rounded, l10n.nav_settings),
     ];
 
@@ -30,6 +49,11 @@ class HomeShell extends StatelessWidget {
         if (wide) {
           final extended = constraints.maxWidth >= 1200;
           return Scaffold(
+            floatingActionButton: FloatingActionButton(
+              tooltip: l10n.quick_add_title,
+              onPressed: () => _quickAdd(context),
+              child: const Icon(Icons.add_rounded),
+            ),
             body: Row(
               children: [
                 NavigationRail(
@@ -63,6 +87,11 @@ class HomeShell extends StatelessWidget {
         }
 
         return Scaffold(
+          floatingActionButton: FloatingActionButton(
+            tooltip: l10n.quick_add_title,
+            onPressed: () => _quickAdd(context),
+            child: const Icon(Icons.add_rounded),
+          ),
           body: shell,
           bottomNavigationBar: NavigationBar(
             selectedIndex: shell.currentIndex,

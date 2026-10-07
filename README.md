@@ -57,6 +57,7 @@ its own data.
    supabase/migrations/20261006000008_invites.sql
    supabase/migrations/20261006000009_rpcs.sql
    supabase/migrations/20261006000010_rls_grants.sql
+   supabase/migrations/20261007000011_invite_member_link.sql
    ```
 
    Then run the isolation proof in the SQL Editor as well:
@@ -109,10 +110,13 @@ lib/
   features/
     auth/       sign in, sign up, forgot password
     household/  splash, setup, create/join household, home shell,
-                dashboard, transactions placeholder
+                dashboard (month summary + recent)
+    members/    people tab (add / rename / deactivate / delete)
+    categories/ category list + editor (bilingual names, icon, color)
+    transactions/ list + create/edit form, quick-add keypad
     settings/   language / theme / digits, invites, sign out
 supabase/
-  migrations/   10 ordered SQL migrations (run manually in SQL Editor)
+  migrations/   11 ordered SQL migrations (run manually in SQL Editor)
   tests/        RLS isolation test (rolls back)
 ```
 
@@ -139,6 +143,7 @@ supabase/
 | Phase | Scope | Status |
 | --- | --- | --- |
 | 1 | Foundation: scaffold, theme, l10n, migrations + RLS, auth, create/join household, settings | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
-| 2 | Member management, transaction CRUD, categories UI | pending |
+| 2 | Member management, transaction CRUD, categories UI, quick-add, month dashboard | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
+| 3 | Vehicles, budgets, recurring rules | pending |
 | 3 | Vehicles, budgets, recurring rules | pending |
 | 4 | Reports, charts, CSV export, polish | pending |

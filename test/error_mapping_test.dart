@@ -16,6 +16,9 @@ void main() {
         'invalid_name': AppErrorCode.invalidName,
         'invalid_currency': AppErrorCode.invalidCurrency,
         'not_authenticated': AppErrorCode.invalidCredentials,
+        'member_linked': AppErrorCode.memberLinked,
+        'login_linked': AppErrorCode.loginLinked,
+        'invalid_member': AppErrorCode.invalidMember,
       };
 
       cases.forEach((message, expected) {
@@ -34,6 +37,34 @@ void main() {
         ),
       );
       expect(mapped.code, AppErrorCode.forbidden);
+    });
+
+    test('maps FK (23503) restrict violations by constraint name', () {
+      expect(
+        ExceptionMapper.map(const PostgrestException(
+          message:
+              'insert or update on table "transactions" violates foreign '
+              'key constraint "transactions_category_id_fkey"',
+          code: '23503',
+        )).code,
+        AppErrorCode.categoryInUse,
+      );
+      expect(
+        ExceptionMapper.map(const PostgrestException(
+          message:
+              'update or delete on table "members" violates foreign '
+              'key constraint "transactions_member_id_fkey"',
+          code: '23503',
+        )).code,
+        AppErrorCode.memberInUse,
+      );
+      expect(
+        ExceptionMapper.map(const PostgrestException(
+          message: 'violates foreign key constraint "something_else_fkey"',
+          code: '23503',
+        )).code,
+        AppErrorCode.forbidden,
+      );
     });
 
     test('maps auth error codes', () {

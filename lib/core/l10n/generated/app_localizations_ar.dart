@@ -305,4 +305,213 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get error_membership_immutable =>
       'لا يمكن تغيير بيانات العضوية من هنا.';
+
+  @override
+  String get nav_people => 'الأشخاص';
+
+  @override
+  String get members_title => 'الأشخاص';
+
+  @override
+  String get member_add => 'إضافة شخص';
+
+  @override
+  String get member_name => 'اسم الشخص';
+
+  @override
+  String get member_name_hint => 'مثال: سارة';
+
+  @override
+  String get member_rename => 'إعادة التسمية';
+
+  @override
+  String get member_delete => 'حذف الشخص';
+
+  @override
+  String get member_delete_confirm_title => 'حذف هذا الشخص؟';
+
+  @override
+  String get member_delete_confirm_body =>
+      'يمكنك حذف الأشخاص الذين ليس لديهم معاملات فقط.';
+
+  @override
+  String get delete_action => 'حذف';
+
+  @override
+  String get member_active => 'نشط';
+
+  @override
+  String get member_inactive => 'غير نشط';
+
+  @override
+  String get member_linked_badge => 'مرتبط';
+
+  @override
+  String get member_you => 'أنت';
+
+  @override
+  String get member_empty_title => 'لا يوجد أشخاص بعد';
+
+  @override
+  String get member_empty_body =>
+      'أضف أفراد أسرتك حتى يتسنى تسجيل المصروفات لكل شخص.';
+
+  @override
+  String get member_in_use => 'لهذا الشخص معاملات مسجّلة ولا يمكن حذفه.';
+
+  @override
+  String get categories_title => 'التصنيفات';
+
+  @override
+  String get manage_categories => 'إدارة التصنيفات';
+
+  @override
+  String get category_add => 'إضافة تصنيف';
+
+  @override
+  String get category_edit => 'تعديل التصنيف';
+
+  @override
+  String get category_name_en => 'الاسم بالإنجليزية';
+
+  @override
+  String get category_name_ar => 'الاسم بالعربية';
+
+  @override
+  String get category_group => 'المجموعة';
+
+  @override
+  String get category_icon => 'الأيقونة';
+
+  @override
+  String get category_color => 'اللون';
+
+  @override
+  String get category_delete_confirm_title => 'حذف هذا التصنيف؟';
+
+  @override
+  String get category_delete_confirm_body =>
+      'يمكنك حذف التصنيفات التي ليس لها معاملات فقط.';
+
+  @override
+  String get group_general => 'مصروفات عامة';
+
+  @override
+  String get group_car => 'مصروفات السيارة';
+
+  @override
+  String get group_fixed => 'التزامات ثابتة';
+
+  @override
+  String get group_income => 'الدخل';
+
+  @override
+  String get type_expense => 'مصروف';
+
+  @override
+  String get type_income => 'دخل';
+
+  @override
+  String get amount => 'المبلغ';
+
+  @override
+  String get amount_invalid => 'أدخل مبلغاً صحيحاً.';
+
+  @override
+  String get amount_zero => 'يجب أن يكون المبلغ أكبر من صفر.';
+
+  @override
+  String get category => 'التصنيف';
+
+  @override
+  String get person => 'الشخص';
+
+  @override
+  String get date => 'التاريخ';
+
+  @override
+  String get note => 'ملاحظة (اختياري)';
+
+  @override
+  String get save => 'حفظ';
+
+  @override
+  String get transaction_new_title => 'معاملة جديدة';
+
+  @override
+  String get transaction_edit_title => 'تعديل المعاملة';
+
+  @override
+  String get transaction_saved => 'تم حفظ المعاملة.';
+
+  @override
+  String get transaction_delete => 'حذف المعاملة';
+
+  @override
+  String get transaction_delete_confirm_title => 'حذف هذه المعاملة؟';
+
+  @override
+  String get transaction_delete_confirm_body =>
+      'لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get transaction_deleted => 'تم حذف المعاملة.';
+
+  @override
+  String get month_no_data => 'لا توجد معاملات في هذا الشهر.';
+
+  @override
+  String get month_prev => 'الشهر السابق';
+
+  @override
+  String get month_next => 'الشهر التالي';
+
+  @override
+  String get filter_everyone => 'الجميع';
+
+  @override
+  String get select_category => 'اختر تصنيفاً';
+
+  @override
+  String get select_person => 'اختر شخصاً';
+
+  @override
+  String get quick_add_title => 'إضافة سريعة';
+
+  @override
+  String get quick_add_more => 'خيارات إضافية';
+
+  @override
+  String get dashboard_expenses => 'المصروفات';
+
+  @override
+  String get dashboard_balance => 'الرصيد';
+
+  @override
+  String get dashboard_recent => 'الأحدث';
+
+  @override
+  String get invite_link_title => 'ربط بشخص';
+
+  @override
+  String get invite_link_none => 'انضمام فقط (بدون ربط)';
+
+  @override
+  String get invite_link_hint =>
+      'عند قبول الدعوة يصبح حساب المقبول هو حساب هذا الشخص.';
+
+  @override
+  String get error_member_linked => 'ذلك الشخص مرتبط بحساب بالفعل.';
+
+  @override
+  String get error_login_linked => 'هذا الحساب مرتبط بشخص بالفعل.';
+
+  @override
+  String get error_invalid_member => 'ذلك الشخص ليس من هذه الأسرة.';
+
+  @override
+  String get error_category_in_use => 'ذلك التصنيف له معاملات ولا يمكن حذفه.';
+
+  @override
+  String get error_member_in_use => 'ذلك الشخص له معاملات ولا يمكن حذفه.';
 }

@@ -26,6 +26,11 @@ String errorMessage(BuildContext context, Object error) {
     AppErrorCode.invalidCurrency => l10n.error_invalid_currency,
     AppErrorCode.invalidRole => l10n.error_invalid_role,
     AppErrorCode.membershipImmutable => l10n.error_membership_immutable,
+    AppErrorCode.memberLinked => l10n.error_member_linked,
+    AppErrorCode.loginLinked => l10n.error_login_linked,
+    AppErrorCode.invalidMember => l10n.error_invalid_member,
+    AppErrorCode.categoryInUse => l10n.error_category_in_use,
+    AppErrorCode.memberInUse => l10n.error_member_in_use,
     AppErrorCode.unknown => l10n.error_unknown,
   };
 }
