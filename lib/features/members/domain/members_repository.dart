@@ -13,6 +13,10 @@ abstract interface class MembersRepository {
 
   Future<void> renameMember({required String memberId, required String name});
 
+  /// True when a person of [householdId] is linked to the caller's login.
+  /// Used by the router to send legacy logins to /claim.
+  Future<bool> hasLinkedPerson({required String householdId});
+
   Future<void> setMemberActive({
     required String memberId,
     required bool isActive,

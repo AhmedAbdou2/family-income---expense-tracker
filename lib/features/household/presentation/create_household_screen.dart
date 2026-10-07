@@ -5,6 +5,7 @@ import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/form_messages.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/error_view.dart';
+import '../../members/presentation/providers.dart';
 import '../presentation/providers.dart';
 
 /// Common currencies for households in the region. Currency is stored as an
@@ -44,6 +45,7 @@ class CreateHouseholdScreen extends ConsumerStatefulWidget {
 class _CreateHouseholdScreenState extends ConsumerState<CreateHouseholdScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _personController = TextEditingController();
   String _currency = 'SAR';
   bool _submitting = false;
   Object? _error;
@@ -51,6 +53,7 @@ class _CreateHouseholdScreenState extends ConsumerState<CreateHouseholdScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _personController.dispose();
     super.dispose();
   }
 
@@ -65,10 +68,12 @@ class _CreateHouseholdScreenState extends ConsumerState<CreateHouseholdScreen> {
       await ref.read(householdRepositoryProvider).createHousehold(
             name: _nameController.text,
             currency: _currency,
+            displayName: _personController.text,
           );
       if (!mounted) return;
       // Membership is now non-null: the router redirect sends us to '/'.
       ref.invalidate(membershipProvider);
+      ref.invalidate(linkedMemberProvider);
     } catch (error) {
       if (mounted) setState(() => _error = error);
     } finally {
@@ -112,6 +117,20 @@ class _CreateHouseholdScreenState extends ConsumerState<CreateHouseholdScreen> {
                           context,
                           Validators.required(value, max: 80),
                         ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _personController,
+                        enabled: !_submitting,
+                        textInputAction: TextInputAction.next,
+                        maxLength: 40,
+                        decoration: InputDecoration(
+                          labelText: l10n.member_name,
+                          hintText: l10n.member_name_hint,
+                          counterText: '',
+                        ),
+                        validator: (value) =>
+                            fieldError(context, Validators.displayName(value)),
                       ),
                       const SizedBox(height: 16),
                       DropdownButtonFormField<String>(

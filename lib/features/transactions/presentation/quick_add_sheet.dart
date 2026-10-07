@@ -6,9 +6,11 @@ import '../../../core/settings/preferences.dart';
 import '../../../core/settings/settings_controller.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/error_view.dart';
+import '../../auth/presentation/providers.dart';
 import '../../categories/domain/entities.dart';
 import '../../categories/presentation/category_visuals.dart';
 import '../../categories/presentation/providers.dart';
+import '../../household/domain/entities.dart';
 import '../../household/presentation/providers.dart';
 import '../../members/domain/entities.dart';
 import '../../members/presentation/providers.dart';
@@ -90,17 +92,29 @@ class _QuickAddSheetState extends ConsumerState<_QuickAddSheet> {
     return active.isEmpty ? (members.isEmpty ? null : members.first) : active.first;
   }
 
+  /// A child may only ever record their own person - no chips, no choice.
+  Member? _ownPerson(List<Member> members, String? me) {
+    if (me == null) return null;
+    for (final member in members) {
+      if (member.userId == me) return member;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final categories = ref.watch(categoriesProvider).value ?? const <Category>[];
     final members = ref.watch(membersProvider).value ?? const <Member>[];
     final arabicDigits = ref.watch(settingsProvider).arabicDigits;
-    final currency = ref.watch(membershipProvider).value?.household.currency;
+    final membership = ref.watch(membershipProvider).value;
+    final currency = membership?.household.currency;
     final scheme = Theme.of(context).colorScheme;
+    final isChild = membership?.role == MemberRole.child;
 
     final category = _resolveCategory(categories);
-    final member = _resolveMember(members);
+    final member =
+        isChild ? _ownPerson(members, ref.watch(authStateProvider).value) : _resolveMember(members);
     final visibleCategories = categories.where(_inType).toList();
     final canSave = _amount.canSave && category != null && member != null;
 
@@ -191,25 +205,33 @@ class _QuickAddSheetState extends ConsumerState<_QuickAddSheet> {
           ),
           const SizedBox(height: 8),
 
-          // Person chips.
-          SizedBox(
-            height: 40,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                for (final item in members)
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(end: 8),
-                    child: ChoiceChip(
-                      avatar: const Icon(Icons.person_outline, size: 16),
-                      label: Text(item.name),
-                      selected: member?.id == item.id,
-                      onSelected: (_) => setState(() => _memberId = item.id),
+          // Person chips. A child never picks: their spend is always
+          // recorded as their own person (or is blocked when this login
+          // has no person linked yet).
+          if (isChild && member == null)
+            Text(
+              l10n.quick_add_no_person,
+              style: TextStyle(color: scheme.error),
+            )
+          else if (!isChild)
+            SizedBox(
+              height: 40,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  for (final item in members)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 8),
+                      child: ChoiceChip(
+                        avatar: const Icon(Icons.person_outline, size: 16),
+                        label: Text(item.name),
+                        selected: member?.id == item.id,
+                        onSelected: (_) => setState(() => _memberId = item.id),
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
           const SizedBox(height: 8),
 
           TextField(
@@ -281,15 +303,21 @@ class _QuickAddSheetState extends ConsumerState<_QuickAddSheet> {
     final categories = ref.read(categoriesProvider).value ?? const <Category>[];
     final members = ref.read(membersProvider).value ?? const <Member>[];
     final category = _resolveCategory(categories);
-    final member = _resolveMember(members);
+    final isChild = membership.role == MemberRole.child;
+    final member = isChild
+        ? _ownPerson(members, ref.read(authStateProvider).value)
+        : _resolveMember(members);
     if (category == null) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.select_category)));
       return;
     }
     if (member == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.select_person)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(isChild ? l10n.quick_add_no_person : l10n.select_person),
+        ),
+      );
       return;
     }
 

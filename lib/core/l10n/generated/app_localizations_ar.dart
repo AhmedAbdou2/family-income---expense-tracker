@@ -240,6 +240,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cancel => 'إلغاء';
 
   @override
+  String get next => 'التالي';
+
+  @override
   String get close => 'إغلاق';
 
   @override
@@ -514,4 +517,76 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get error_member_in_use => 'ذلك الشخص له معاملات ولا يمكن حذفه.';
+
+  @override
+  String get error_already_linked => 'ذلك الشخص مرتبط بحساب آخر بالفعل.';
+
+  @override
+  String get error_last_owner => 'أنت آخر مالك. اجعل عضواً آخر مالكاً أولاً.';
+
+  @override
+  String get error_cannot_change_own_role =>
+      'لا يمكنك تغيير دورك بنفسك. اطلب من مالك آخر.';
+
+  @override
+  String get error_cannot_remove_self => 'للخروج استخدم خيار مغادرة الأسرة.';
+
+  @override
+  String get error_child_requires_member =>
+      'دور الطفل يتطلب حساباً مرتبطاً بشخص.';
+
+  @override
+  String get claim_title => 'أنهِ إعداد حسابك';
+
+  @override
+  String get claim_body =>
+      'انضم حسابك إلى الأسرة لكنه غير مرتبط بشخص بعد. اختر الاسم الذي ستراه عائلتك.';
+
+  @override
+  String get claim_action => 'متابعة';
+
+  @override
+  String get join_name_hint =>
+      'إذا كان المالك قد سمّاك مسبقاً فهذا الاسم لن يُستخدم.';
+
+  @override
+  String get household_members_title => 'أعضاء الأسرة';
+
+  @override
+  String get login_no_person => 'لا يوجد شخص مرتبط';
+
+  @override
+  String get login_change_role => 'تغيير الدور';
+
+  @override
+  String get login_remove => 'إزالة الحساب';
+
+  @override
+  String get login_remove_confirm_title => 'إزالة هذا الحساب؟';
+
+  @override
+  String get login_remove_confirm_body =>
+      'سيبقى الشخص وسجل معاملاته، ويفقد الحساب صلاحيته فقط.';
+
+  @override
+  String get leave_household => 'مغادرة الأسرة';
+
+  @override
+  String get leave_confirm_title => 'مغادرة هذه الأسرة؟';
+
+  @override
+  String get leave_confirm_body =>
+      'ستفقد صلاحيتك للدخول. يبقى شخصك وسجل معاملاتك لدى العائلة.';
+
+  @override
+  String get leave_last_owner_hint => 'اجعل عضواً آخر مالكاً أولاً.';
+
+  @override
+  String get invite_target_title => 'من سينضم؟';
+
+  @override
+  String get invite_new_person => 'شخص جديد (يختار اسمه بنفسه)';
+
+  @override
+  String get quick_add_no_person => 'هذا الحساب غير مرتبط بشخص بعد.';
 }

@@ -238,6 +238,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
+  String get next => 'Next';
+
+  @override
   String get close => 'Close';
 
   @override
@@ -516,4 +519,80 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get error_member_in_use =>
       'That person has transactions and can\'t be deleted.';
+
+  @override
+  String get error_already_linked =>
+      'That person was already linked to another account.';
+
+  @override
+  String get error_last_owner =>
+      'You\'re the last owner. Make another member an owner first.';
+
+  @override
+  String get error_cannot_change_own_role =>
+      'You can\'t change your own role. Ask another owner.';
+
+  @override
+  String get error_cannot_remove_self =>
+      'To leave, use Leave household instead.';
+
+  @override
+  String get error_child_requires_member =>
+      'A child role needs an account linked to a person.';
+
+  @override
+  String get claim_title => 'Finish setting up your account';
+
+  @override
+  String get claim_body =>
+      'Your account joined the household but isn\'t linked to a person yet. Choose the name your family will see.';
+
+  @override
+  String get claim_action => 'Continue';
+
+  @override
+  String get join_name_hint =>
+      'If the owner already named you, this name isn\'t used.';
+
+  @override
+  String get household_members_title => 'Household members';
+
+  @override
+  String get login_no_person => 'No person linked';
+
+  @override
+  String get login_change_role => 'Change role';
+
+  @override
+  String get login_remove => 'Remove account';
+
+  @override
+  String get login_remove_confirm_title => 'Remove this account?';
+
+  @override
+  String get login_remove_confirm_body =>
+      'The person and their transactions stay; the account only loses access.';
+
+  @override
+  String get leave_household => 'Leave household';
+
+  @override
+  String get leave_confirm_title => 'Leave this household?';
+
+  @override
+  String get leave_confirm_body =>
+      'You\'ll lose access. Your person and transactions stay with the family.';
+
+  @override
+  String get leave_last_owner_hint => 'Make another member an owner first.';
+
+  @override
+  String get invite_target_title => 'Who will join?';
+
+  @override
+  String get invite_new_person => 'New person (chooses their own name)';
+
+  @override
+  String get quick_add_no_person =>
+      'This account isn\'t linked to a person yet.';
 }

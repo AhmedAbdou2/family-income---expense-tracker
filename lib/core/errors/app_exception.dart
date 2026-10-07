@@ -26,6 +26,11 @@ enum AppErrorCode {
   memberLinked,
   loginLinked,
   invalidMember,
+  alreadyLinked,
+  lastOwner,
+  cannotChangeOwnRole,
+  cannotRemoveSelf,
+  childRequiresMember,
   categoryInUse,
   memberInUse,
   unknown,
@@ -134,6 +139,16 @@ abstract final class ExceptionMapper {
         return const AppException(AppErrorCode.loginLinked);
       case 'invalid_member':
         return const AppException(AppErrorCode.invalidMember);
+      case 'already_linked':
+        return const AppException(AppErrorCode.alreadyLinked);
+      case 'last_owner':
+        return const AppException(AppErrorCode.lastOwner);
+      case 'cannot_change_own_role':
+        return const AppException(AppErrorCode.cannotChangeOwnRole);
+      case 'cannot_remove_self':
+        return const AppException(AppErrorCode.cannotRemoveSelf);
+      case 'child_requires_member':
+        return const AppException(AppErrorCode.childRequiresMember);
     }
 
     final message = error.message.toLowerCase();

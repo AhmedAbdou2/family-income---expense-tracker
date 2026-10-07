@@ -43,11 +43,16 @@ class HouseholdRepositoryImpl implements HouseholdRepository {
   Future<void> createHousehold({
     required String name,
     required String currency,
+    required String displayName,
   }) async {
     try {
       await _client.rpc(
         'create_household',
-        params: {'p_name': name.trim(), 'p_currency': currency},
+        params: {
+          'p_name': name.trim(),
+          'p_currency': currency,
+          'p_display_name': displayName.trim(),
+        },
       );
     } catch (error) {
       throw ExceptionMapper.map(error);
@@ -55,9 +60,109 @@ class HouseholdRepositoryImpl implements HouseholdRepository {
   }
 
   @override
-  Future<void> acceptInvite({required String code}) async {
+  Future<void> acceptInvite({required String code, String? displayName}) async {
     try {
-      await _client.rpc('accept_invite', params: {'p_code': code.trim()});
+      await _client.rpc(
+        'accept_invite',
+        params: {
+          'p_code': code.trim(),
+          if (displayName != null) 'p_display_name': displayName.trim(),
+        },
+      );
+    } catch (error) {
+      throw ExceptionMapper.map(error);
+    }
+  }
+
+  @override
+  Future<void> claimMember({required String displayName}) async {
+    try {
+      await _client.rpc(
+        'claim_member',
+        params: {'p_display_name': displayName.trim()},
+      );
+    } catch (error) {
+      throw ExceptionMapper.map(error);
+    }
+  }
+
+  @override
+  Future<List<HouseholdLogin>> listLogins({required String householdId}) async {
+    try {
+      final loginRows = await _client
+          .from('household_users')
+          .select('user_id, role, created_at')
+          .eq('household_id', householdId)
+          .order('created_at', ascending: true);
+
+      final personRows = await _client
+          .from('members')
+          .select('id, user_id, name')
+          .eq('household_id', householdId)
+          .not('user_id', 'is', null);
+
+      final personByUser = <String, (String, String)>{
+        for (final row in personRows)
+          if (row['user_id'] != null)
+            row['user_id'] as String:
+                (row['id'] as String, row['name'] as String),
+      };
+
+      return loginRows.map((row) {
+        final userId = row['user_id'] as String;
+        final person = personByUser[userId];
+        return HouseholdLogin(
+          userId: userId,
+          role: MemberRole.fromDb(row['role'] as String),
+          joinedAt: DateTime.parse(row['created_at'] as String),
+          personId: person?.$1,
+          personName: person?.$2,
+        );
+      }).toList();
+    } catch (error) {
+      throw ExceptionMapper.map(error);
+    }
+  }
+
+  @override
+  Future<void> updateHouseholdRole({
+    required String householdId,
+    required String userId,
+    required MemberRole role,
+  }) async {
+    try {
+      await _client.rpc(
+        'update_household_role',
+        params: {
+          'p_household_id': householdId,
+          'p_user_id': userId,
+          'p_role': role.dbValue,
+        },
+      );
+    } catch (error) {
+      throw ExceptionMapper.map(error);
+    }
+  }
+
+  @override
+  Future<void> removeHouseholdLogin({
+    required String householdId,
+    required String userId,
+  }) async {
+    try {
+      await _client.rpc(
+        'remove_household_login',
+        params: {'p_household_id': householdId, 'p_user_id': userId},
+      );
+    } catch (error) {
+      throw ExceptionMapper.map(error);
+    }
+  }
+
+  @override
+  Future<void> leaveHousehold() async {
+    try {
+      await _client.rpc('leave_household');
     } catch (error) {
       throw ExceptionMapper.map(error);
     }

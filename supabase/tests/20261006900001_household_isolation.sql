@@ -1,5 +1,5 @@
 -- ===================================================================
--- RLS ISOLATION TEST - Phase 1 + Phase 2 extensions
+-- RLS ISOLATION TEST - Phase 1 + Phase 2 + Phase 2.5 extensions
 -- ===================================================================
 -- Proves that a user from household B cannot SELECT / INSERT / UPDATE /
 -- DELETE any row of household A, and that child-role restrictions hold.
@@ -9,14 +9,40 @@
 --   * a linked child can SELECT/INSERT transactions ONLY for their own
 --     linked member;
 --   * a child cannot EDIT categories, members or budgets (0 rows touched);
---   * member-bound invite edge cases (member_linked at create + accept).
+--   * member-bound invite edge cases (member_linked at create,
+--     already_linked at accept).
+--
+-- Phase 2.5 additions (section 6):
+--   * join-only invite: the joiner CHOOSES their name (trim + 1..40,
+--     a bad name never consumes the code);
+--   * claim_member for legacy logins that have a household but no
+--     person of their own (twice -> member_linked, no household ->
+--     not_member, name validation);
+--   * rename_member matrix (owner renames anyone, everyone else only
+--     their own person, foreign household -> invalid_member);
+--   * update_household_role matrix (non-owner forbidden, promotion TO
+--     owner allowed, self -> cannot_change_own_role, sole-owner
+--     self-demote -> last_owner FIRST, child_requires_member,
+--     invalid_role, invalid_member);
+--   * leave_household / remove_household_login (cannot_remove_self,
+--     last_owner, link cleared, person + transactions kept, removed
+--     login loses ALL access immediately);
+--   * direct-write lockdown on members (no attaching a login on
+--     INSERT, no direct name/user_id UPDATE at all, linked persons
+--     undeletable, is_active UPDATE still allowed, name trigger trims
+--     + validates, no direct role UPDATE on household_users);
+--   * accept edge cases (login_linked, foreign person ->
+--     invalid_member, code never consumed on any failure).
+--
+-- Logins used: A + B (isolation), C + D + E (phase 2), F + G + H
+-- (phase 2.5 joiners/legacy), J + K + L (role / leave / remove cast).
 --
 -- HOW TO RUN: paste this ENTIRE file into the Supabase SQL editor and run
 -- it. It executes inside ONE transaction and always ROLLS BACK, so it
 -- leaves no data behind. Success = green notice below; any failure =
 -- red error starting with "FAIL:" or "TEST SETUP FAILED:".
 --
--- Prerequisite: migrations 1..11 have been run in that order.
+-- Prerequisite: migrations 1..12 have been run in that order.
 -- ===================================================================
 
 begin;
@@ -53,15 +79,27 @@ set local role authenticated;
 set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
 set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
 
-select set_config('test.hh_a', public.create_household('Test HH A', 'SAR')::text, false);
-
-insert into public.members (household_id, name)
-values (current_setting('test.hh_a')::uuid, 'A Person');
+-- Migration 12: create_household now also creates + links the owner's
+-- own person, so no manual member insert is needed anymore.
+select set_config('test.hh_a', public.create_household('Test HH A', 'SAR', 'A Person')::text, false);
 
 select set_config('test.member_a', (
   select m.id from public.members m
   where m.household_id = current_setting('test.hh_a')::uuid
+    and m.name = 'A Person'
   limit 1)::text, false);
+
+-- The owner's person must be linked to the owner's login right away.
+do $$
+declare n int;
+begin
+  select count(*) into n from public.members m
+   where m.id = current_setting('test.member_a')::uuid
+     and m.user_id = '11111111-1111-4111-8111-111111111111';
+  if n <> 1 then
+    raise exception 'TEST SETUP FAILED: owner person not linked to owner login';
+  end if;
+end $$;
 
 select set_config('test.category_a', (
   select c.id from public.categories c
@@ -150,11 +188,16 @@ begin
   get diagnostics n = row_count;
   if n <> 0 then raise exception 'FAIL: B updated % rows of A''s transactions', n; end if;
 
-  update public.members
-     set name = 'pwned'
-   where household_id = current_setting('test.hh_a')::uuid;
-  get diagnostics n = row_count;
-  if n <> 0 then raise exception 'FAIL: B updated % rows of A''s members', n; end if;
+  -- 3c2. Person names can no longer be written directly AT ALL (the
+  --      name/link columns lost their UPDATE grant in migration 12):
+  --      rejected before RLS even runs -> rename_member() only.
+  begin
+    update public.members
+       set name = 'pwned'
+     where household_id = current_setting('test.hh_a')::uuid;
+    raise exception 'FAIL: B updated A''s member names directly';
+  exception when insufficient_privilege then null;
+  end;
 
   update public.households
      set name = 'pwned'
@@ -217,7 +260,9 @@ select set_config('test.invite', public.create_invite(
 set local request.jwt.claims to '{"sub":"22222222-2222-4222-8222-222222222222","role":"authenticated"}';
 set local request.jwt.claim.sub to '22222222-2222-4222-8222-222222222222';
 
-select set_config('test.joined', public.accept_invite(current_setting('test.invite'))::text, false);
+-- Migration 12: join-only invites require the joiner's chosen name.
+select set_config('test.joined', public.accept_invite(
+  current_setting('test.invite'), 'Joiner B')::text, false);
 
 do $$
 declare n int;
@@ -232,12 +277,20 @@ begin
   select count(*) into n from public.household_users;
   if n <> 2 then raise exception 'FAIL: child B sees % memberships (expected 2)', n; end if;
 
-  -- 4b. ...but still CANNOT see A's person, or A's transaction
-  --     (A Person is not linked to B's login).
+  -- 4b. ...but sees ONLY the person created for their own join: A's
+  --     person and A's transaction stay invisible.
   select count(*) into n from public.members;
-  if n <> 0 then raise exception 'FAIL: child B sees % member rows (expected 0)', n; end if;
+  if n <> 1 then raise exception 'FAIL: child B sees % member rows (expected 1)', n; end if;
+  select count(*) into n from public.members
+   where id = current_setting('test.member_a')::uuid;
+  if n <> 0 then raise exception 'FAIL: child B can see A''s person (%)', n; end if;
   select count(*) into n from public.transactions;
   if n <> 0 then raise exception 'FAIL: child B sees % transactions (expected 0)', n; end if;
+  -- The name B chose was stored, trimmed, and linked to B's login.
+  select count(*) into n from public.members
+   where name = 'Joiner B'
+     and user_id = '22222222-2222-4222-8222-222222222222';
+  if n <> 1 then raise exception 'FAIL: join-only person not stored trimmed+linked (%)', n; end if;
 
   -- 4c. Child cannot write A's person's transactions.
   begin
@@ -432,12 +485,16 @@ begin
   exception when insufficient_privilege then null;
   end;
 
-  -- 5.4 Child cannot EDIT members - not even their OWN row.
-  update public.members
-     set name = 'renamed by kid'
-   where household_id = current_setting('test.hh_a')::uuid;
-  get diagnostics n = row_count;
-  if n <> 0 then raise exception 'FAIL: child edited % member rows', n; end if;
+  -- 5.4 Child cannot EDIT members - not even their OWN row. After
+  --     migration 12 a direct name write is rejected outright (column
+  --     grant); renames only go through rename_member().
+  begin
+    update public.members
+       set name = 'renamed by kid'
+     where household_id = current_setting('test.hh_a')::uuid;
+    raise exception 'FAIL: child renamed a member directly';
+  exception when insufficient_privilege then null;
+  end;
 
   delete from public.members
    where household_id = current_setting('test.hh_a')::uuid;
@@ -483,8 +540,9 @@ begin
 end $$;
 
 -- 5.7 Edge case at ACCEPT time: two codes minted for the same still-
---     unlinked person; the second acceptance must fail with member_linked
---     (and must NOT consume the code or create a membership).
+--     unlinked person; the second acceptance must fail with
+--     already_linked (migration 12's distinct accept-time key) and must
+--     NOT consume the code or create a membership.
 insert into public.members (household_id, name)
 values (current_setting('test.hh_a')::uuid, 'Kid D');
 
@@ -516,7 +574,7 @@ begin
     raise exception 'FAIL: second acceptance linked a person who was already linked';
   exception when others then
     if sqlerrm like 'FAIL:%' then raise; end if;
-    if sqlerrm <> 'member_linked' then raise; end if;
+    if sqlerrm <> 'already_linked' then raise; end if;
   end;
 end $$;
 
@@ -528,8 +586,9 @@ set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
 do $$
 declare n int;
 begin
+  -- A Person (owner, auto-created), Joiner B, Linked Kid, Kid D.
   select count(*) into n from public.members;
-  if n <> 3 then raise exception 'FAIL: owner sees % members (expected 3)', n; end if;
+  if n <> 4 then raise exception 'FAIL: owner sees % members (expected 4)', n; end if;
   -- txn_a + pre-linked kid txn + C's own insert
   select count(*) into n from public.transactions;
   if n <> 3 then raise exception 'FAIL: owner sees % transactions (expected 3)', n; end if;
@@ -543,7 +602,712 @@ begin
 end $$;
 
 -- --------------------------------------------------------------------
--- 6. Nothing above is persisted.
+-- 6. PHASE 2.5: self-service membership - join-only names, claim_member,
+--    rename/role/leave/remove RPCs, direct-write lockdown.
+-- --------------------------------------------------------------------
+set local role none;
+
+-- Logins: F (join-only joiner), G (legacy login with a household but
+-- no person), H (no household at all), J + K + L (the role / leave /
+-- remove cast in their own household).
+insert into auth.users (instance_id, id, aud, role, email, encrypted_password,
+                        email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+                        created_at, updated_at)
+values
+  ('00000000-0000-0000-0000-000000000000', '66666666-6666-4666-8666-666666666666',
+   'authenticated', 'authenticated', 'rls-test-f@test.local', 'not-a-real-hash',
+   now(), '{}'::jsonb, '{}'::jsonb, now(), now()),
+  ('00000000-0000-0000-0000-000000000000', '77777777-7777-4777-8777-777777777777',
+   'authenticated', 'authenticated', 'rls-test-g@test.local', 'not-a-real-hash',
+   now(), '{}'::jsonb, '{}'::jsonb, now(), now()),
+  ('00000000-0000-0000-0000-000000000000', '88888888-8888-4888-8888-888888888888',
+   'authenticated', 'authenticated', 'rls-test-h@test.local', 'not-a-real-hash',
+   now(), '{}'::jsonb, '{}'::jsonb, now(), now()),
+  ('00000000-0000-0000-0000-000000000000', '99999999-9999-4999-8999-999999999999',
+   'authenticated', 'authenticated', 'rls-test-j@test.local', 'not-a-real-hash',
+   now(), '{}'::jsonb, '{}'::jsonb, now(), now()),
+  ('00000000-0000-0000-0000-000000000000', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+   'authenticated', 'authenticated', 'rls-test-k@test.local', 'not-a-real-hash',
+   now(), '{}'::jsonb, '{}'::jsonb, now(), now()),
+  ('00000000-0000-0000-0000-000000000000', 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+   'authenticated', 'authenticated', 'rls-test-l@test.local', 'not-a-real-hash',
+   now(), '{}'::jsonb, '{}'::jsonb, now(), now())
+on conflict (id) do nothing;
+
+-- 6.1 Join-only invite: the joiner CHOOSES their name, and a bad name
+--     never consumes the code.
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
+set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
+
+select set_config('test.invite_join', public.create_invite(
+  current_setting('test.hh_a')::uuid, 'child', 7)::text, false);
+
+set local request.jwt.claims to '{"sub":"66666666-6666-4666-8666-666666666666","role":"authenticated"}';
+set local request.jwt.claim.sub to '66666666-6666-4666-8666-666666666666';
+
+do $$
+declare n int;
+begin
+  begin
+    perform public.accept_invite(current_setting('test.invite_join'), '   ');
+    raise exception 'FAIL: blank display name accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_name' then raise; end if;
+  end;
+
+  begin
+    perform public.accept_invite(current_setting('test.invite_join'), repeat('x', 41));
+    raise exception 'FAIL: 41-char display name accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_name' then raise; end if;
+  end;
+
+  -- Both failures wrote nothing: no membership, code still unused.
+  select count(*) into n from public.household_users
+   where user_id = '66666666-6666-4666-8666-666666666666';
+  if n <> 0 then raise exception 'FAIL: failed accepts wrote a membership (%)', n; end if;
+end $$;
+
+select set_config('test.joined_f', public.accept_invite(
+  current_setting('test.invite_join'), '   Fayzah Al-Sayed   ')::text, false);
+
+do $$
+declare n int;
+begin
+  if current_setting('test.joined_f') <> current_setting('test.hh_a') then
+    raise exception 'FAIL: join-only accept joined a different household';
+  end if;
+  -- Stored trimmed, exactly once, linked to F's login, invite role applied.
+  select count(*) into n from public.members
+   where user_id = '66666666-6666-4666-8666-666666666666'
+     and name = 'Fayzah Al-Sayed';
+  if n <> 1 then raise exception 'FAIL: join-only person not stored trimmed+linked (got %)', n; end if;
+  select count(*) into n from public.household_users
+   where user_id = '66666666-6666-4666-8666-666666666666' and role = 'child';
+  if n <> 1 then raise exception 'FAIL: join-only joiner has wrong role (%)', n; end if;
+end $$;
+
+-- 6.2 claim_member: G is a LEGACY login (household, person = none).
+set local role none;
+insert into public.household_users (household_id, user_id, role)
+values (current_setting('test.hh_a')::uuid, '77777777-7777-4777-8777-777777777777', 'adult')
+on conflict (household_id, user_id) do nothing;
+
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"77777777-7777-4777-8777-777777777777","role":"authenticated"}';
+set local request.jwt.claim.sub to '77777777-7777-4777-8777-777777777777';
+
+do $$
+declare n int; v_id uuid;
+begin
+  select count(*) into n from public.members
+   where user_id = '77777777-7777-4777-8777-777777777777';
+  if n <> 0 then raise exception 'TEST SETUP FAILED: G starts with a person (%)', n; end if;
+
+  begin
+    perform public.claim_member('');
+    raise exception 'FAIL: claim_member accepted an empty name';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_name' then raise; end if;
+  end;
+
+  v_id := public.claim_member('  G Person  ');
+  select count(*) into n from public.members
+   where id = v_id
+     and user_id = '77777777-7777-4777-8777-777777777777'
+     and name = 'G Person';
+  if n <> 1 then raise exception 'FAIL: claim_member did not create+link+trim (got %)', n; end if;
+
+  begin
+    perform public.claim_member('Again');
+    raise exception 'FAIL: second claim_member created a duplicate person';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'member_linked' then raise; end if;
+  end;
+end $$;
+
+-- H has no household at all -> claim is meaningless for them.
+set local request.jwt.claims to '{"sub":"88888888-8888-4888-8888-888888888888","role":"authenticated"}';
+set local request.jwt.claim.sub to '88888888-8888-4888-8888-888888888888';
+
+do $$
+begin
+  begin
+    perform public.claim_member('Nobody');
+    raise exception 'FAIL: claim_member worked for a login with no household';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'not_member' then raise; end if;
+  end;
+end $$;
+
+-- 6.3 rename_member matrix. First: J creates their own household.
+set local request.jwt.claims to '{"sub":"99999999-9999-4999-8999-999999999999","role":"authenticated"}';
+set local request.jwt.claim.sub to '99999999-9999-4999-8999-999999999999';
+
+select set_config('test.hh_j', public.create_household('Test HH J', 'JOD', 'J Person')::text, false);
+
+select set_config('test.member_j', (
+  select m.id from public.members m
+  where m.household_id = current_setting('test.hh_j')::uuid and m.name = 'J Person'
+  limit 1)::text, false);
+
+-- F (child of hh_a) may rename ONLY their own person.
+set local request.jwt.claims to '{"sub":"66666666-6666-4666-8666-666666666666","role":"authenticated"}';
+set local request.jwt.claim.sub to '66666666-6666-4666-8666-666666666666';
+
+do $$
+declare n int; v_me uuid;
+begin
+  select m.id into v_me from public.members m
+   where m.user_id = '66666666-6666-4666-8666-666666666666';
+
+  perform public.rename_member(v_me, '  Little F  ');
+  select count(*) into n from public.members where id = v_me and name = 'Little F';
+  if n <> 1 then raise exception 'FAIL: self-rename did not store a trimmed name (%)', n; end if;
+
+  begin
+    perform public.rename_member(current_setting('test.member_a')::uuid, 'Pwned A');
+    raise exception 'FAIL: child renamed another person';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    perform public.rename_member(current_setting('test.member_j')::uuid, 'Pwned J');
+    raise exception 'FAIL: renamed a person of ANOTHER household';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_member' then raise; end if;
+  end;
+
+  begin
+    perform public.rename_member(v_me, '');
+    raise exception 'FAIL: rename_member accepted an empty name';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_name' then raise; end if;
+  end;
+end $$;
+
+-- A (owner of hh_a) may rename ANY person of their household.
+set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
+set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
+
+do $$
+declare n int;
+begin
+  perform public.rename_member(
+    (select m.id from public.members m
+      where m.user_id = '77777777-7777-4777-8777-777777777777'),
+    'G renamed');
+  select count(*) into n from public.members
+   where user_id = '77777777-7777-4777-8777-777777777777' and name = 'G renamed';
+  if n <> 1 then raise exception 'FAIL: owner could not rename another person (%)', n; end if;
+
+  -- A renaming a person of ANOTHER household must fail too.
+  begin
+    perform public.rename_member(current_setting('test.member_j')::uuid, 'Pwned J');
+    raise exception 'FAIL: owner renamed a person of another household';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_member' then raise; end if;
+  end;
+end $$;
+
+-- 6.4 update_household_role matrix in hh_j (K + L start as adults
+--     without persons of their own).
+set local role none;
+insert into public.household_users (household_id, user_id, role) values
+  (current_setting('test.hh_j')::uuid, 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'adult'),
+  (current_setting('test.hh_j')::uuid, 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', 'adult')
+on conflict (household_id, user_id) do nothing;
+
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","role":"authenticated"}';
+set local request.jwt.claim.sub to 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+
+do $$
+begin
+  -- K (adult, NOT owner) cannot touch roles at all.
+  begin
+    perform public.update_household_role(current_setting('test.hh_j')::uuid,
+      '99999999-9999-4999-8999-999999999999', 'adult');
+    raise exception 'FAIL: non-owner changed a role';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  -- K (non-owner) cannot remove logins either.
+  begin
+    perform public.remove_household_login(current_setting('test.hh_j')::uuid,
+      '99999999-9999-4999-8999-999999999999');
+    raise exception 'FAIL: non-owner removed a login';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+end $$;
+
+-- J (owner) walks the whole role matrix.
+set local request.jwt.claims to '{"sub":"99999999-9999-4999-8999-999999999999","role":"authenticated"}';
+set local request.jwt.claim.sub to '99999999-9999-4999-8999-999999999999';
+
+do $$
+declare n int;
+begin
+  -- Role 'child' requires the target login to have a linked person.
+  begin
+    perform public.update_household_role(current_setting('test.hh_j')::uuid,
+      'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'child');
+    raise exception 'FAIL: child role set on a login with no person';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'child_requires_member' then raise; end if;
+  end;
+
+  -- Promotion TO owner is allowed (ownership-transfer path).
+  perform public.update_household_role(current_setting('test.hh_j')::uuid,
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'owner');
+  select count(*) into n from public.household_users
+   where household_id = current_setting('test.hh_j')::uuid
+     and user_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+     and role = 'owner';
+  if n <> 1 then raise exception 'FAIL: promotion to owner did not stick (%)', n; end if;
+
+  -- With TWO owners, demoting yourself -> cannot_change_own_role
+  -- (last_owner correctly does NOT fire first here).
+  begin
+    perform public.update_household_role(current_setting('test.hh_j')::uuid,
+      '99999999-9999-4999-8999-999999999999', 'adult');
+    raise exception 'FAIL: owner changed their own role';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'cannot_change_own_role' then raise; end if;
+  end;
+
+  -- Invalid role names are rejected.
+  begin
+    perform public.update_household_role(current_setting('test.hh_j')::uuid,
+      'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', 'supermaster');
+    raise exception 'FAIL: invalid role name accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_role' then raise; end if;
+  end;
+
+  -- A login of ANOTHER household is simply not a member here.
+  begin
+    perform public.update_household_role(current_setting('test.hh_j')::uuid,
+      '66666666-6666-4666-8666-666666666666', 'adult');
+    raise exception 'FAIL: role set on a login of another household';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_member' then raise; end if;
+  end;
+end $$;
+
+-- K (now also an owner): demote J, then hit last_owner on SELF.
+set local request.jwt.claims to '{"sub":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","role":"authenticated"}';
+set local request.jwt.claim.sub to 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+
+do $$
+declare n int;
+begin
+  perform public.update_household_role(current_setting('test.hh_j')::uuid,
+    '99999999-9999-4999-8999-999999999999', 'adult');
+  select count(*) into n from public.household_users
+   where household_id = current_setting('test.hh_j')::uuid
+     and user_id = '99999999-9999-4999-8999-999999999999'
+     and role = 'adult';
+  if n <> 1 then raise exception 'FAIL: peer-owner demotion did not stick (%)', n; end if;
+
+  -- Sole owner demoting THEMSELVES must get last_owner - this proves
+  -- the last-owner check runs BEFORE the cannot_change_own_role check.
+  begin
+    perform public.update_household_role(current_setting('test.hh_j')::uuid,
+      'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'adult');
+    raise exception 'FAIL: sole owner demoted themselves';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'last_owner' then raise; end if;
+  end;
+
+  -- Restore: K promotes J back to owner.
+  perform public.update_household_role(current_setting('test.hh_j')::uuid,
+    '99999999-9999-4999-8999-999999999999', 'owner');
+end $$;
+
+-- 6.5 leave_household / remove_household_login.
+-- L claims a person first, then becomes a child.
+set local request.jwt.claims to '{"sub":"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb","role":"authenticated"}';
+set local request.jwt.claim.sub to 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+
+do $$
+declare n int; v_cat uuid;
+begin
+  perform public.claim_member('L Person');
+  select count(*) into n from public.members
+   where user_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb' and name = 'L Person';
+  if n <> 1 then raise exception 'FAIL: L could not claim a person (%)', n; end if;
+end $$;
+
+-- J (owner) now succeeds where child_requires_member fired before.
+set local request.jwt.claims to '{"sub":"99999999-9999-4999-8999-999999999999","role":"authenticated"}';
+set local request.jwt.claim.sub to '99999999-9999-4999-8999-999999999999';
+
+do $$
+begin
+  perform public.update_household_role(current_setting('test.hh_j')::uuid,
+    'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', 'child');
+end $$;
+
+-- L (now a linked child) records a transaction for their own person.
+set local request.jwt.claims to '{"sub":"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb","role":"authenticated"}';
+set local request.jwt.claim.sub to 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+
+do $$
+declare v_cat uuid;
+begin
+  select c.id into v_cat from public.categories c
+   where c.household_id = current_setting('test.hh_j')::uuid
+     and c."group" = 'general'
+   limit 1;
+
+  insert into public.transactions (household_id, type, amount, category_id, member_id, date)
+  values (current_setting('test.hh_j')::uuid, 'expense', 3.50, v_cat,
+          (select m.id from public.members m
+            where m.user_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'),
+          current_date);
+end $$;
+
+-- L leaves: membership gone, link cleared, person + transaction kept.
+do $$
+begin
+  perform public.leave_household();
+end $$;
+
+set local role none;
+
+do $$
+declare n int;
+begin
+  select count(*) into n from public.household_users
+   where household_id = current_setting('test.hh_j')::uuid
+     and user_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+  if n <> 0 then raise exception 'FAIL: leaver still has a membership (%)', n; end if;
+
+  select count(*) into n from public.members
+   where household_id = current_setting('test.hh_j')::uuid
+     and user_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+  if n <> 0 then raise exception 'FAIL: leaver''s person still linked (%)', n; end if;
+
+  select count(*) into n from public.members where name = 'L Person';
+  if n <> 1 then raise exception 'FAIL: leaver''s person was deleted (%)', n; end if;
+
+  select count(*) into n from public.transactions t
+   join public.members m on m.id = t.member_id
+   where m.name = 'L Person';
+  if n <> 1 then raise exception 'FAIL: leaver''s transactions were deleted (%)', n; end if;
+end $$;
+
+-- The removed login LOST every trace of the household immediately.
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb","role":"authenticated"}';
+set local request.jwt.claim.sub to 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+
+do $$
+declare n int;
+begin
+  select count(*) into n from public.households;
+  if n <> 0 then raise exception 'FAIL: removed login sees % households (expected 0)', n; end if;
+  select count(*) into n from public.household_users;
+  if n <> 0 then raise exception 'FAIL: removed login sees % memberships (expected 0)', n; end if;
+  select count(*) into n from public.members;
+  if n <> 0 then raise exception 'FAIL: removed login sees % persons (expected 0)', n; end if;
+  select count(*) into n from public.transactions;
+  if n <> 0 then raise exception 'FAIL: removed login sees % transactions (expected 0)', n; end if;
+  select count(*) into n from public.invites;
+  if n <> 0 then raise exception 'FAIL: removed login sees % invites (expected 0)', n; end if;
+
+  begin
+    perform public.create_invite(current_setting('test.hh_j')::uuid, 'adult', 1);
+    raise exception 'FAIL: removed login minted an invite';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'not_member' then raise; end if;
+  end;
+end $$;
+
+-- K claims a person and records a transaction, so removal can prove
+-- the same keep-transactions semantics.
+set local request.jwt.claims to '{"sub":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","role":"authenticated"}';
+set local request.jwt.claim.sub to 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+
+do $$
+declare v_cat uuid;
+begin
+  perform public.claim_member('K Person');
+  select c.id into v_cat from public.categories c
+   where c.household_id = current_setting('test.hh_j')::uuid
+     and c."group" = 'general'
+   limit 1;
+  insert into public.transactions (household_id, type, amount, category_id, member_id, date)
+  values (current_setting('test.hh_j')::uuid, 'expense', 7.25, v_cat,
+          (select m.id from public.members m
+            where m.user_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),
+          current_date);
+end $$;
+
+-- J cannot remove THEMSELVES (must use leave instead).
+set local request.jwt.claims to '{"sub":"99999999-9999-4999-8999-999999999999","role":"authenticated"}';
+set local request.jwt.claim.sub to '99999999-9999-4999-8999-999999999999';
+
+do $$
+begin
+  begin
+    perform public.remove_household_login(current_setting('test.hh_j')::uuid,
+      '99999999-9999-4999-8999-999999999999');
+    raise exception 'FAIL: owner removed themselves via remove_household_login';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'cannot_remove_self' then raise; end if;
+  end;
+end $$;
+
+-- J (owner) removes K: link cleared, person + transactions kept.
+do $$
+begin
+  perform public.remove_household_login(current_setting('test.hh_j')::uuid,
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+end $$;
+
+set local role none;
+
+do $$
+declare n int;
+begin
+  select count(*) into n from public.household_users
+   where household_id = current_setting('test.hh_j')::uuid
+     and user_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+  if n <> 0 then raise exception 'FAIL: removed login still has a membership (%)', n; end if;
+  select count(*) into n from public.members
+   where name = 'K Person' and user_id is null;
+  if n <> 1 then raise exception 'FAIL: removed login''s person not unlinked (%)', n; end if;
+  select count(*) into n from public.transactions t
+   join public.members m on m.id = t.member_id
+   where m.name = 'K Person';
+  if n <> 1 then raise exception 'FAIL: removed login''s transactions were deleted (%)', n; end if;
+end $$;
+
+-- K lost every trace of hh_j immediately.
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","role":"authenticated"}';
+set local request.jwt.claim.sub to 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+
+do $$
+declare n int;
+begin
+  select count(*) into n from public.households;
+  if n <> 0 then raise exception 'FAIL: removed login K sees % households (expected 0)', n; end if;
+  select count(*) into n from public.household_users;
+  if n <> 0 then raise exception 'FAIL: removed login K sees % memberships (expected 0)', n; end if;
+  select count(*) into n from public.members;
+  if n <> 0 then raise exception 'FAIL: removed login K sees % persons (expected 0)', n; end if;
+  select count(*) into n from public.transactions;
+  if n <> 0 then raise exception 'FAIL: removed login K sees % transactions (expected 0)', n; end if;
+  select count(*) into n from public.invites;
+  if n <> 0 then raise exception 'FAIL: removed login K sees % invites (expected 0)', n; end if;
+
+  begin
+    perform public.create_invite(current_setting('test.hh_j')::uuid, 'adult', 1);
+    raise exception 'FAIL: removed login K minted an invite';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'not_member' then raise; end if;
+  end;
+end $$;
+
+-- J is now the SOLE owner -> leaving must fail with last_owner.
+set local request.jwt.claims to '{"sub":"99999999-9999-4999-8999-999999999999","role":"authenticated"}';
+set local request.jwt.claim.sub to '99999999-9999-4999-8999-999999999999';
+
+do $$
+begin
+  begin
+    perform public.leave_household();
+    raise exception 'FAIL: the sole owner left the household';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'last_owner' then raise; end if;
+  end;
+end $$;
+
+-- 6.6 Direct-write lockdown on members (as owner A).
+set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
+set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
+
+do $$
+declare n int;
+begin
+  -- A direct INSERT can never attach a login to a person.
+  begin
+    insert into public.members (household_id, name, user_id)
+    values (current_setting('test.hh_a')::uuid, 'Self Attached', auth.uid());
+    raise exception 'FAIL: direct insert attached a login to a person';
+  exception when insufficient_privilege then null;
+  end;
+
+  -- Names and links are not directly writable AT ALL anymore.
+  begin
+    update public.members set name = 'direct rename'
+     where id = current_setting('test.member_a')::uuid;
+    raise exception 'FAIL: owner renamed a person directly';
+  exception when insufficient_privilege then null;
+  end;
+
+  begin
+    update public.members set user_id = null
+     where id = current_setting('test.member_a')::uuid;
+    raise exception 'FAIL: owner rewrote a person''s link directly';
+  exception when insufficient_privilege then null;
+  end;
+
+  -- Linked persons cannot be deleted directly...
+  delete from public.members
+   where id = current_setting('test.member_a')::uuid;
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'FAIL: owner deleted a LINKED person (% rows)', n; end if;
+
+  -- ...but the add-person flow (unlinked INSERT) still works, and the
+  -- name trigger trims + validates on the way in.
+  begin
+    insert into public.members (household_id, name)
+    values (current_setting('test.hh_a')::uuid, '   ');
+    raise exception 'FAIL: blank person name accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_name' then raise; end if;
+  end;
+
+  begin
+    insert into public.members (household_id, name)
+    values (current_setting('test.hh_a')::uuid, repeat('y', 41));
+    raise exception 'FAIL: 41-char person name accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_name' then raise; end if;
+  end;
+
+  insert into public.members (household_id, name)
+  values (current_setting('test.hh_a')::uuid, '   Spare Person  ');
+  select count(*) into n from public.members
+   where name = 'Spare Person' and user_id is null;
+  if n <> 1 then raise exception 'FAIL: name trigger did not trim a direct insert (%)', n; end if;
+
+  -- is_active stays directly writable (deactivate flow).
+  update public.members set is_active = false where name = 'Spare Person';
+  get diagnostics n = row_count;
+  if n <> 1 then raise exception 'FAIL: deactivate update touched % rows', n; end if;
+
+  -- Unlinked persons can still be deleted (remove-person flow).
+  delete from public.members where name = 'Spare Person';
+  get diagnostics n = row_count;
+  if n <> 1 then raise exception 'FAIL: unlinked person delete touched % rows', n; end if;
+
+  -- Roles have no direct table path at all anymore (RPC only).
+  update public.household_users set role = 'owner'
+   where household_id = current_setting('test.hh_a')::uuid
+     and user_id = '66666666-6666-4666-8666-666666666666';
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'FAIL: role changed directly (% rows)', n; end if;
+end $$;
+
+-- 6.7 accept_invite edge cases: login_linked and a person of ANOTHER
+--     household (invalid_member). Both must leave the code unconsumed.
+set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
+set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
+
+insert into public.members (household_id, name)
+values (current_setting('test.hh_a')::uuid, 'To Link');
+
+select set_config('test.member_to_link', (
+  select m.id from public.members m
+  where m.household_id = current_setting('test.hh_a')::uuid and m.name = 'To Link'
+  limit 1)::text, false);
+
+select set_config('test.invite_bound', public.create_invite(
+  current_setting('test.hh_a')::uuid, 'adult', 7,
+  current_setting('test.member_to_link')::uuid)::text, false);
+
+-- Simulate a login whose person exists but whose membership was lost:
+-- accepting a person-bound invite must refuse (login_linked).
+set local role none;
+delete from public.household_users
+ where household_id = current_setting('test.hh_a')::uuid
+   and user_id = '66666666-6666-4666-8666-666666666666';
+
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"66666666-6666-4666-8666-666666666666","role":"authenticated"}';
+set local request.jwt.claim.sub to '66666666-6666-4666-8666-666666666666';
+
+do $$
+begin
+  begin
+    perform public.accept_invite(current_setting('test.invite_bound'));
+    raise exception 'FAIL: a login that already has a person linked accepted a bound invite';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'login_linked' then raise; end if;
+  end;
+end $$;
+
+-- Corrupt the invite (defence-in-depth probe): point it at a person of
+-- ANOTHER household. H must be rejected with invalid_member.
+set local role none;
+update public.invites
+   set member_id = current_setting('test.member_j')::uuid
+ where code = current_setting('test.invite_bound');
+
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"88888888-8888-4888-8888-888888888888","role":"authenticated"}';
+set local request.jwt.claim.sub to '88888888-8888-4888-8888-888888888888';
+
+do $$
+declare n int;
+begin
+  begin
+    perform public.accept_invite(current_setting('test.invite_bound'), 'H Name');
+    raise exception 'FAIL: accepted a bound invite pointing at a foreign person';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_member' then raise; end if;
+  end;
+
+  select count(*) into n from public.household_users
+   where user_id = '88888888-8888-4888-8888-888888888888';
+  if n <> 0 then raise exception 'FAIL: failed accepts wrote a membership (%)', n; end if;
+end $$;
+
+-- Neither failure consumed the code.
+set local role none;
+do $$
+declare n int;
+begin
+  select count(*) into n from public.invites
+   where code = current_setting('test.invite_bound') and used_by is null;
+  if n <> 1 then raise exception 'FAIL: failed accepts consumed the code (%)', n; end if;
+end $$;
+
+-- --------------------------------------------------------------------
+-- 7. Nothing above is persisted.
 -- --------------------------------------------------------------------
 select 'ALL RLS ISOLATION TESTS PASSED' as result;
 do $$ begin raise notice 'ALL RLS ISOLATION TESTS PASSED'; end $$;

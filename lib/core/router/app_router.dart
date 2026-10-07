@@ -7,14 +7,17 @@ import '../../features/auth/presentation/providers.dart';
 import '../../features/auth/presentation/sign_in_screen.dart';
 import '../../features/auth/presentation/sign_up_screen.dart';
 import '../../features/categories/presentation/categories_screen.dart';
+import '../../features/household/presentation/claim_screen.dart';
 import '../../features/household/presentation/create_household_screen.dart';
 import '../../features/household/presentation/dashboard_screen.dart';
 import '../../features/household/presentation/home_shell.dart';
+import '../../features/household/presentation/household_members_screen.dart';
 import '../../features/household/presentation/join_household_screen.dart';
 import '../../features/household/presentation/providers.dart';
 import '../../features/household/presentation/setup_screen.dart';
 import '../../features/household/presentation/splash_screen.dart';
 import '../../features/members/presentation/members_screen.dart';
+import '../../features/members/presentation/providers.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/transactions/presentation/transaction_form_screen.dart';
 import '../../features/transactions/presentation/transactions_screen.dart';
@@ -34,9 +37,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       ref.listen(authStateProvider, (_, _) => refresh.notify());
   final membershipSubscription =
       ref.listen(membershipProvider, (_, _) => refresh.notify());
+  final linkedMemberSubscription =
+      ref.listen(linkedMemberProvider, (_, _) => refresh.notify());
   ref.onDispose(() {
     authSubscription.close();
     membershipSubscription.close();
+    linkedMemberSubscription.close();
     refresh.dispose();
   });
 
@@ -46,12 +52,15 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final auth = ref.read(authStateProvider);
       final membership = ref.read(membershipProvider);
+      final linked = ref.read(linkedMemberProvider);
       return appRedirect(
         authLoading: auth.isLoading,
         signedIn: auth.value != null,
         membershipLoading: membership.isLoading,
         hasMembership: membership.value != null,
         location: state.matchedLocation,
+        memberLoading: linked.isLoading,
+        hasLinkedMember: linked.value ?? true,
       );
     },
     routes: [
@@ -91,6 +100,17 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/categories',
         builder: (context, state) => const CategoriesScreen(),
+      ),
+
+      // Legacy logins (household but no linked person) must finish setup
+      // here before the router lets them into the shell.
+      GoRoute(
+        path: claimRoute,
+        builder: (context, state) => const ClaimScreen(),
+      ),
+      GoRoute(
+        path: '/household-members',
+        builder: (context, state) => const HouseholdMembersScreen(),
       ),
 
       // Main shell: bottom nav on mobile, side rail on web/desktop

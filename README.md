@@ -58,6 +58,7 @@ its own data.
    supabase/migrations/20261006000009_rpcs.sql
    supabase/migrations/20261006000010_rls_grants.sql
    supabase/migrations/20261007000011_invite_member_link.sql
+   supabase/migrations/20261008000012_self_service_members.sql
    ```
 
    Then run the isolation proof in the SQL Editor as well:
@@ -67,8 +68,16 @@ its own data.
    ```
 
    It creates two throwaway households, proves household B can select /
-   insert / update / delete nothing of household A, prints
-   `ALL RLS ISOLATION TESTS PASSED`, and **rolls everything back**.
+   insert / update / delete nothing of household A (including the
+   self-service flows: claim, rename, role change, leave, account
+   removal), prints `ALL RLS ISOLATION TESTS PASSED`, and **rolls
+   everything back**.
+
+   Migration 12 changes the `create_household` / `accept_invite`
+   signatures and adds `claim_member`, `rename_member`,
+   `update_household_role`, `leave_household`,
+   `remove_household_login`. **Refresh any open app tabs** after running
+   it: browsers cache the old function definitions.
 
    The header comment of `20261006000010_rls_grants.sql` explains every
    RLS policy in plain language. See `AGENTS.md` for the same summary.
@@ -86,7 +95,7 @@ its own data.
 | --- | --- |
 | `flutter gen-l10n` | Regenerate `lib/core/l10n/generated/` from the `.arb` files |
 | `flutter analyze` | Lint/typecheck (must stay at 0 issues) |
-| `flutter test` | Unit tests: redirect, money, l10n parity, error mapping, quick-add keypad, shell FAB heroes |
+| `flutter test` | Unit tests: redirect (incl. /claim), money, l10n parity, error mapping, validators, quick-add keypad, shell FAB heroes |
 | `flutter build web --release` | Release build (verified working) |
 | `flutter build apk --debug` | Android build (requires a JDK, see above) |
 
@@ -109,14 +118,14 @@ lib/
     widgets/    loading / error / empty-state helpers
   features/
     auth/       sign in, sign up, forgot password
-    household/  splash, setup, create/join household, home shell,
-                dashboard (month summary + recent)
+    household/  splash, setup, create/join household, claim (legacy
+                logins), home shell, dashboard, household members
     members/    people tab (add / rename / deactivate / delete)
     categories/ category list + editor (bilingual names, icon, color)
     transactions/ list + create/edit form, quick-add keypad
-    settings/   language / theme / digits, invites, sign out
+    settings/   language / theme / digits, invites, leave, sign out
 supabase/
-  migrations/   11 ordered SQL migrations (run manually in SQL Editor)
+  migrations/   12 ordered SQL migrations (run manually in SQL Editor)
   tests/        RLS isolation test (rolls back)
 ```
 
@@ -137,6 +146,17 @@ supabase/
 - Referential integrity is enforced in the `transactions` policies: the
   referenced member/category/vehicle/recurring rule must live in the
   **same** household.
+- Logins manage membership only through RPCs: `update_household_role`
+  (owner-only, never self, never last owner), `remove_household_login`
+  (owner-only, never self), `leave_household` (keeps the person and its
+  transactions, refuses the last owner). Person names are renamed via
+  `rename_member` (owner renames anyone; other logins only their own
+  person) - direct `members.name` UPDATE is revoked from `authenticated`.
+- Join-only invites let the joiner choose their own name; person-bound
+  invites link to the person the owner picked. A login that leaves and
+  rejoins later as a "New person" creates a **second** person for the
+  same human - the owner can delete the leftover unlinked one from the
+  People tab.
 
 ## Phase plan
 
@@ -144,6 +164,6 @@ supabase/
 | --- | --- | --- |
 | 1 | Foundation: scaffold, theme, l10n, migrations + RLS, auth, create/join household, settings | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
 | 2 | Member management, transaction CRUD, categories UI, quick-add, month dashboard | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
-| 3 | Vehicles, budgets, recurring rules | pending |
+| 2.5 | Self-service membership: joiner picks their own name, claim screen for legacy logins, owner-only Household-members screen, role/removal/leave RPCs | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
 | 3 | Vehicles, budgets, recurring rules | pending |
 | 4 | Reports, charts, CSV export, polish | pending |

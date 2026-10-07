@@ -36,4 +36,12 @@ abstract final class Validators {
     if (!RegExp(r'^[A-Z0-9]{6}$').hasMatch(v)) return 'invalid_code';
     return null;
   }
+
+  /// Person / household display name: 1-40 chars after trimming.
+  static String? displayName(String? value) {
+    final v = value?.trim() ?? '';
+    if (v.isEmpty) return 'required';
+    if (v.length > 40) return 'too_long';
+    return null;
+  }
 }

@@ -77,7 +77,7 @@ class MembersScreen extends ConsumerWidget {
         content: TextField(
           controller: controller,
           autofocus: true,
-          maxLength: 60,
+          maxLength: 40,
           textInputAction: TextInputAction.done,
           decoration: InputDecoration(
             labelText: dialogContext.l10n.member_name,
@@ -142,6 +142,13 @@ class _MemberTile extends ConsumerWidget {
       badge = null;
     }
 
+    // owner/adult manage everyone; any login may rename its own person;
+    // only unlinked persons can be deleted (RLS restricts anyway).
+    final isOwnPerson = member.isLinked && member.userId == me;
+    final canRename = canManage || isOwnPerson;
+    final canDelete = canManage && !member.isLinked;
+    final canToggle = canManage;
+
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: scheme.primaryContainer,
@@ -152,18 +159,21 @@ class _MemberTile extends ConsumerWidget {
       ),
       title: Text(member.name),
       subtitle: badge == null ? null : Text(badge),
-      trailing: canManage
+      trailing: (canRename || canToggle || canDelete)
           ? PopupMenuButton<String>(
               onSelected: (action) => _handle(context, ref, action),
               itemBuilder: (context) => [
-                PopupMenuItem(value: 'rename', child: Text(l10n.member_rename)),
-                PopupMenuItem(
-                  value: 'toggle',
-                  child: Text(
-                    member.isActive ? l10n.member_inactive : l10n.member_active,
+                if (canRename)
+                  PopupMenuItem(value: 'rename', child: Text(l10n.member_rename)),
+                if (canToggle)
+                  PopupMenuItem(
+                    value: 'toggle',
+                    child: Text(
+                      member.isActive ? l10n.member_inactive : l10n.member_active,
+                    ),
                   ),
-                ),
-                PopupMenuItem(value: 'delete', child: Text(l10n.member_delete)),
+                if (canDelete)
+                  PopupMenuItem(value: 'delete', child: Text(l10n.member_delete)),
               ],
             )
           : null,
@@ -206,7 +216,7 @@ class _MemberTile extends ConsumerWidget {
         content: TextField(
           controller: controller,
           autofocus: true,
-          maxLength: 60,
+          maxLength: 40,
           decoration: InputDecoration(
             labelText: dialogContext.l10n.member_name,
             counterText: '',

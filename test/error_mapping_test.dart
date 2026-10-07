@@ -19,6 +19,11 @@ void main() {
         'member_linked': AppErrorCode.memberLinked,
         'login_linked': AppErrorCode.loginLinked,
         'invalid_member': AppErrorCode.invalidMember,
+        'already_linked': AppErrorCode.alreadyLinked,
+        'last_owner': AppErrorCode.lastOwner,
+        'cannot_change_own_role': AppErrorCode.cannotChangeOwnRole,
+        'cannot_remove_self': AppErrorCode.cannotRemoveSelf,
+        'child_requires_member': AppErrorCode.childRequiresMember,
       };
 
       cases.forEach((message, expected) {

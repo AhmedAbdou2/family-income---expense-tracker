@@ -55,9 +55,27 @@ class MembersRepositoryImpl implements MembersRepository {
     required String name,
   }) async {
     try {
-      await _client
+      await _client.rpc(
+        'rename_member',
+        params: {'p_member_id': memberId, 'p_display_name': name.trim()},
+      );
+    } catch (error) {
+      throw ExceptionMapper.map(error);
+    }
+  }
+
+  @override
+  Future<bool> hasLinkedPerson({required String householdId}) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return false;
+    try {
+      final rows = await _client
           .from('members')
-          .update({'name': name.trim()}).eq('id', memberId);
+          .select('id')
+          .eq('household_id', householdId)
+          .eq('user_id', userId)
+          .limit(1);
+      return rows.isNotEmpty;
     } catch (error) {
       throw ExceptionMapper.map(error);
     }

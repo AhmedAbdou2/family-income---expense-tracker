@@ -26,3 +26,15 @@ final invitesProvider = FutureProvider<List<Invite>>((ref) async {
       .watch(householdRepositoryProvider)
       .listInvites(householdId: membership.household.id);
 });
+
+/// All logins of the current household, merged with their linked person
+/// (Household-members screen + Settings leave-row owner count). Readable by
+/// every member - `household_users` has no emails, only user id / role /
+/// joined-at / linked person name.
+final householdLoginsProvider = FutureProvider<List<HouseholdLogin>>((ref) async {
+  final membership = ref.watch(membershipProvider).value;
+  if (membership == null) return const <HouseholdLogin>[];
+  return ref
+      .watch(householdRepositoryProvider)
+      .listLogins(householdId: membership.household.id);
+});

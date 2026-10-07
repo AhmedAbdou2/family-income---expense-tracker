@@ -183,6 +183,7 @@ void main() {
         '/transactions/new',
         '/transactions/edit/00000000-0000-0000-0000-000000000000',
         '/categories',
+        '/household-members',
       ]) {
         expect(
           appRedirect(
@@ -205,6 +206,105 @@ void main() {
           ),
           '/sign-in',
           reason: 'signed out: $location',
+        );
+      }
+    });
+
+    test('linked-person check keeps the user on splash while resolving', () {
+      expect(
+        appRedirect(
+          authLoading: false,
+          signedIn: true,
+          membershipLoading: false,
+          hasMembership: true,
+          memberLoading: true,
+          hasLinkedMember: false,
+          location: '/',
+        ),
+        splashRoute,
+      );
+      expect(
+        appRedirect(
+          authLoading: false,
+          signedIn: true,
+          membershipLoading: false,
+          hasMembership: true,
+          memberLoading: true,
+          hasLinkedMember: false,
+          location: splashRoute,
+        ),
+        isNull,
+      );
+    });
+
+    test('household login without a linked person goes to /claim', () {
+      for (final location in ['/', '/transactions', '/settings', splashRoute]) {
+        expect(
+          appRedirect(
+            authLoading: false,
+            signedIn: true,
+            membershipLoading: false,
+            hasMembership: true,
+            memberLoading: false,
+            hasLinkedMember: false,
+            location: location,
+          ),
+          claimRoute,
+          reason: location,
+        );
+      }
+      expect(
+        appRedirect(
+          authLoading: false,
+          signedIn: true,
+          membershipLoading: false,
+          hasMembership: true,
+          memberLoading: false,
+          hasLinkedMember: false,
+          location: claimRoute,
+        ),
+        isNull,
+        reason: 'stays on /claim',
+      );
+      // Signed out or household-less logins never see the claim screen.
+      expect(
+        appRedirect(
+          authLoading: false,
+          signedIn: false,
+          membershipLoading: false,
+          hasMembership: false,
+          hasLinkedMember: false,
+          location: claimRoute,
+        ),
+        '/sign-in',
+      );
+      expect(
+        appRedirect(
+          authLoading: false,
+          signedIn: true,
+          membershipLoading: false,
+          hasMembership: false,
+          hasLinkedMember: false,
+          location: claimRoute,
+        ),
+        '/setup',
+      );
+    });
+
+    test('claim screen returns to the shell once the person is linked', () {
+      for (final location in [claimRoute, splashRoute, '/setup']) {
+        expect(
+          appRedirect(
+            authLoading: false,
+            signedIn: true,
+            membershipLoading: false,
+            hasMembership: true,
+            memberLoading: false,
+            hasLinkedMember: true,
+            location: location,
+          ),
+          '/',
+          reason: location,
         );
       }
     });

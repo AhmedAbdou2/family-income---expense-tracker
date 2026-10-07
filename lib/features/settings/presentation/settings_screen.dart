@@ -32,6 +32,16 @@ class SettingsScreen extends ConsumerWidget {
       MemberRole.owner || MemberRole.adult => true,
       _ => false,
     };
+    final isOwner = ref.watch(membershipProvider).value?.role == MemberRole.owner;
+    // The last owner may not leave (disabled row + hint); the RPC enforces
+    // it too (`last_owner`), this only keeps the UI honest.
+    final ownerCount = ref
+            .watch(householdLoginsProvider)
+            .value
+            ?.where((login) => login.role == MemberRole.owner)
+            .length ??
+        0;
+    final canLeave = !(isOwner && ownerCount == 1);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settings_title)),
@@ -124,6 +134,41 @@ class SettingsScreen extends ConsumerWidget {
           // ----------------------------------------------------------------
           _SectionHeader(title: l10n.household_section),
           const _HouseholdCard(),
+
+          // Owner-only: manage the household's *logins* (roles, removal,
+          // person names). Members list itself stays in the People tab.
+          if (isOwner) ...[
+            Card(
+              child: ListTile(
+                leading:
+                    Icon(Icons.manage_accounts_outlined, color: scheme.primary),
+                title: Text(l10n.household_members_title),
+                onTap: () => context.push('/household-members'),
+              ),
+            ),
+          ],
+
+          // Leave is available to everyone - but the last owner sees it
+          // disabled with a hint (make someone else an owner first).
+          Card(
+            child: ListTile(
+              leading: Icon(Icons.exit_to_app_outlined, color: scheme.error),
+              title: Text(
+                l10n.leave_household,
+                style: TextStyle(
+                  color: canLeave ? scheme.error : scheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: canLeave
+                  ? null
+                  : Text(
+                      l10n.leave_last_owner_hint,
+                      style: TextStyle(color: scheme.onSurfaceVariant),
+                    ),
+              onTap: canLeave ? () => _confirmLeave(context, ref) : null,
+            ),
+          ),
 
           if (isAdult) ...[
             // ------------------------------------------------------------
@@ -219,59 +264,44 @@ class SettingsScreen extends ConsumerWidget {
     );
     if (role == null || !context.mounted) return;
 
-    // Optional: bind the invite to an existing person so that accepting it
-    // links the login to that members row (member-bound invite). Absent
-    // link, the login joins with no person of its own - that's what
-    // 'Join only' means.
-    String? memberId;
+    // Who will join: a brand-new person (default - they choose their own
+    // name when accepting, migration 12) or an existing still-unlinked
+    // person of the household (member-bound invite, migration 11).
     final members = await ref.read(membersProvider.future);
     if (!context.mounted) return;
     final unlinked =
         members.where((member) => member.isActive && !member.isLinked).toList();
-    if (unlinked.isNotEmpty) {
-      final choice = await showDialog<Object?>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: Text(dialogContext.l10n.invite_link_title),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                dialogContext.l10n.invite_link_hint,
-                style: Theme.of(dialogContext)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(
-                        color: Theme.of(dialogContext)
-                            .colorScheme
-                            .onSurfaceVariant),
-              ),
-              const SizedBox(height: 8),
-              ListTile(
-                leading: const Icon(Icons.person_off_outlined),
-                title: Text(dialogContext.l10n.invite_link_none),
-                onTap: () => Navigator.of(dialogContext).pop('none'),
-              ),
-              for (final member in unlinked)
-                ListTile(
-                  leading: const Icon(Icons.person_add_alt_outlined),
-                  title: Text(member.name),
-                  onTap: () => Navigator.of(dialogContext).pop(member.id),
-                ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(dialogContext.l10n.cancel),
+    final choice = await showDialog<Object?>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(dialogContext.l10n.invite_target_title),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: Text(dialogContext.l10n.invite_new_person),
+              onTap: () => Navigator.of(dialogContext).pop('new'),
             ),
+            for (final member in unlinked)
+              ListTile(
+                leading: const Icon(Icons.person_add_alt_outlined),
+                title: Text(member.name),
+                onTap: () => Navigator.of(dialogContext).pop(member.id),
+              ),
           ],
         ),
-      );
-      if (!context.mounted || choice == null) return;
-      memberId = choice == 'none' ? null : choice as String;
-    }
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(dialogContext.l10n.cancel),
+          ),
+        ],
+      ),
+    );
+    if (!context.mounted || choice == null) return;
+    final String? memberId = choice == 'new' ? null : choice as String;
 
     try {
       final code = await ref.read(householdRepositoryProvider).createInvite(
@@ -337,6 +367,47 @@ class SettingsScreen extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(errorMessage(context, error))));
+      }
+    }
+  }
+
+  Future<void> _confirmLeave(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(dialogContext.l10n.leave_confirm_title),
+        content: Text(dialogContext.l10n.leave_confirm_body),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(dialogContext.l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(dialogContext.l10n.leave_household),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(householdRepositoryProvider).leaveHousehold();
+      // Access is gone immediately: the router redirect sends this login
+      // to /setup (create or join a new household). The person and its
+      // transactions stay with the old household.
+      ref
+        ..invalidate(membershipProvider)
+        ..invalidate(householdLoginsProvider)
+        ..invalidate(linkedMemberProvider)
+        ..invalidate(membersProvider)
+        ..invalidate(invitesProvider);
+    } catch (error) {
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(errorMessage(context, error))),
+        );
       }
     }
   }

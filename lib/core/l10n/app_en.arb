@@ -91,6 +91,7 @@
   "loading": "Loading...",
   "retry": "Retry",
   "cancel": "Cancel",
+  "next": "Next",
   "close": "Close",
   "error_title": "Something went wrong",
   "error_network": "No internet connection. Please try again.",
@@ -187,5 +188,33 @@
   "error_login_linked": "This account is already linked to a person.",
   "error_invalid_member": "That person doesn't belong to this household.",
   "error_category_in_use": "That category has transactions and can't be deleted.",
-  "error_member_in_use": "That person has transactions and can't be deleted."
+  "error_member_in_use": "That person has transactions and can't be deleted.",
+
+  "error_already_linked": "That person was already linked to another account.",
+  "error_last_owner": "You're the last owner. Make another member an owner first.",
+  "error_cannot_change_own_role": "You can't change your own role. Ask another owner.",
+  "error_cannot_remove_self": "To leave, use Leave household instead.",
+  "error_child_requires_member": "A child role needs an account linked to a person.",
+
+  "claim_title": "Finish setting up your account",
+  "claim_body": "Your account joined the household but isn't linked to a person yet. Choose the name your family will see.",
+  "claim_action": "Continue",
+
+  "join_name_hint": "If the owner already named you, this name isn't used.",
+
+  "household_members_title": "Household members",
+  "login_no_person": "No person linked",
+  "login_change_role": "Change role",
+  "login_remove": "Remove account",
+  "login_remove_confirm_title": "Remove this account?",
+  "login_remove_confirm_body": "The person and their transactions stay; the account only loses access.",
+
+  "leave_household": "Leave household",
+  "leave_confirm_title": "Leave this household?",
+  "leave_confirm_body": "You'll lose access. Your person and transactions stay with the family.",
+  "leave_last_owner_hint": "Make another member an owner first.",
+  "invite_target_title": "Who will join?",
+  "invite_new_person": "New person (chooses their own name)",
+
+  "quick_add_no_person": "This account isn't linked to a person yet."
 }

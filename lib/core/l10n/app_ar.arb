@@ -80,6 +80,7 @@
   "loading": "جارٍ التحميل...",
   "retry": "إعادة المحاولة",
   "cancel": "إلغاء",
+  "next": "التالي",
   "close": "إغلاق",
   "error_title": "حدث خطأ ما",
   "error_network": "لا يوجد اتصال بالإنترنت. حاول مرة أخرى.",
@@ -176,5 +177,33 @@
   "error_login_linked": "هذا الحساب مرتبط بشخص بالفعل.",
   "error_invalid_member": "ذلك الشخص ليس من هذه الأسرة.",
   "error_category_in_use": "ذلك التصنيف له معاملات ولا يمكن حذفه.",
-  "error_member_in_use": "ذلك الشخص له معاملات ولا يمكن حذفه."
+  "error_member_in_use": "ذلك الشخص له معاملات ولا يمكن حذفه.",
+
+  "error_already_linked": "ذلك الشخص مرتبط بحساب آخر بالفعل.",
+  "error_last_owner": "أنت آخر مالك. اجعل عضواً آخر مالكاً أولاً.",
+  "error_cannot_change_own_role": "لا يمكنك تغيير دورك بنفسك. اطلب من مالك آخر.",
+  "error_cannot_remove_self": "للخروج استخدم خيار مغادرة الأسرة.",
+  "error_child_requires_member": "دور الطفل يتطلب حساباً مرتبطاً بشخص.",
+
+  "claim_title": "أنهِ إعداد حسابك",
+  "claim_body": "انضم حسابك إلى الأسرة لكنه غير مرتبط بشخص بعد. اختر الاسم الذي ستراه عائلتك.",
+  "claim_action": "متابعة",
+
+  "join_name_hint": "إذا كان المالك قد سمّاك مسبقاً فهذا الاسم لن يُستخدم.",
+
+  "household_members_title": "أعضاء الأسرة",
+  "login_no_person": "لا يوجد شخص مرتبط",
+  "login_change_role": "تغيير الدور",
+  "login_remove": "إزالة الحساب",
+  "login_remove_confirm_title": "إزالة هذا الحساب؟",
+  "login_remove_confirm_body": "سيبقى الشخص وسجل معاملاته، ويفقد الحساب صلاحيته فقط.",
+
+  "leave_household": "مغادرة الأسرة",
+  "leave_confirm_title": "مغادرة هذه الأسرة؟",
+  "leave_confirm_body": "ستفقد صلاحيتك للدخول. يبقى شخصك وسجل معاملاتك لدى العائلة.",
+  "leave_last_owner_hint": "اجعل عضواً آخر مالكاً أولاً.",
+  "invite_target_title": "من سينضم؟",
+  "invite_new_person": "شخص جديد (يختار اسمه بنفسه)",
+
+  "quick_add_no_person": "هذا الحساب غير مرتبط بشخص بعد."
 }

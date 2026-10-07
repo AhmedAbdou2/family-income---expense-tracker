@@ -51,3 +51,29 @@ class Invite {
 
   bool get isActive => !isUsed && !isExpired;
 }
+
+/// One login of a household, merged with its linked person (if any).
+/// Never carries emails - `household_users` has no email column.
+class HouseholdLogin {
+  const HouseholdLogin({
+    required this.userId,
+    required this.role,
+    required this.joinedAt,
+    this.personId,
+    this.personName,
+  });
+
+  final String userId;
+  final MemberRole role;
+  final DateTime joinedAt;
+
+  /// Id of the person linked to this login, or null when the login has no
+  /// person of its own (join-only legacy logins).
+  final String? personId;
+
+  /// Display name of the person linked to this login, or null when the
+  /// login has no person of its own (join-only legacy logins).
+  final String? personName;
+
+  bool get hasPerson => personName != null;
+}

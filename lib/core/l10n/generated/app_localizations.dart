@@ -530,6 +530,12 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancel;
 
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
   /// No description provided for @close.
   ///
   /// In en, this message translates to:
@@ -1063,6 +1069,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'That person has transactions and can\'t be deleted.'**
   String get error_member_in_use;
+
+  /// No description provided for @error_already_linked.
+  ///
+  /// In en, this message translates to:
+  /// **'That person was already linked to another account.'**
+  String get error_already_linked;
+
+  /// No description provided for @error_last_owner.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re the last owner. Make another member an owner first.'**
+  String get error_last_owner;
+
+  /// No description provided for @error_cannot_change_own_role.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t change your own role. Ask another owner.'**
+  String get error_cannot_change_own_role;
+
+  /// No description provided for @error_cannot_remove_self.
+  ///
+  /// In en, this message translates to:
+  /// **'To leave, use Leave household instead.'**
+  String get error_cannot_remove_self;
+
+  /// No description provided for @error_child_requires_member.
+  ///
+  /// In en, this message translates to:
+  /// **'A child role needs an account linked to a person.'**
+  String get error_child_requires_member;
+
+  /// No description provided for @claim_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish setting up your account'**
+  String get claim_title;
+
+  /// No description provided for @claim_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account joined the household but isn\'t linked to a person yet. Choose the name your family will see.'**
+  String get claim_body;
+
+  /// No description provided for @claim_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get claim_action;
+
+  /// No description provided for @join_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'If the owner already named you, this name isn\'t used.'**
+  String get join_name_hint;
+
+  /// No description provided for @household_members_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Household members'**
+  String get household_members_title;
+
+  /// No description provided for @login_no_person.
+  ///
+  /// In en, this message translates to:
+  /// **'No person linked'**
+  String get login_no_person;
+
+  /// No description provided for @login_change_role.
+  ///
+  /// In en, this message translates to:
+  /// **'Change role'**
+  String get login_change_role;
+
+  /// No description provided for @login_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove account'**
+  String get login_remove;
+
+  /// No description provided for @login_remove_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this account?'**
+  String get login_remove_confirm_title;
+
+  /// No description provided for @login_remove_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'The person and their transactions stay; the account only loses access.'**
+  String get login_remove_confirm_body;
+
+  /// No description provided for @leave_household.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave household'**
+  String get leave_household;
+
+  /// No description provided for @leave_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave this household?'**
+  String get leave_confirm_title;
+
+  /// No description provided for @leave_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll lose access. Your person and transactions stay with the family.'**
+  String get leave_confirm_body;
+
+  /// No description provided for @leave_last_owner_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Make another member an owner first.'**
+  String get leave_last_owner_hint;
+
+  /// No description provided for @invite_target_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Who will join?'**
+  String get invite_target_title;
+
+  /// No description provided for @invite_new_person.
+  ///
+  /// In en, this message translates to:
+  /// **'New person (chooses their own name)'**
+  String get invite_new_person;
+
+  /// No description provided for @quick_add_no_person.
+  ///
+  /// In en, this message translates to:
+  /// **'This account isn\'t linked to a person yet.'**
+  String get quick_add_no_person;
 }
 
 class _AppLocalizationsDelegate
