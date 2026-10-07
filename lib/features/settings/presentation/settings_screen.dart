@@ -36,7 +36,9 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settings_title)),
       body: ListView(
-        padding: const EdgeInsetsDirectional.only(bottom: 32),
+        // Clear the shell's quick-add FAB (56 + margin) so the Sign out
+        // row at the end of the list is never covered by it.
+        padding: const EdgeInsetsDirectional.only(bottom: 120),
         children: [
           // ----------------------------------------------------------------
           // Language
