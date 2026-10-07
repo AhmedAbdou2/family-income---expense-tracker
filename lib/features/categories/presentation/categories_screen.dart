@@ -69,6 +69,9 @@ class CategoriesScreen extends ConsumerWidget {
       ),
       floatingActionButton: canManage
           ? FloatingActionButton.extended(
+              // Unique tag: must never match the shell's quick-add FAB,
+              // or the two would fly into each other across routes.
+              heroTag: const ValueKey('add-category-fab'),
               icon: const Icon(Icons.add_rounded),
               label: Text(l10n.category_add),
               onPressed: () => showCategoryEditor(context, ref),

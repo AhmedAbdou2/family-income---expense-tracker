@@ -28,7 +28,20 @@ class MembersScreen extends ConsumerWidget {
     final canManage = membership != null && _canManage(membership.role);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.members_title)),
+      appBar: AppBar(
+        title: Text(l10n.members_title),
+        // Add lives in the app bar, not a FAB: the shell already owns the
+        // only FAB (quick-add), and two default-tagged FABs in one Navigator
+        // subtree trip the duplicate-hero assertion on route transitions.
+        actions: [
+          if (canManage)
+            IconButton(
+              tooltip: l10n.member_add,
+              icon: const Icon(Icons.person_add_alt_1_outlined),
+              onPressed: () => _addMember(context, ref),
+            ),
+        ],
+      ),
       body: members.when(
         loading: () => const LoadingView(),
         error: (error, _) => ErrorView(
@@ -52,13 +65,6 @@ class MembersScreen extends ConsumerWidget {
           );
         },
       ),
-      floatingActionButton: canManage
-          ? FloatingActionButton.extended(
-              icon: const Icon(Icons.person_add_alt_1_outlined),
-              label: Text(l10n.member_add),
-              onPressed: () => _addMember(context, ref),
-            )
-          : null,
     );
   }
 

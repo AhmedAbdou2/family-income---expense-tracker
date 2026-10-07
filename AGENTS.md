@@ -32,7 +32,7 @@ Flutter (Riverpod 3, go_router 18, Supabase) + Postgres with RLS.
 ```sh
 flutter gen-l10n        # only if .arb files changed
 flutter analyze         # must be clean
-flutter test            # must pass (34 tests)
+flutter test            # must pass (35 tests)
 flutter build web --release   # compile check; ~3-4 min
 ```
 
@@ -142,6 +142,10 @@ the settings dialog says so.
   invite person picker (member-bound invites), child-role UI gating
   (no manage controls, invites/categories sections hidden), new error
   codes (member_linked / login_linked / invalid_member / category_in_use
-  / member_in_use), routes + tests (34), web release build OK.
+  / member_in_use), routes + tests (35), web release build OK.
+- **Phase 2 fix**: duplicate FAB hero tags froze route transitions —
+  the shell now owns the single quick-add FAB (`ValueKey('quick-add-fab')`),
+  add-person moved to the People app bar, add-category got its own tag;
+  regression test `test/home_shell_fab_hero_test.dart`.
 - Phase 3: vehicles, budgets, recurring rules.
 - Phase 4: reports/charts/CSV export/polish.

@@ -50,6 +50,7 @@ class HomeShell extends StatelessWidget {
           final extended = constraints.maxWidth >= 1200;
           return Scaffold(
             floatingActionButton: FloatingActionButton(
+              heroTag: const ValueKey('quick-add-fab'),
               tooltip: l10n.quick_add_title,
               onPressed: () => _quickAdd(context),
               child: const Icon(Icons.add_rounded),
@@ -88,6 +89,7 @@ class HomeShell extends StatelessWidget {
 
         return Scaffold(
           floatingActionButton: FloatingActionButton(
+            heroTag: const ValueKey('quick-add-fab'),
             tooltip: l10n.quick_add_title,
             onPressed: () => _quickAdd(context),
             child: const Icon(Icons.add_rounded),

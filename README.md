@@ -86,7 +86,7 @@ its own data.
 | --- | --- |
 | `flutter gen-l10n` | Regenerate `lib/core/l10n/generated/` from the `.arb` files |
 | `flutter analyze` | Lint/typecheck (must stay at 0 issues) |
-| `flutter test` | Unit tests: redirect, money, l10n parity, error mapping |
+| `flutter test` | Unit tests: redirect, money, l10n parity, error mapping, quick-add keypad, shell FAB heroes |
 | `flutter build web --release` | Release build (verified working) |
 | `flutter build apk --debug` | Android build (requires a JDK, see above) |
 
