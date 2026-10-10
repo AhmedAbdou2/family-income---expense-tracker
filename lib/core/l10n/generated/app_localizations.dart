@@ -668,6 +668,12 @@ abstract class AppLocalizations {
   /// **'People'**
   String get nav_people;
 
+  /// No description provided for @nav_vehicles.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicles'**
+  String get nav_vehicles;
+
   /// No description provided for @members_title.
   ///
   /// In en, this message translates to:

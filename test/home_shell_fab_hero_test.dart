@@ -68,6 +68,13 @@ GoRouter buildTestRouter() => GoRouter(
                     const Scaffold(body: Center(child: Text('settings'))),
               ),
             ]),
+            StatefulShellBranch(routes: [
+              GoRoute(
+                path: '/vehicles',
+                builder: (context, state) =>
+                    const Scaffold(body: Center(child: Text('vehicles'))),
+              ),
+            ]),
           ],
         ),
       ],

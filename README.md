@@ -99,7 +99,7 @@ its own data.
 | --- | --- |
 | `flutter gen-l10n` | Regenerate `lib/core/l10n/generated/` from the `.arb` files |
 | `flutter analyze` | Lint/typecheck (must stay at 0 issues) |
-| `flutter test` | Unit tests: redirect (incl. /claim), money, l10n parity, error mapping, validators, quick-add keypad, shell FAB heroes, fuel stats, maintenance status |
+| `flutter test` | Unit tests: redirect (incl. /claim + adult-only guards), money, l10n parity, error mapping, validators, quick-add keypad, shell FAB heroes, fuel stats, maintenance status, vehicle-detail layout, vehicles nav |
 | `flutter build web --release` | Release build (verified working) |
 | `flutter build apk --debug` | Android build (requires a JDK, see above) |
 

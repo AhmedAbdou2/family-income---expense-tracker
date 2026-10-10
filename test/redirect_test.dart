@@ -308,5 +308,46 @@ void main() {
         );
       }
     });
+
+    test('children are redirected away from adult-only routes', () {
+      for (final location in [
+        '/vehicles',
+        '/vehicles/new',
+        '/vehicles/v1',
+        '/vehicles/v1/fuel/new',
+        '/recurring',
+        '/recurring/new',
+      ]) {
+        expect(
+          appRedirect(
+            authLoading: false,
+            signedIn: true,
+            membershipLoading: false,
+            hasMembership: true,
+            location: location,
+            isAdult: false,
+          ),
+          '/',
+          reason: 'child: $location',
+        );
+      }
+    });
+
+    test('adults may open adult-only routes', () {
+      for (final location in ['/vehicles', '/vehicles/v1', '/recurring']) {
+        expect(
+          appRedirect(
+            authLoading: false,
+            signedIn: true,
+            membershipLoading: false,
+            hasMembership: true,
+            location: location,
+            isAdult: true,
+          ),
+          isNull,
+          reason: 'adult: $location',
+        );
+      }
+    });
   });
 }

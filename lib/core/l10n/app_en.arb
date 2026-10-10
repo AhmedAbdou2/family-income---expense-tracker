@@ -115,6 +115,7 @@
   "error_membership_immutable": "Membership details can't be changed here.",
 
   "nav_people": "People",
+  "nav_vehicles": "Vehicles",
 
   "members_title": "People",
   "member_add": "Add person",

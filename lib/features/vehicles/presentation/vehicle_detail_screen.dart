@@ -6,6 +6,7 @@ import 'package:intl/intl.dart' show DateFormat;
 import '../../../core/l10n/l10n.dart';
 import '../../../core/settings/settings_controller.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/widgets/app_buttons.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_view.dart';
 import '../../household/presentation/providers.dart';
@@ -131,6 +132,7 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
           _SectionHeader(
             title: l10n.fuel_logs_title,
             action: FilledButton.tonalIcon(
+              style: AppButtons.inline,
               icon: const Icon(Icons.add_rounded, size: 18),
               label: Text(l10n.fuel_log_add),
               onPressed: () =>
@@ -167,6 +169,7 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
           _SectionHeader(
             title: l10n.maintenance_title,
             action: FilledButton.tonalIcon(
+              style: AppButtons.inline,
               icon: const Icon(Icons.add_rounded, size: 18),
               label: Text(l10n.maintenance_add),
               onPressed: () =>

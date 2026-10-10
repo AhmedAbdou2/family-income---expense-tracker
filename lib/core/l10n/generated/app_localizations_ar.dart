@@ -313,6 +313,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get nav_people => 'الأشخاص';
 
   @override
+  String get nav_vehicles => 'المركبات';
+
+  @override
   String get members_title => 'الأشخاص';
 
   @override

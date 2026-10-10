@@ -29,7 +29,17 @@ class VehiclesScreen extends ConsumerWidget {
     final vehicles = ref.watch(vehiclesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.vehicles_title)),
+      appBar: AppBar(
+        title: Text(l10n.vehicles_title),
+        actions: [
+          if (canManage)
+            IconButton(
+              tooltip: l10n.vehicle_add,
+              icon: const Icon(Icons.add_rounded),
+              onPressed: () => context.push('/vehicles/new'),
+            ),
+        ],
+      ),
       body: vehicles.when(
         loading: () => const LoadingView(),
         error: (error, _) => ErrorView(
@@ -74,14 +84,6 @@ class VehiclesScreen extends ConsumerWidget {
           );
         },
       ),
-      floatingActionButton: canManage
-          ? FloatingActionButton.extended(
-              heroTag: const ValueKey('add-vehicle-fab'),
-              icon: const Icon(Icons.add_rounded),
-              label: Text(l10n.vehicle_add),
-              onPressed: () => context.push('/vehicles/new'),
-            )
-          : null,
     );
   }
 }

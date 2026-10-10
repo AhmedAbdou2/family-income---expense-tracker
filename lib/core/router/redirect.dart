@@ -8,6 +8,18 @@ const String claimRoute = '/claim';
 const Set<String> authRoutes = {'/sign-in', '/sign-up', '/forgot-password'};
 const Set<String> setupRoutes = {'/setup', '/setup/create', '/setup/join'};
 
+/// Routes only owner/adult logins may open. Vehicles (with fuel/maintenance)
+/// and recurring fixed commitments are adult features; a child landing here
+/// (e.g. a stale bookmark) is sent back to the dashboard.
+const Set<String> adultOnlyRoutes = {'/vehicles', '/recurring'};
+
+bool _isAdultOnly(String location) {
+  for (final route in adultOnlyRoutes) {
+    if (location == route || location.startsWith('$route/')) return true;
+  }
+  return false;
+}
+
 /// Decides where (if anywhere) the router should send the user.
 ///
 /// Flow:
@@ -24,6 +36,7 @@ String? appRedirect({
   required String location,
   bool memberLoading = false,
   bool hasLinkedMember = true,
+  bool isAdult = true,
 }) {
   if (authLoading) {
     return location == splashRoute ? null : splashRoute;
@@ -47,6 +60,10 @@ String? appRedirect({
 
   if (!hasLinkedMember) {
     return location == claimRoute ? null : claimRoute;
+  }
+
+  if (!isAdult && _isAdultOnly(location)) {
+    return '/';
   }
 
   if (authRoutes.contains(location) ||

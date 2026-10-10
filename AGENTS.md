@@ -32,7 +32,7 @@ Flutter (Riverpod 3, go_router 18, Supabase) + Postgres with RLS.
 ```sh
 flutter gen-l10n        # only if .arb files changed
 flutter analyze         # must be clean
-flutter test            # must pass (52 tests)
+flutter test            # must pass (60 tests)
 flutter build web --release   # compile check; ~3-4 min
 ```
 
@@ -216,6 +216,19 @@ owner can delete the leftover unlinked person from the People tab.
   end) posted idempotently by `generate_recurring_transactions` when an
   adult opens the dashboard, adult-only Settings entries, new error codes
   (invalid_vehicle / invalid_item / invalid_log / invalid_value /
-  odometer_backwards / no_car_category / no_linked_person), tests (52),
+  odometer_backwards / no_car_category / no_linked_person), tests (60),
   web release build OK.
+- Phase 3 fix (button-in-Row crash): the global button theme uses
+  `minimumSize: Size.fromHeight(...)` (width = infinity) so form buttons
+  stretch full width; inside an unbounded `Row` that threw
+  "BoxConstraints forces an infinite width" and broke the vehicle detail
+  screen (so "Add fill-up" did nothing). Section-header action buttons now
+  use `AppButtons.inline` (`lib/core/widgets/app_buttons.dart`,
+  `minimumSize: Size(0, 44)`). Regression tests:
+  `test/vehicle_detail_layout_test.dart` (narrow/wide + tap-to-open).
+- Phase 3 UX: Vehicles is a top-level nav destination for owner/adult only
+  (last shell branch so a child's destination indexes stay 1:1); children
+  are redirected away from `/vehicles` and `/recurring`; the Vehicles tab
+  uses an AppBar add action instead of its own FAB. Tests:
+  `test/home_shell_vehicles_nav_test.dart`.
 - Phase 4: reports/charts/CSV export/polish.

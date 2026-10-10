@@ -310,6 +310,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nav_people => 'People';
 
   @override
+  String get nav_vehicles => 'Vehicles';
+
+  @override
   String get members_title => 'People';
 
   @override

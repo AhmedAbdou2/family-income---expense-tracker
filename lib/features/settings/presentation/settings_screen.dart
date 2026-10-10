@@ -190,7 +190,7 @@ class SettingsScreen extends ConsumerWidget {
               child: ListTile(
                 leading: Icon(Icons.directions_car_outlined, color: scheme.primary),
                 title: Text(l10n.vehicles_title),
-                onTap: () => context.push('/vehicles'),
+                onTap: () => context.go('/vehicles'),
               ),
             ),
 

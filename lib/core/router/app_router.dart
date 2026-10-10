@@ -7,6 +7,7 @@ import '../../features/auth/presentation/providers.dart';
 import '../../features/auth/presentation/sign_in_screen.dart';
 import '../../features/auth/presentation/sign_up_screen.dart';
 import '../../features/categories/presentation/categories_screen.dart';
+import '../../features/household/domain/entities.dart';
 import '../../features/household/presentation/claim_screen.dart';
 import '../../features/household/presentation/create_household_screen.dart';
 import '../../features/household/presentation/dashboard_screen.dart';
@@ -68,6 +69,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         location: state.matchedLocation,
         memberLoading: linked.isLoading,
         hasLinkedMember: linked.value ?? true,
+        isAdult: membership.value?.role != MemberRole.child,
       );
     },
     routes: [
@@ -148,10 +150,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
-        path: '/vehicles',
-        builder: (context, state) => const VehiclesScreen(),
-      ),
-      GoRoute(
         path: '/recurring/new',
         builder: (context, state) => const RecurringFormScreen(),
       ),
@@ -201,6 +199,15 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(
               path: '/settings',
               builder: (context, state) => const SettingsScreen(),
+            ),
+          ]),
+          // Vehicles is the LAST branch on purpose: children (who don't get
+          // this destination) then keep a 1:1 index map for the first four
+          // destinations. See `HomeShell` + the redirect guard.
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/vehicles',
+              builder: (context, state) => const VehiclesScreen(),
             ),
           ]),
         ],
