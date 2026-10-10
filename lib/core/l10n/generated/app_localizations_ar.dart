@@ -589,4 +589,329 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get quick_add_no_person => 'هذا الحساب غير مرتبط بشخص بعد.';
+
+  @override
+  String get vehicles_section => 'السيارات والمصروفات';
+
+  @override
+  String get vehicles_title => 'السيارات';
+
+  @override
+  String get vehicles_empty_title => 'لا توجد سيارات بعد';
+
+  @override
+  String get vehicles_empty_body => 'أضف سيارة لتتبّع الوقود والصيانة.';
+
+  @override
+  String get vehicle_add => 'إضافة سيارة';
+
+  @override
+  String get vehicle_edit => 'تعديل السيارة';
+
+  @override
+  String get vehicle_name => 'اسم السيارة';
+
+  @override
+  String get vehicle_name_hint => 'مثال: كورولا البيضاء';
+
+  @override
+  String get vehicle_plate => 'اللوحة (اختياري)';
+
+  @override
+  String get vehicle_plate_hint => 'مثال: أ ب ج ١٢٣';
+
+  @override
+  String get vehicle_fuel_type => 'نوع الوقود';
+
+  @override
+  String get vehicle_odometer => 'قراءة العداد الحالية (كم)';
+
+  @override
+  String get vehicle_odometer_hint => 'مثال: ٤٥٠٠٠';
+
+  @override
+  String get vehicle_archive => 'أرشفة';
+
+  @override
+  String get vehicle_restore => 'استعادة';
+
+  @override
+  String get vehicle_archived => 'مؤرشفة';
+
+  @override
+  String vehicle_odometer_value(String km) {
+    return 'العداد: $km كم';
+  }
+
+  @override
+  String get vehicle_saved => 'تم حفظ السيارة.';
+
+  @override
+  String get vehicle_archive_confirm_title => 'أرشفة هذه السيارة؟';
+
+  @override
+  String get vehicle_archive_confirm_body =>
+      'تبقى في السجل لكن تُخفى من القوائم.';
+
+  @override
+  String get fuel_type_petrol => 'بنزين';
+
+  @override
+  String get fuel_type_diesel => 'ديزل';
+
+  @override
+  String get fuel_type_electric => 'كهربائية';
+
+  @override
+  String get fuel_type_hybrid => 'هجينة';
+
+  @override
+  String get fuel_logs_title => 'سجل الوقود';
+
+  @override
+  String get fuel_log_add => 'تسجيل تعبئة';
+
+  @override
+  String get fuel_log_odometer => 'العداد (كم)';
+
+  @override
+  String get fuel_log_liters => 'اللترات';
+
+  @override
+  String get fuel_log_cost => 'التكلفة الإجمالية';
+
+  @override
+  String get fuel_log_full_tank => 'خزان ممتلئ';
+
+  @override
+  String get fuel_log_full_badge => 'ممتلئ';
+
+  @override
+  String get fuel_log_electric_hint => 'سيارة كهربائية: لا تُسجَّل اللترات.';
+
+  @override
+  String get fuel_log_saved => 'تم تسجيل التعبئة.';
+
+  @override
+  String get fuel_logs_empty => 'لم تُسجَّل أي تعبئة بعد.';
+
+  @override
+  String get fuel_log_delete => 'حذف التعبئة';
+
+  @override
+  String get fuel_log_delete_confirm_title => 'حذف هذه التعبئة؟';
+
+  @override
+  String get fuel_log_delete_confirm_body =>
+      'سيُحذف مصروف الوقود المرتبط أيضًا.';
+
+  @override
+  String get fuel_log_deleted => 'تم حذف التعبئة.';
+
+  @override
+  String get fuel_stats_title => 'الاستهلاك';
+
+  @override
+  String get fuel_stats_l_per_100km => 'لتر/١٠٠كم';
+
+  @override
+  String get fuel_stats_cost_per_km => 'التكلفة/كم';
+
+  @override
+  String get fuel_stats_no_data =>
+      'أضف تعبئتين ممتلئتين على الأقل لعرض الاستهلاك.';
+
+  @override
+  String get maintenance_title => 'الصيانة';
+
+  @override
+  String get maintenance_add => 'إضافة تذكير';
+
+  @override
+  String get maintenance_edit => 'تعديل التذكير';
+
+  @override
+  String get maintenance_name => 'اسم البند';
+
+  @override
+  String get maintenance_name_hint => 'مثال: تغيير الزيت';
+
+  @override
+  String get maintenance_due_date => 'تاريخ الاستحقاق';
+
+  @override
+  String get maintenance_due_odometer => 'عداد الاستحقاق (كم)';
+
+  @override
+  String get maintenance_interval_days => 'يتكرر كل (أيام)';
+
+  @override
+  String get maintenance_interval_km => 'يتكرر كل (كم)';
+
+  @override
+  String get maintenance_interval_hint =>
+      'اختياري: ينشئ تذكيرًا جديدًا بعد الإتمام.';
+
+  @override
+  String get maintenance_need_one_due => 'أدخل تاريخ استحقاق أو قراءة عداد.';
+
+  @override
+  String get maintenance_status_overdue => 'متأخر';
+
+  @override
+  String get maintenance_status_due_soon => 'قريب';
+
+  @override
+  String get maintenance_empty => 'لا توجد تذكيرات صيانة بعد.';
+
+  @override
+  String maintenance_due_date_line(String date) {
+    return 'الاستحقاق $date';
+  }
+
+  @override
+  String maintenance_due_odo_line(String km) {
+    return 'عند $km كم';
+  }
+
+  @override
+  String get maintenance_complete => 'تم الإنجاز';
+
+  @override
+  String get maintenance_complete_title => 'إتمام الصيانة';
+
+  @override
+  String get maintenance_complete_cost => 'إضافة تكلفة (اختياري)';
+
+  @override
+  String get maintenance_completed => 'تمت الصيانة.';
+
+  @override
+  String get maintenance_delete => 'حذف التذكير';
+
+  @override
+  String get maintenance_delete_confirm_title => 'حذف هذا التذكير؟';
+
+  @override
+  String get maintenance_delete_confirm_body => 'لا يمكن التراجع عن ذلك.';
+
+  @override
+  String get maintenance_saved => 'تم حفظ التذكير.';
+
+  @override
+  String get recurring_section => 'الالتزامات الثابتة';
+
+  @override
+  String get recurring_title => 'الالتزامات الثابتة';
+
+  @override
+  String get recurring_empty_title => 'لا توجد التزامات ثابتة بعد';
+
+  @override
+  String get recurring_empty_body =>
+      'أضف الإيجار أو الأقساط أو الراتب لترحيلها تلقائيًا.';
+
+  @override
+  String get recurring_add => 'إضافة التزام';
+
+  @override
+  String get recurring_edit => 'تعديل الالتزام';
+
+  @override
+  String get recurring_name => 'الاسم (اختياري)';
+
+  @override
+  String get recurring_name_hint => 'مثال: إيجار الشقة';
+
+  @override
+  String get recurring_amount => 'المبلغ';
+
+  @override
+  String get recurring_frequency => 'التكرار';
+
+  @override
+  String get frequency_weekly => 'أسبوعي';
+
+  @override
+  String get frequency_monthly => 'شهري';
+
+  @override
+  String get frequency_yearly => 'سنوي';
+
+  @override
+  String get recurring_day_of_month => 'يوم الشهر';
+
+  @override
+  String get recurring_start_date => 'تاريخ البدء';
+
+  @override
+  String get recurring_end_date => 'تاريخ الانتهاء (اختياري)';
+
+  @override
+  String recurring_next_due_line(String date) {
+    return 'التالي: $date';
+  }
+
+  @override
+  String get recurring_active => 'نشط';
+
+  @override
+  String get recurring_paused => 'موقوف';
+
+  @override
+  String get recurring_pause => 'إيقاف';
+
+  @override
+  String get recurring_resume => 'تشغيل';
+
+  @override
+  String get recurring_saved => 'تم حفظ الالتزام.';
+
+  @override
+  String get recurring_delete => 'حذف الالتزام';
+
+  @override
+  String get recurring_delete_confirm_title => 'حذف هذا الالتزام؟';
+
+  @override
+  String get recurring_delete_confirm_body => 'تبقى الحركات المرحّلة.';
+
+  @override
+  String get recurring_deleted => 'تم حذف الالتزام.';
+
+  @override
+  String recurring_generated(int count) {
+    return 'تم ترحيل $count حركة دورية.';
+  }
+
+  @override
+  String get recurring_type_income => 'دخل';
+
+  @override
+  String get recurring_type_expense => 'مصروف';
+
+  @override
+  String get recurring_inactive_hint => 'الالتزامات الموقوفة لا تُرحَّل.';
+
+  @override
+  String get error_invalid_vehicle => 'هذه السيارة لا تنتمي إلى هذا المنزل.';
+
+  @override
+  String get error_invalid_item => 'تذكير الصيانة هذا غير موجود.';
+
+  @override
+  String get error_invalid_log => 'تعبئة الوقود هذه غير موجودة.';
+
+  @override
+  String get error_invalid_value => 'أدخل قيمًا صحيحة.';
+
+  @override
+  String get error_odometer_backwards =>
+      'لا يمكن أن يكون العداد أقل من تعبئة سابقة.';
+
+  @override
+  String get error_no_car_category => 'أضف فئة سيارة أولًا.';
+
+  @override
+  String get error_no_linked_person => 'اربط هذا الحساب بشخص أولًا.';
 }

@@ -32,7 +32,7 @@ Flutter (Riverpod 3, go_router 18, Supabase) + Postgres with RLS.
 ```sh
 flutter gen-l10n        # only if .arb files changed
 flutter analyze         # must be clean
-flutter test            # must pass (41 tests)
+flutter test            # must pass (52 tests)
 flutter build web --release   # compile check; ~3-4 min
 ```
 
@@ -67,8 +67,18 @@ lib/features  auth/  domain (AuthRepository, SignUpOutcome), data
               transactions/ domain (Transaction, TransactionType), data,
                    presentation (month/member-filtered list, create/edit form,
                    QuickAddAmountController + quick-add sheet, month providers)
+              vehicles/  domain (Vehicle, FuelType, FuelLog, MaintenanceItem,
+                   FuelStats full-to-full, MaintenanceReminder), data,
+                   presentation (vehiclesProvider, fuelLogsProvider(vehicleId),
+                   maintenanceProvider(vehicleId): list/form/detail screens,
+                   fuel-log form, maintenance form; L/100km + cost/km)
+              recurring/ domain (RecurrenceFrequency, RecurringRule), data,
+                   presentation (recurringRulesProvider + list/form screens;
+                   due transactions posted by generate_recurring_transactions
+                   when an adult opens the dashboard — idempotent)
               settings/  settings screen (language/theme/digits, invites with
-                   optional person link, manage categories, sign out)
+                   optional person link, manage categories, vehicles + fixed
+                   commitments entries, sign out)
 ```
 
 - Providers: Riverpod 3 `NotifierProvider`/`StreamProvider`/`FutureProvider`.
@@ -79,9 +89,13 @@ lib/features  auth/  domain (AuthRepository, SignUpOutcome), data
   `/forgot-password`, `/setup`, `/setup/create`, `/setup/join`, `/claim`,
   `/household-members`, `/` (dashboard), `/transactions`,
   `/transactions/new`, `/transactions/edit/:id`, `/members`, `/categories`,
-  `/settings`. Detail routes are declared before the shell. A household
-  login with no linked person is held on `/claim` until it picks a name
-  (`linkedMemberProvider`; errors assume "linked" so a failure never
+  `/vehicles`, `/vehicles/new`, `/vehicles/edit/:id`, `/vehicles/:id`,
+  `/vehicles/:id/fuel/new`, `/vehicles/:id/maintenance/new`,
+  `/vehicles/:id/maintenance/edit/:itemId`, `/recurring`,
+  `/recurring/new`, `/recurring/edit/:id`, `/settings`. Detail routes are
+  declared before the shell (and `/vehicles/new` before `/vehicles/:id`). A
+  household login with no linked person is held on `/claim` until it picks a
+  name (`linkedMemberProvider`; errors assume "linked" so a failure never
   blocks the app).
 - Environment: `flutter_dotenv`, keys read in `lib/core/config/env.dart`.
 
@@ -104,13 +118,21 @@ Supabase SQL Editor (user does this manually):
    RPCs with `last_owner` / `cannot_change_own_role` /
    `cannot_remove_self` / `child_requires_member`, name trigger, direct
    `members` name UPDATE revoked from `authenticated`, INSERT/DELETE on
-   `members` limited to unlinked rows).
+   `members` limited to unlinked rows) → 13. fuel + maintenance + recurring
+   (adds `vehicles.fuel_type`/`is_active`, new `fuel_logs` (SELECT-only;
+   writes via `add_fuel_log`/`delete_fuel_log`), new `maintenance_items`
+   (adult CRUD + `complete_maintenance`), `recurring_rules.name/start_date/
+   end_date`, `transactions.recurrence_date` + partial unique index
+   `(recurring_rule_id, recurrence_date)`, and the idempotent
+   `generate_recurring_transactions`; vehicles/recurring/fuel/maintenance
+   SELECT narrowed to **adults only** — children get zero access; new
+   definer fns REVOKE/GRANT hardened).
 
 Migration 11 is **frozen** (run green on the cloud DB together with the
-isolation test). Migration 12 is fully validated in Docker (all 12 files
-+ extended test green) — the user runs it (and the test) on the cloud
-next; after that it is frozen too. Any further DB change must be a NEW
-migration file.
+isolation test). Migration 12 is **frozen** too. Migration 13 is validated
+in Docker (all 13 files + extended isolation test green, privilege matrix
+clean) — the user runs it on the cloud next; after that it is frozen. Any
+further DB change must be a NEW migration file.
 
 Indexes: `household_id` on every table; `(household_id, date)` on
 transactions.
@@ -122,14 +144,18 @@ RLS design (full plain-language comments in migration 10):
   read `household_users` without recursive RLS.
 - Trigger freezes `household_users.user_id`/`household_id` (update = role
   change only).
-- All 9 tables: RLS enabled; `anon` has zero access; RPCs granted to
+- All 11 tables: RLS enabled; `anon` has zero access; RPCs granted to
   `authenticated` only; `seed_default_categories` executable by nobody
   outside definer functions.
 - SELECT: members see their household's rows. Children additionally see
   only their own `members` row and that person's transactions; they can
-  read categories (needed to record spending).
+  read categories (needed to record spending). Vehicles, fuel logs,
+  maintenance reminders and recurring rules are **adult-only — a child
+  gets zero SELECT access** to them.
 - INSERT/UPDATE/DELETE on `members`, `categories`, `vehicles`,
-  `recurring_rules`, `budgets`: owner/adult only.
+  `maintenance_items`, `recurring_rules`, `budgets`: owner/adult only.
+  `fuel_logs` has a SELECT policy only — writes go through
+  `add_fuel_log`/`delete_fuel_log` (RPC-only).
 - `transactions` insert/update also require member/category/vehicle/recurring
   rows to belong to the same household.
 - `households` update/delete: owner only; no insert policy.
@@ -178,5 +204,18 @@ owner can delete the leftover unlinked person from the People tab.
   at 40), new error codes (last_owner / cannot_change_own_role /
   cannot_remove_self / child_requires_member / already_linked), tests
   (41), web release build OK.
-- Phase 3: vehicles, budgets, recurring rules.
+- Phase 3 (done, awaiting approval): migration 13 + extended isolation
+  test (section 8: vehicles, add/delete fuel, invalid fuel, maintenance +
+  re-arm + expense, recurring catch-up/idempotency/child-0, child &
+  outsider lockout; Docker-green, all 13 files + privilege matrix clean,
+  user runs it on cloud next), vehicles CRUD + archive, fuel log with
+  odometer-never-backwards + one linked expense per fill-up, L/100km
+  (full-to-full) + cost/km, maintenance reminders (due date and/or
+  odometer, in-app due-soon/overdue, completing may post an expense),
+  recurring fixed commitments (weekly/monthly/yearly, start + optional
+  end) posted idempotently by `generate_recurring_transactions` when an
+  adult opens the dashboard, adult-only Settings entries, new error codes
+  (invalid_vehicle / invalid_item / invalid_log / invalid_value /
+  odometer_backwards / no_car_category / no_linked_person), tests (52),
+  web release build OK.
 - Phase 4: reports/charts/CSV export/polish.

@@ -46,9 +46,7 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settings_title)),
       body: ListView(
-        // Clear the shell's quick-add FAB (56 + margin) so the Sign out
-        // row at the end of the list is never covered by it.
-        padding: const EdgeInsetsDirectional.only(bottom: 120),
+        padding: const EdgeInsetsDirectional.only(bottom: 32),
         children: [
           // ----------------------------------------------------------------
           // Language
@@ -181,6 +179,27 @@ class SettingsScreen extends ConsumerWidget {
                 title: Text(l10n.manage_categories),
                 subtitle: Text(l10n.categories_title),
                 onTap: () => context.push('/categories'),
+              ),
+            ),
+
+            // ------------------------------------------------------------
+            // Phase 3: vehicles & fixed commitments
+            // ------------------------------------------------------------
+            _SectionHeader(title: l10n.vehicles_section),
+            Card(
+              child: ListTile(
+                leading: Icon(Icons.directions_car_outlined, color: scheme.primary),
+                title: Text(l10n.vehicles_title),
+                onTap: () => context.push('/vehicles'),
+              ),
+            ),
+
+            _SectionHeader(title: l10n.recurring_section),
+            Card(
+              child: ListTile(
+                leading: Icon(Icons.event_repeat_outlined, color: scheme.primary),
+                title: Text(l10n.recurring_title),
+                onTap: () => context.push('/recurring'),
               ),
             ),
 

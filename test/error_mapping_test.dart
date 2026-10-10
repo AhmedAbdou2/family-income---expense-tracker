@@ -24,6 +24,13 @@ void main() {
         'cannot_change_own_role': AppErrorCode.cannotChangeOwnRole,
         'cannot_remove_self': AppErrorCode.cannotRemoveSelf,
         'child_requires_member': AppErrorCode.childRequiresMember,
+        'invalid_vehicle': AppErrorCode.invalidVehicle,
+        'invalid_item': AppErrorCode.invalidItem,
+        'invalid_log': AppErrorCode.invalidLog,
+        'invalid_value': AppErrorCode.invalidValue,
+        'odometer_backwards': AppErrorCode.odometerBackwards,
+        'no_car_category': AppErrorCode.noCarCategory,
+        'no_linked_person': AppErrorCode.noLinkedPerson,
       };
 
       cases.forEach((message, expected) {

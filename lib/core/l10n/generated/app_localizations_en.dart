@@ -595,4 +595,333 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get quick_add_no_person =>
       'This account isn\'t linked to a person yet.';
+
+  @override
+  String get vehicles_section => 'Vehicles & car';
+
+  @override
+  String get vehicles_title => 'Vehicles';
+
+  @override
+  String get vehicles_empty_title => 'No vehicles yet';
+
+  @override
+  String get vehicles_empty_body =>
+      'Add a vehicle to track fuel and maintenance.';
+
+  @override
+  String get vehicle_add => 'Add vehicle';
+
+  @override
+  String get vehicle_edit => 'Edit vehicle';
+
+  @override
+  String get vehicle_name => 'Vehicle name';
+
+  @override
+  String get vehicle_name_hint => 'e.g. White Corolla';
+
+  @override
+  String get vehicle_plate => 'Plate (optional)';
+
+  @override
+  String get vehicle_plate_hint => 'e.g. ABC 123';
+
+  @override
+  String get vehicle_fuel_type => 'Fuel type';
+
+  @override
+  String get vehicle_odometer => 'Current odometer (km)';
+
+  @override
+  String get vehicle_odometer_hint => 'e.g. 45000';
+
+  @override
+  String get vehicle_archive => 'Archive';
+
+  @override
+  String get vehicle_restore => 'Restore';
+
+  @override
+  String get vehicle_archived => 'Archived';
+
+  @override
+  String vehicle_odometer_value(String km) {
+    return 'Odometer: $km km';
+  }
+
+  @override
+  String get vehicle_saved => 'Vehicle saved.';
+
+  @override
+  String get vehicle_archive_confirm_title => 'Archive this vehicle?';
+
+  @override
+  String get vehicle_archive_confirm_body =>
+      'It stays in history but is hidden from pickers.';
+
+  @override
+  String get fuel_type_petrol => 'Petrol';
+
+  @override
+  String get fuel_type_diesel => 'Diesel';
+
+  @override
+  String get fuel_type_electric => 'Electric';
+
+  @override
+  String get fuel_type_hybrid => 'Hybrid';
+
+  @override
+  String get fuel_logs_title => 'Fuel log';
+
+  @override
+  String get fuel_log_add => 'Add fill-up';
+
+  @override
+  String get fuel_log_odometer => 'Odometer (km)';
+
+  @override
+  String get fuel_log_liters => 'Liters';
+
+  @override
+  String get fuel_log_cost => 'Total cost';
+
+  @override
+  String get fuel_log_full_tank => 'Full tank';
+
+  @override
+  String get fuel_log_full_badge => 'Full';
+
+  @override
+  String get fuel_log_electric_hint =>
+      'Electric vehicle: liters aren\'t recorded.';
+
+  @override
+  String get fuel_log_saved => 'Fill-up saved.';
+
+  @override
+  String get fuel_logs_empty => 'No fill-ups recorded yet.';
+
+  @override
+  String get fuel_log_delete => 'Delete fill-up';
+
+  @override
+  String get fuel_log_delete_confirm_title => 'Delete this fill-up?';
+
+  @override
+  String get fuel_log_delete_confirm_body =>
+      'The linked fuel expense is deleted too.';
+
+  @override
+  String get fuel_log_deleted => 'Fill-up deleted.';
+
+  @override
+  String get fuel_stats_title => 'Economy';
+
+  @override
+  String get fuel_stats_l_per_100km => 'L/100km';
+
+  @override
+  String get fuel_stats_cost_per_km => 'Cost/km';
+
+  @override
+  String get fuel_stats_no_data =>
+      'Add at least two full fill-ups to see consumption.';
+
+  @override
+  String get maintenance_title => 'Maintenance';
+
+  @override
+  String get maintenance_add => 'Add reminder';
+
+  @override
+  String get maintenance_edit => 'Edit reminder';
+
+  @override
+  String get maintenance_name => 'Item name';
+
+  @override
+  String get maintenance_name_hint => 'e.g. Oil change';
+
+  @override
+  String get maintenance_due_date => 'Due date';
+
+  @override
+  String get maintenance_due_odometer => 'Due odometer (km)';
+
+  @override
+  String get maintenance_interval_days => 'Repeat every (days)';
+
+  @override
+  String get maintenance_interval_km => 'Repeat every (km)';
+
+  @override
+  String get maintenance_interval_hint =>
+      'Optional: leaves a new reminder after completion.';
+
+  @override
+  String get maintenance_need_one_due => 'Enter a due date or a due odometer.';
+
+  @override
+  String get maintenance_status_overdue => 'Overdue';
+
+  @override
+  String get maintenance_status_due_soon => 'Due soon';
+
+  @override
+  String get maintenance_empty => 'No maintenance reminders yet.';
+
+  @override
+  String maintenance_due_date_line(String date) {
+    return 'Due $date';
+  }
+
+  @override
+  String maintenance_due_odo_line(String km) {
+    return 'At $km km';
+  }
+
+  @override
+  String get maintenance_complete => 'Mark done';
+
+  @override
+  String get maintenance_complete_title => 'Complete maintenance';
+
+  @override
+  String get maintenance_complete_cost => 'Add cost (optional)';
+
+  @override
+  String get maintenance_completed => 'Maintenance completed.';
+
+  @override
+  String get maintenance_delete => 'Delete reminder';
+
+  @override
+  String get maintenance_delete_confirm_title => 'Delete this reminder?';
+
+  @override
+  String get maintenance_delete_confirm_body => 'This can\'t be undone.';
+
+  @override
+  String get maintenance_saved => 'Reminder saved.';
+
+  @override
+  String get recurring_section => 'Fixed commitments';
+
+  @override
+  String get recurring_title => 'Fixed commitments';
+
+  @override
+  String get recurring_empty_title => 'No fixed commitments yet';
+
+  @override
+  String get recurring_empty_body =>
+      'Add rent, installments or a salary to post them automatically.';
+
+  @override
+  String get recurring_add => 'Add commitment';
+
+  @override
+  String get recurring_edit => 'Edit commitment';
+
+  @override
+  String get recurring_name => 'Name (optional)';
+
+  @override
+  String get recurring_name_hint => 'e.g. Apartment rent';
+
+  @override
+  String get recurring_amount => 'Amount';
+
+  @override
+  String get recurring_frequency => 'Repeats';
+
+  @override
+  String get frequency_weekly => 'Weekly';
+
+  @override
+  String get frequency_monthly => 'Monthly';
+
+  @override
+  String get frequency_yearly => 'Yearly';
+
+  @override
+  String get recurring_day_of_month => 'Day of month';
+
+  @override
+  String get recurring_start_date => 'Start date';
+
+  @override
+  String get recurring_end_date => 'End date (optional)';
+
+  @override
+  String recurring_next_due_line(String date) {
+    return 'Next: $date';
+  }
+
+  @override
+  String get recurring_active => 'Active';
+
+  @override
+  String get recurring_paused => 'Paused';
+
+  @override
+  String get recurring_pause => 'Pause';
+
+  @override
+  String get recurring_resume => 'Resume';
+
+  @override
+  String get recurring_saved => 'Commitment saved.';
+
+  @override
+  String get recurring_delete => 'Delete commitment';
+
+  @override
+  String get recurring_delete_confirm_title => 'Delete this commitment?';
+
+  @override
+  String get recurring_delete_confirm_body =>
+      'Already-posted transactions stay.';
+
+  @override
+  String get recurring_deleted => 'Commitment deleted.';
+
+  @override
+  String recurring_generated(int count) {
+    return 'Posted $count recurring transactions.';
+  }
+
+  @override
+  String get recurring_type_income => 'Income';
+
+  @override
+  String get recurring_type_expense => 'Expense';
+
+  @override
+  String get recurring_inactive_hint => 'Paused commitments don\'t post.';
+
+  @override
+  String get error_invalid_vehicle =>
+      'That vehicle doesn\'t belong to this household.';
+
+  @override
+  String get error_invalid_item => 'That maintenance reminder doesn\'t exist.';
+
+  @override
+  String get error_invalid_log => 'That fill-up doesn\'t exist.';
+
+  @override
+  String get error_invalid_value => 'Enter valid values.';
+
+  @override
+  String get error_odometer_backwards =>
+      'The odometer can\'t be lower than an earlier fill-up.';
+
+  @override
+  String get error_no_car_category => 'Add a car category first.';
+
+  @override
+  String get error_no_linked_person => 'Link this account to a person first.';
 }

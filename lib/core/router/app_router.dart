@@ -18,9 +18,16 @@ import '../../features/household/presentation/setup_screen.dart';
 import '../../features/household/presentation/splash_screen.dart';
 import '../../features/members/presentation/members_screen.dart';
 import '../../features/members/presentation/providers.dart';
+import '../../features/recurring/presentation/recurring_form_screen.dart';
+import '../../features/recurring/presentation/recurring_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/transactions/presentation/transaction_form_screen.dart';
 import '../../features/transactions/presentation/transactions_screen.dart';
+import '../../features/vehicles/presentation/fuel_log_form_screen.dart';
+import '../../features/vehicles/presentation/maintenance_form_screen.dart';
+import '../../features/vehicles/presentation/vehicle_detail_screen.dart';
+import '../../features/vehicles/presentation/vehicle_form_screen.dart';
+import '../../features/vehicles/presentation/vehicles_screen.dart';
 import 'redirect.dart';
 
 export 'redirect.dart';
@@ -100,6 +107,63 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/categories',
         builder: (context, state) => const CategoriesScreen(),
+      ),
+
+      // Phase 3: vehicles & car (fuel log + maintenance), plus recurring
+      // fixed commitments. Specific paths are declared before the
+      // '/vehicles/:id' detail route so 'new'/'edit' aren't swallowed.
+      GoRoute(
+        path: '/vehicles/new',
+        builder: (context, state) => const VehicleFormScreen(),
+      ),
+      GoRoute(
+        path: '/vehicles/edit/:id',
+        builder: (context, state) => VehicleFormScreen(
+          vehicleId: state.pathParameters['id'],
+        ),
+      ),
+      GoRoute(
+        path: '/vehicles/:id/fuel/new',
+        builder: (context, state) => FuelLogFormScreen(
+          vehicleId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/vehicles/:id/maintenance/new',
+        builder: (context, state) => MaintenanceFormScreen(
+          vehicleId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/vehicles/:id/maintenance/edit/:itemId',
+        builder: (context, state) => MaintenanceFormScreen(
+          vehicleId: state.pathParameters['id']!,
+          itemId: state.pathParameters['itemId'],
+        ),
+      ),
+      GoRoute(
+        path: '/vehicles/:id',
+        builder: (context, state) => VehicleDetailScreen(
+          vehicleId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/vehicles',
+        builder: (context, state) => const VehiclesScreen(),
+      ),
+      GoRoute(
+        path: '/recurring/new',
+        builder: (context, state) => const RecurringFormScreen(),
+      ),
+      GoRoute(
+        path: '/recurring/edit/:id',
+        builder: (context, state) => RecurringFormScreen(
+          ruleId: state.pathParameters['id'],
+        ),
+      ),
+      GoRoute(
+        path: '/recurring',
+        builder: (context, state) => const RecurringScreen(),
       ),
 
       // Legacy logins (household but no linked person) must finish setup

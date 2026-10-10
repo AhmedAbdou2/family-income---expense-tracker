@@ -59,6 +59,7 @@ its own data.
    supabase/migrations/20261006000010_rls_grants.sql
    supabase/migrations/20261007000011_invite_member_link.sql
    supabase/migrations/20261008000012_self_service_members.sql
+   supabase/migrations/20261010000013_fuel_maintenance_recurring.sql
    ```
 
    Then run the isolation proof in the SQL Editor as well:
@@ -70,14 +71,17 @@ its own data.
    It creates two throwaway households, proves household B can select /
    insert / update / delete nothing of household A (including the
    self-service flows: claim, rename, role change, leave, account
-   removal), prints `ALL RLS ISOLATION TESTS PASSED`, and **rolls
-   everything back**.
+   removal, plus vehicles / fuel logs / maintenance / recurring rules),
+   prints `ALL RLS ISOLATION TESTS PASSED`, and **rolls everything
+   back**.
 
    Migration 12 changes the `create_household` / `accept_invite`
    signatures and adds `claim_member`, `rename_member`,
    `update_household_role`, `leave_household`,
-   `remove_household_login`. **Refresh any open app tabs** after running
-   it: browsers cache the old function definitions.
+   `remove_household_login`. Migration 13 adds the fuel-log / maintenance
+   / recurring-generation RPCs and a new `fuel_logs` table. **Refresh
+   any open app tabs** after running them: browsers cache the old
+   function definitions.
 
    The header comment of `20261006000010_rls_grants.sql` explains every
    RLS policy in plain language. See `AGENTS.md` for the same summary.
@@ -95,7 +99,7 @@ its own data.
 | --- | --- |
 | `flutter gen-l10n` | Regenerate `lib/core/l10n/generated/` from the `.arb` files |
 | `flutter analyze` | Lint/typecheck (must stay at 0 issues) |
-| `flutter test` | Unit tests: redirect (incl. /claim), money, l10n parity, error mapping, validators, quick-add keypad, shell FAB heroes |
+| `flutter test` | Unit tests: redirect (incl. /claim), money, l10n parity, error mapping, validators, quick-add keypad, shell FAB heroes, fuel stats, maintenance status |
 | `flutter build web --release` | Release build (verified working) |
 | `flutter build apk --debug` | Android build (requires a JDK, see above) |
 
@@ -123,9 +127,13 @@ lib/
     members/    people tab (add / rename / deactivate / delete)
     categories/ category list + editor (bilingual names, icon, color)
     transactions/ list + create/edit form, quick-add keypad
+    vehicles/   vehicles, fuel log (+ L/100km & cost/km), maintenance
+                reminders, all car expenses
+    recurring/  fixed commitments (weekly/monthly/yearly) that post due
+                transactions idempotently when an adult opens the app
     settings/   language / theme / digits, invites, leave, sign out
 supabase/
-  migrations/   12 ordered SQL migrations (run manually in SQL Editor)
+  migrations/   13 ordered SQL migrations (run manually in SQL Editor)
   tests/        RLS isolation test (rolls back)
 ```
 
@@ -143,6 +151,13 @@ supabase/
 - Owners/adults see and manage everything in their household; a child
   login sees only the `members` row linked to it and that person's
   transactions.
+- Vehicles, fuel logs, maintenance reminders and recurring rules are
+  **adult-only**: a child login can neither read nor write them. Fuel
+  logs are written only through `add_fuel_log` / `delete_fuel_log`;
+  maintenance reminders via `complete_maintenance`; due recurring
+  transactions via `generate_recurring_transactions` (all
+  `SECURITY DEFINER`, granted to `authenticated` only). `fuel_logs` has
+  a SELECT policy only - direct writes are denied by RLS.
 - Referential integrity is enforced in the `transactions` policies: the
   referenced member/category/vehicle/recurring rule must live in the
   **same** household.
@@ -165,5 +180,5 @@ supabase/
 | 1 | Foundation: scaffold, theme, l10n, migrations + RLS, auth, create/join household, settings | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
 | 2 | Member management, transaction CRUD, categories UI, quick-add, month dashboard | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
 | 2.5 | Self-service membership: joiner picks their own name, claim screen for legacy logins, owner-only Household-members screen, role/removal/leave RPCs | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
-| 3 | Vehicles, budgets, recurring rules | pending |
+| 3 | Vehicles + fuel log (L/100km, cost/km), maintenance reminders, recurring fixed commitments (idempotent generator) | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
 | 4 | Reports, charts, CSV export, polish | pending |

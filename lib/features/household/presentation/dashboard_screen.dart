@@ -12,17 +12,53 @@ import '../../../core/widgets/loading_view.dart';
 import '../../categories/presentation/category_visuals.dart';
 import '../../categories/presentation/providers.dart';
 import '../../members/presentation/providers.dart';
+import '../../recurring/presentation/providers.dart';
 import '../../transactions/domain/entities.dart';
 import '../../transactions/presentation/providers.dart';
+import '../domain/entities.dart';
 import 'providers.dart';
 
 /// Month summary (income / expenses / balance) + the latest rows.
 /// All sums happen on integer minor units - never on doubles.
-class DashboardScreen extends ConsumerWidget {
+///
+/// Opening the dashboard also runs the idempotent recurring generator, so
+/// due fixed commitments post as soon as an adult opens the app.
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _generateRecurring());
+  }
+
+  Future<void> _generateRecurring() async {
+    try {
+      final membership = await ref.read(membershipProvider.future);
+      if (membership == null || membership.role == MemberRole.child) return;
+      final created =
+          await ref.read(recurringRulesRepositoryProvider).generateDue();
+      if (created > 0 && mounted) {
+        ref
+          ..invalidate(dashboardMonthTransactionsProvider)
+          ..invalidate(monthTransactionsProvider);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.recurring_generated(created))),
+        );
+      }
+    } catch (_) {
+      // Best-effort: a pending cloud migration or an offline launch must
+      // never block the dashboard.
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final rtl = Directionality.of(context) == TextDirection.rtl;
     final membership = ref.watch(membershipProvider);

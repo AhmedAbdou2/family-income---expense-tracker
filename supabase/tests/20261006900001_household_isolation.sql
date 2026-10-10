@@ -1,5 +1,5 @@
 -- ===================================================================
--- RLS ISOLATION TEST - Phase 1 + Phase 2 + Phase 2.5 extensions
+-- RLS ISOLATION TEST - Phase 1 + 2 + 2.5 + 3 extensions
 -- ===================================================================
 -- Proves that a user from household B cannot SELECT / INSERT / UPDATE /
 -- DELETE any row of household A, and that child-role restrictions hold.
@@ -34,6 +34,22 @@
 --   * accept edge cases (login_linked, foreign person ->
 --     invalid_member, code never consumed on any failure).
 --
+-- Phase 3 additions (section 8):
+--   * add_fuel_log writes the log + exactly one linked car expense and
+--     bumps the vehicle odometer; electric vehicles take no liters;
+--     backwards/zero/negative/null inputs raise (odometer_backwards /
+--     invalid_value) and write nothing; delete_fuel_log also deletes the
+--     linked expense;
+--   * maintenance_items adult CRUD + name trigger; complete_maintenance
+--     re-arms by days and by km and can record one service expense;
+--   * generate_recurring_transactions: 9 rows from weekly/monthly/
+--     end-capped rules, idempotent on a second run, income derived from
+--     the category group, future rules produce nothing, children never
+--     generate;
+--   * children + outsiders are fully locked out (no SELECT, no direct
+--     writes, RPCs raise forbidden) of vehicles / fuel / maintenance /
+--     recurring rules.
+--
 -- Logins used: A + B (isolation), C + D + E (phase 2), F + G + H
 -- (phase 2.5 joiners/legacy), J + K + L (role / leave / remove cast).
 --
@@ -42,7 +58,7 @@
 -- leaves no data behind. Success = green notice below; any failure =
 -- red error starting with "FAIL:" or "TEST SETUP FAILED:".
 --
--- Prerequisite: migrations 1..12 have been run in that order.
+-- Prerequisite: migrations 1..13 have been run in that order.
 -- ===================================================================
 
 begin;
@@ -1304,6 +1320,469 @@ begin
   select count(*) into n from public.invites
    where code = current_setting('test.invite_bound') and used_by is null;
   if n <> 1 then raise exception 'FAIL: failed accepts consumed the code (%)', n; end if;
+end $$;
+
+-- --------------------------------------------------------------------
+-- 8. PHASE 3: vehicles, fuel log, maintenance reminders, recurring
+--    generation (owner/adult only; children + outsiders locked out).
+-- --------------------------------------------------------------------
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
+set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
+
+-- 8.0 Owner A seeds two vehicles (petrol + electric) by direct insert.
+do $$
+declare v_car uuid; v_ev uuid;
+begin
+  insert into public.vehicles (household_id, name, plate, fuel_type)
+  values (current_setting('test.hh_a')::uuid, 'A Car', 'ABC-123', 'petrol')
+  returning id into v_car;
+  perform set_config('test.vehicle_a', v_car::text, false);
+
+  insert into public.vehicles (household_id, name, plate, fuel_type)
+  values (current_setting('test.hh_a')::uuid, 'A EV', null, 'electric')
+  returning id into v_ev;
+  perform set_config('test.vehicle_ev', v_ev::text, false);
+end $$;
+
+-- 8.1 add_fuel_log creates the log, bumps the odometer, and inserts the
+--     single linked car expense (no double counting).
+do $$
+declare v_tx uuid; v_log uuid;
+begin
+  v_log := public.add_fuel_log(
+    current_setting('test.vehicle_a')::uuid, current_date - 2, 10000, 45.350, 10050, true);
+  perform set_config('test.fuel1', v_log::text, false);
+
+  select transaction_id into v_tx from public.fuel_logs where id = v_log;
+  perform set_config('test.txn_fuel1', v_tx::text, false);
+
+  perform public.add_fuel_log(
+    current_setting('test.vehicle_a')::uuid, current_date - 1, 10300, 42.750, 9500, true);
+
+  -- Electric: no liters allowed/needed; cost still recorded.
+  perform public.add_fuel_log(
+    current_setting('test.vehicle_ev')::uuid, current_date, 500, 0, 3000, true);
+end $$;
+
+do $$
+declare n int; v numeric;
+begin
+  select count(*) into n from public.fuel_logs;
+  if n <> 3 then raise exception 'FAIL: owner sees % fuel logs (expected 3)', n; end if;
+
+  select current_odometer into v from public.vehicles
+   where id = current_setting('test.vehicle_a')::uuid;
+  if v <> 10300 then raise exception 'FAIL: vehicle odometer not bumped (got %)', v; end if;
+  select current_odometer into v from public.vehicles
+   where id = current_setting('test.vehicle_ev')::uuid;
+  if v <> 500 then raise exception 'FAIL: electric odometer not set (got %)', v; end if;
+
+  select count(*) into n
+    from public.transactions t
+    join public.categories c on c.id = t.category_id
+   where t.id = current_setting('test.txn_fuel1')::uuid
+     and t.type = 'expense'
+     and t.amount = 100.50
+     and t.vehicle_id = current_setting('test.vehicle_a')::uuid
+     and t.member_id = current_setting('test.member_a')::uuid
+     and c."group" = 'car'
+     and c.name_en = 'Fuel'
+     and t.odometer = 10000
+     and t.liters = 45.350
+     and t.note = 'A Car';
+  if n <> 1 then raise exception 'FAIL: fuel expense row wrong (% rows)', n; end if;
+
+  select count(*) into n from public.transactions
+   where vehicle_id = current_setting('test.vehicle_a')::uuid;
+  if n <> 2 then raise exception 'FAIL: expected 2 car expenses from 2 fill-ups (got %)', n; end if;
+end $$;
+
+-- 8.2 Rejected fuel inputs leave nothing behind.
+do $$
+declare n int;
+begin
+  begin
+    perform public.add_fuel_log(current_setting('test.vehicle_a')::uuid,
+      current_date, 10250, 40, 9000, false);
+    raise exception 'FAIL: backwards odometer accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'odometer_backwards' then raise; end if;
+  end;
+
+  begin
+    perform public.add_fuel_log(current_setting('test.vehicle_a')::uuid,
+      current_date, 10400, 0, 9000, false);
+    raise exception 'FAIL: zero liters accepted on petrol';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_value' then raise; end if;
+  end;
+
+  begin
+    perform public.add_fuel_log(current_setting('test.vehicle_a')::uuid,
+      current_date, -1, 40, 9000, false);
+    raise exception 'FAIL: negative odometer accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_value' then raise; end if;
+  end;
+
+  begin
+    perform public.add_fuel_log(current_setting('test.vehicle_a')::uuid,
+      current_date, 10400, 40, 0, false);
+    raise exception 'FAIL: zero cost accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_value' then raise; end if;
+  end;
+
+  begin
+    perform public.add_fuel_log(current_setting('test.vehicle_a')::uuid,
+      null, 10400, 40, 9000, false);
+    raise exception 'FAIL: null date accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_value' then raise; end if;
+  end;
+
+  begin
+    perform public.add_fuel_log(current_setting('test.vehicle_ev')::uuid,
+      current_date, 600, 5, 3000, true);
+    raise exception 'FAIL: liters accepted on electric';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_value' then raise; end if;
+  end;
+
+  select count(*) into n from public.fuel_logs;
+  if n <> 3 then raise exception 'FAIL: invalid fuel attempts wrote rows (% logs)', n; end if;
+end $$;
+
+-- 8.3 Maintenance reminders: create, name trigger, complete + re-arm.
+do $$
+declare v1 uuid; v2 uuid;
+begin
+  insert into public.maintenance_items (household_id, vehicle_id, name, due_date, interval_days)
+  values (current_setting('test.hh_a')::uuid, current_setting('test.vehicle_a')::uuid,
+          'Oil Change', current_date - 1, 180)
+  returning id into v1;
+  perform set_config('test.item1', v1::text, false);
+
+  insert into public.maintenance_items (household_id, vehicle_id, name, due_odometer_km, interval_km)
+  values (current_setting('test.hh_a')::uuid, current_setting('test.vehicle_a')::uuid,
+          'Tires', 9900, 5000)
+  returning id into v2;
+  perform set_config('test.item2', v2::text, false);
+end $$;
+
+do $$
+declare n int; v_due date; v_odo numeric;
+begin
+  begin
+    insert into public.maintenance_items (household_id, vehicle_id, name, due_date)
+    values (current_setting('test.hh_a')::uuid, current_setting('test.vehicle_a')::uuid,
+            '   ', current_date);
+    raise exception 'FAIL: blank maintenance name accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_name' then raise; end if;
+  end;
+
+  perform public.complete_maintenance(current_setting('test.item1')::uuid, 20000, 'At Garage');
+  select due_date into v_due from public.maintenance_items
+   where id = current_setting('test.item1')::uuid;
+  if v_due <> (current_date - 1) + 180 then
+    raise exception 'FAIL: day-interval re-arm wrong (got %)', v_due;
+  end if;
+  select count(*) into n from public.maintenance_items
+   where id = current_setting('test.item1')::uuid and completed_at is not null;
+  if n <> 1 then raise exception 'FAIL: item not marked complete'; end if;
+
+  select count(*) into n from public.transactions
+   where vehicle_id = current_setting('test.vehicle_a')::uuid
+     and amount = 200.00 and note = 'At Garage'
+     and member_id = current_setting('test.member_a')::uuid;
+  if n <> 1 then raise exception 'FAIL: maintenance expense wrong (%)', n; end if;
+
+  perform public.complete_maintenance(current_setting('test.item2')::uuid);
+  select due_odometer_km into v_odo from public.maintenance_items
+   where id = current_setting('test.item2')::uuid;
+  if v_odo <> 14900 then raise exception 'FAIL: km-interval re-arm wrong (got %)', v_odo; end if;
+
+  begin
+    perform public.complete_maintenance('00000000-0000-0000-0000-000000000000');
+    raise exception 'FAIL: completing an unknown item succeeded';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_item' then raise; end if;
+  end;
+end $$;
+
+-- 8.4 Recurring generation: idempotent, respects end_date, derives type
+--     from the category group, and children trigger nothing.
+select set_config('test.category_income', (
+  select c.id from public.categories c
+  where c.household_id = current_setting('test.hh_a')::uuid and c."group" = 'income'
+  order by c.name_en limit 1)::text, false);
+
+do $$
+declare r1 uuid; r2 uuid; r3 uuid;
+begin
+  insert into public.recurring_rules
+    (household_id, category_id, member_id, amount, frequency, next_due, name)
+  values (current_setting('test.hh_a')::uuid, current_setting('test.category_a')::uuid,
+          current_setting('test.member_a')::uuid, 2000.00, 'weekly', current_date - 40, 'Rent')
+  returning id into r1;
+  perform set_config('test.rule1', r1::text, false);
+
+  insert into public.recurring_rules
+    (household_id, category_id, member_id, amount, frequency, next_due, name)
+  values (current_setting('test.hh_a')::uuid, current_setting('test.category_income')::uuid,
+          current_setting('test.member_a')::uuid, 5000.00, 'monthly', current_date - 3, 'Salary')
+  returning id into r2;
+  perform set_config('test.rule2', r2::text, false);
+
+  insert into public.recurring_rules
+    (household_id, category_id, member_id, amount, frequency, next_due, end_date, name)
+  values (current_setting('test.hh_a')::uuid, current_setting('test.category_a')::uuid,
+          current_setting('test.member_a')::uuid, 100.00, 'weekly', current_date - 20,
+          current_date - 7, 'Temp')
+  returning id into r3;
+  perform set_config('test.rule3', r3::text, false);
+end $$;
+
+-- Child C runs the generator FIRST: returns 0 (children never generate).
+set local request.jwt.claims to '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated"}';
+set local request.jwt.claim.sub to '33333333-3333-4333-8333-333333333333';
+
+select set_config('test.child_created', public.generate_recurring_transactions()::text, false);
+
+do $$
+begin
+  if current_setting('test.child_created') <> '0' then
+    raise exception 'FAIL: child generated % recurring transactions (expected 0)',
+      current_setting('test.child_created');
+  end if;
+end $$;
+
+-- Owner A runs it: 6 (weekly x40d) + 1 (monthly) + 2 (weekly, end_date) = 9.
+set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
+set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
+
+select set_config('test.created', public.generate_recurring_transactions()::text, false);
+
+do $$
+declare n int; v_due date;
+begin
+  if current_setting('test.created') <> '9' then
+    raise exception 'FAIL: generator created % rows (expected 9)', current_setting('test.created');
+  end if;
+
+  select count(*) into n from public.transactions
+   where recurring_rule_id = current_setting('test.rule1')::uuid;
+  if n <> 6 then raise exception 'FAIL: weekly rule produced % rows (expected 6)', n; end if;
+
+  select count(*) into n from public.transactions
+   where recurring_rule_id = current_setting('test.rule2')::uuid and type = 'income';
+  if n <> 1 then raise exception 'FAIL: income rule produced % income rows (expected 1)', n; end if;
+
+  select count(*) into n from public.transactions
+   where recurring_rule_id = current_setting('test.rule3')::uuid;
+  if n <> 2 then raise exception 'FAIL: end_date rule produced % rows (expected 2)', n; end if;
+
+  -- Cursor moved past the last generated date (no re-scan next time).
+  select next_due into v_due from public.recurring_rules
+   where id = current_setting('test.rule1')::uuid;
+  if v_due <> current_date + 2 then
+    raise exception 'FAIL: weekly cursor not advanced (got %)', v_due;
+  end if;
+end $$;
+
+-- Second run is a no-op (idempotent via the partial unique index).
+select set_config('test.created2', public.generate_recurring_transactions()::text, false);
+
+do $$
+begin
+  if current_setting('test.created2') <> '0' then
+    raise exception 'FAIL: second generation created % rows (expected 0)',
+      current_setting('test.created2');
+  end if;
+
+  begin
+    insert into public.recurring_rules
+      (household_id, category_id, member_id, amount, frequency, next_due, name)
+    values (current_setting('test.hh_a')::uuid, current_setting('test.category_a')::uuid,
+            current_setting('test.member_a')::uuid, 50.00, 'weekly', current_date - 5, '   ');
+    raise exception 'FAIL: blank recurring-rule name accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_name' then raise; end if;
+  end;
+
+  -- A future-dated rule generates nothing.
+  insert into public.recurring_rules
+    (household_id, category_id, member_id, amount, frequency, next_due, name)
+  values (current_setting('test.hh_a')::uuid, current_setting('test.category_a')::uuid,
+          current_setting('test.member_a')::uuid, 30.00, 'weekly', current_date + 5, 'Later');
+end $$;
+
+select set_config('test.created3', public.generate_recurring_transactions()::text, false);
+
+do $$
+begin
+  if current_setting('test.created3') <> '0' then
+    raise exception 'FAIL: future rule generated % rows (expected 0)',
+      current_setting('test.created3');
+  end if;
+end $$;
+
+-- 8.5 Child C is fully locked out of the whole feature set.
+set local request.jwt.claims to '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated"}';
+set local request.jwt.claim.sub to '33333333-3333-4333-8333-333333333333';
+
+do $$
+declare n int;
+begin
+  select count(*) into n from public.vehicles;
+  if n <> 0 then raise exception 'FAIL: child sees % vehicles (expected 0)', n; end if;
+  select count(*) into n from public.fuel_logs;
+  if n <> 0 then raise exception 'FAIL: child sees % fuel logs (expected 0)', n; end if;
+  select count(*) into n from public.maintenance_items;
+  if n <> 0 then raise exception 'FAIL: child sees % maintenance items (expected 0)', n; end if;
+  select count(*) into n from public.recurring_rules;
+  if n <> 0 then raise exception 'FAIL: child sees % recurring rules (expected 0)', n; end if;
+
+  begin
+    perform public.add_fuel_log(current_setting('test.vehicle_a')::uuid,
+      current_date, 11000, 40, 9000, false);
+    raise exception 'FAIL: child added a fuel log';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    perform public.delete_fuel_log(current_setting('test.fuel1')::uuid);
+    raise exception 'FAIL: child deleted a fuel log';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    perform public.complete_maintenance(current_setting('test.item1')::uuid, 100);
+    raise exception 'FAIL: child completed maintenance';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    insert into public.fuel_logs (household_id, vehicle_id, odometer_km, total_cost)
+    values (current_setting('test.hh_a')::uuid,
+            current_setting('test.vehicle_a')::uuid, 11000, 50);
+    raise exception 'FAIL: child inserted a fuel log directly';
+  exception when insufficient_privilege then null;
+  end;
+
+  begin
+    insert into public.maintenance_items (household_id, vehicle_id, name, due_date)
+    values (current_setting('test.hh_a')::uuid,
+            current_setting('test.vehicle_a')::uuid, 'Kid Item', current_date);
+    raise exception 'FAIL: child inserted a maintenance item';
+  exception when insufficient_privilege then null;
+  end;
+
+  begin
+    insert into public.recurring_rules
+      (household_id, category_id, member_id, amount, frequency, next_due)
+    values (current_setting('test.hh_a')::uuid,
+            current_setting('test.category_a')::uuid,
+            current_setting('test.member_a')::uuid, 10, 'weekly', current_date);
+    raise exception 'FAIL: child inserted a recurring rule';
+  exception when insufficient_privilege then null;
+  end;
+
+  update public.maintenance_items set due_date = current_date + 1;
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'FAIL: child updated % maintenance items', n; end if;
+  delete from public.maintenance_items;
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'FAIL: child deleted % maintenance items', n; end if;
+end $$;
+
+-- 8.6 Outsider H (no household) is locked out too.
+set local request.jwt.claims to '{"sub":"88888888-8888-4888-8888-888888888888","role":"authenticated"}';
+set local request.jwt.claim.sub to '88888888-8888-4888-8888-888888888888';
+
+do $$
+declare n int;
+begin
+  select count(*) into n from public.vehicles;
+  if n <> 0 then raise exception 'FAIL: outsider sees % vehicles (expected 0)', n; end if;
+  select count(*) into n from public.fuel_logs;
+  if n <> 0 then raise exception 'FAIL: outsider sees % fuel logs (expected 0)', n; end if;
+  select count(*) into n from public.maintenance_items;
+  if n <> 0 then raise exception 'FAIL: outsider sees % maintenance items (expected 0)', n; end if;
+
+  begin
+    perform public.add_fuel_log(current_setting('test.vehicle_a')::uuid,
+      current_date, 11000, 40, 9000, false);
+    raise exception 'FAIL: outsider added a fuel log';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    perform public.delete_fuel_log(current_setting('test.fuel1')::uuid);
+    raise exception 'FAIL: outsider deleted a fuel log';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+end $$;
+
+-- 8.7 Owner deletes a fuel log: the linked expense goes with it.
+set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
+set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
+
+do $$
+declare n int;
+begin
+  begin
+    perform public.delete_fuel_log('00000000-0000-0000-0000-000000000000');
+    raise exception 'FAIL: deleting an unknown fuel log succeeded';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_log' then raise; end if;
+  end;
+
+  perform public.delete_fuel_log(current_setting('test.fuel1')::uuid);
+
+  select count(*) into n from public.fuel_logs;
+  if n <> 2 then raise exception 'FAIL: delete left % fuel logs (expected 2)', n; end if;
+  select count(*) into n from public.transactions
+   where id = current_setting('test.txn_fuel1')::uuid;
+  if n <> 0 then raise exception 'FAIL: linked fuel expense survived the delete (%)', n; end if;
+end $$;
+
+-- 8.8 Owner still sees the whole Phase 3 picture.
+do $$
+declare n int;
+begin
+  select count(*) into n from public.vehicles;
+  if n <> 2 then raise exception 'FAIL: owner sees % vehicles (expected 2)', n; end if;
+  select count(*) into n from public.fuel_logs;
+  if n <> 2 then raise exception 'FAIL: owner sees % fuel logs (expected 2)', n; end if;
+  select count(*) into n from public.maintenance_items;
+  if n <> 2 then raise exception 'FAIL: owner sees % maintenance items (expected 2)', n; end if;
+  select count(*) into n from public.recurring_rules;
+  if n <> 4 then raise exception 'FAIL: owner sees % recurring rules (expected 4)', n; end if;
+  select count(*) into n from public.transactions where recurring_rule_id is not null;
+  if n <> 9 then raise exception 'FAIL: owner sees % generated transactions (expected 9)', n; end if;
 end $$;
 
 -- --------------------------------------------------------------------

@@ -33,6 +33,13 @@ enum AppErrorCode {
   childRequiresMember,
   categoryInUse,
   memberInUse,
+  invalidVehicle,
+  invalidItem,
+  invalidLog,
+  invalidValue,
+  odometerBackwards,
+  noCarCategory,
+  noLinkedPerson,
   unknown,
 }
 
@@ -149,6 +156,20 @@ abstract final class ExceptionMapper {
         return const AppException(AppErrorCode.cannotRemoveSelf);
       case 'child_requires_member':
         return const AppException(AppErrorCode.childRequiresMember);
+      case 'invalid_vehicle':
+        return const AppException(AppErrorCode.invalidVehicle);
+      case 'invalid_item':
+        return const AppException(AppErrorCode.invalidItem);
+      case 'invalid_log':
+        return const AppException(AppErrorCode.invalidLog);
+      case 'invalid_value':
+        return const AppException(AppErrorCode.invalidValue);
+      case 'odometer_backwards':
+        return const AppException(AppErrorCode.odometerBackwards);
+      case 'no_car_category':
+        return const AppException(AppErrorCode.noCarCategory);
+      case 'no_linked_person':
+        return const AppException(AppErrorCode.noLinkedPerson);
     }
 
     final message = error.message.toLowerCase();

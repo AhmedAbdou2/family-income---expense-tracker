@@ -1201,6 +1201,624 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This account isn\'t linked to a person yet.'**
   String get quick_add_no_person;
+
+  /// No description provided for @vehicles_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicles & car'**
+  String get vehicles_section;
+
+  /// No description provided for @vehicles_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicles'**
+  String get vehicles_title;
+
+  /// No description provided for @vehicles_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No vehicles yet'**
+  String get vehicles_empty_title;
+
+  /// No description provided for @vehicles_empty_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a vehicle to track fuel and maintenance.'**
+  String get vehicles_empty_body;
+
+  /// No description provided for @vehicle_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add vehicle'**
+  String get vehicle_add;
+
+  /// No description provided for @vehicle_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit vehicle'**
+  String get vehicle_edit;
+
+  /// No description provided for @vehicle_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle name'**
+  String get vehicle_name;
+
+  /// No description provided for @vehicle_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. White Corolla'**
+  String get vehicle_name_hint;
+
+  /// No description provided for @vehicle_plate.
+  ///
+  /// In en, this message translates to:
+  /// **'Plate (optional)'**
+  String get vehicle_plate;
+
+  /// No description provided for @vehicle_plate_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. ABC 123'**
+  String get vehicle_plate_hint;
+
+  /// No description provided for @vehicle_fuel_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel type'**
+  String get vehicle_fuel_type;
+
+  /// No description provided for @vehicle_odometer.
+  ///
+  /// In en, this message translates to:
+  /// **'Current odometer (km)'**
+  String get vehicle_odometer;
+
+  /// No description provided for @vehicle_odometer_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 45000'**
+  String get vehicle_odometer_hint;
+
+  /// No description provided for @vehicle_archive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get vehicle_archive;
+
+  /// No description provided for @vehicle_restore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get vehicle_restore;
+
+  /// No description provided for @vehicle_archived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get vehicle_archived;
+
+  /// No description provided for @vehicle_odometer_value.
+  ///
+  /// In en, this message translates to:
+  /// **'Odometer: {km} km'**
+  String vehicle_odometer_value(String km);
+
+  /// No description provided for @vehicle_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle saved.'**
+  String get vehicle_saved;
+
+  /// No description provided for @vehicle_archive_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive this vehicle?'**
+  String get vehicle_archive_confirm_title;
+
+  /// No description provided for @vehicle_archive_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'It stays in history but is hidden from pickers.'**
+  String get vehicle_archive_confirm_body;
+
+  /// No description provided for @fuel_type_petrol.
+  ///
+  /// In en, this message translates to:
+  /// **'Petrol'**
+  String get fuel_type_petrol;
+
+  /// No description provided for @fuel_type_diesel.
+  ///
+  /// In en, this message translates to:
+  /// **'Diesel'**
+  String get fuel_type_diesel;
+
+  /// No description provided for @fuel_type_electric.
+  ///
+  /// In en, this message translates to:
+  /// **'Electric'**
+  String get fuel_type_electric;
+
+  /// No description provided for @fuel_type_hybrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Hybrid'**
+  String get fuel_type_hybrid;
+
+  /// No description provided for @fuel_logs_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel log'**
+  String get fuel_logs_title;
+
+  /// No description provided for @fuel_log_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add fill-up'**
+  String get fuel_log_add;
+
+  /// No description provided for @fuel_log_odometer.
+  ///
+  /// In en, this message translates to:
+  /// **'Odometer (km)'**
+  String get fuel_log_odometer;
+
+  /// No description provided for @fuel_log_liters.
+  ///
+  /// In en, this message translates to:
+  /// **'Liters'**
+  String get fuel_log_liters;
+
+  /// No description provided for @fuel_log_cost.
+  ///
+  /// In en, this message translates to:
+  /// **'Total cost'**
+  String get fuel_log_cost;
+
+  /// No description provided for @fuel_log_full_tank.
+  ///
+  /// In en, this message translates to:
+  /// **'Full tank'**
+  String get fuel_log_full_tank;
+
+  /// No description provided for @fuel_log_full_badge.
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get fuel_log_full_badge;
+
+  /// No description provided for @fuel_log_electric_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Electric vehicle: liters aren\'t recorded.'**
+  String get fuel_log_electric_hint;
+
+  /// No description provided for @fuel_log_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill-up saved.'**
+  String get fuel_log_saved;
+
+  /// No description provided for @fuel_logs_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No fill-ups recorded yet.'**
+  String get fuel_logs_empty;
+
+  /// No description provided for @fuel_log_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete fill-up'**
+  String get fuel_log_delete;
+
+  /// No description provided for @fuel_log_delete_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this fill-up?'**
+  String get fuel_log_delete_confirm_title;
+
+  /// No description provided for @fuel_log_delete_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'The linked fuel expense is deleted too.'**
+  String get fuel_log_delete_confirm_body;
+
+  /// No description provided for @fuel_log_deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill-up deleted.'**
+  String get fuel_log_deleted;
+
+  /// No description provided for @fuel_stats_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Economy'**
+  String get fuel_stats_title;
+
+  /// No description provided for @fuel_stats_l_per_100km.
+  ///
+  /// In en, this message translates to:
+  /// **'L/100km'**
+  String get fuel_stats_l_per_100km;
+
+  /// No description provided for @fuel_stats_cost_per_km.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost/km'**
+  String get fuel_stats_cost_per_km;
+
+  /// No description provided for @fuel_stats_no_data.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least two full fill-ups to see consumption.'**
+  String get fuel_stats_no_data;
+
+  /// No description provided for @maintenance_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance'**
+  String get maintenance_title;
+
+  /// No description provided for @maintenance_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add reminder'**
+  String get maintenance_add;
+
+  /// No description provided for @maintenance_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit reminder'**
+  String get maintenance_edit;
+
+  /// No description provided for @maintenance_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Item name'**
+  String get maintenance_name;
+
+  /// No description provided for @maintenance_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Oil change'**
+  String get maintenance_name_hint;
+
+  /// No description provided for @maintenance_due_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Due date'**
+  String get maintenance_due_date;
+
+  /// No description provided for @maintenance_due_odometer.
+  ///
+  /// In en, this message translates to:
+  /// **'Due odometer (km)'**
+  String get maintenance_due_odometer;
+
+  /// No description provided for @maintenance_interval_days.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat every (days)'**
+  String get maintenance_interval_days;
+
+  /// No description provided for @maintenance_interval_km.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat every (km)'**
+  String get maintenance_interval_km;
+
+  /// No description provided for @maintenance_interval_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional: leaves a new reminder after completion.'**
+  String get maintenance_interval_hint;
+
+  /// No description provided for @maintenance_need_one_due.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a due date or a due odometer.'**
+  String get maintenance_need_one_due;
+
+  /// No description provided for @maintenance_status_overdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get maintenance_status_overdue;
+
+  /// No description provided for @maintenance_status_due_soon.
+  ///
+  /// In en, this message translates to:
+  /// **'Due soon'**
+  String get maintenance_status_due_soon;
+
+  /// No description provided for @maintenance_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No maintenance reminders yet.'**
+  String get maintenance_empty;
+
+  /// No description provided for @maintenance_due_date_line.
+  ///
+  /// In en, this message translates to:
+  /// **'Due {date}'**
+  String maintenance_due_date_line(String date);
+
+  /// No description provided for @maintenance_due_odo_line.
+  ///
+  /// In en, this message translates to:
+  /// **'At {km} km'**
+  String maintenance_due_odo_line(String km);
+
+  /// No description provided for @maintenance_complete.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark done'**
+  String get maintenance_complete;
+
+  /// No description provided for @maintenance_complete_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete maintenance'**
+  String get maintenance_complete_title;
+
+  /// No description provided for @maintenance_complete_cost.
+  ///
+  /// In en, this message translates to:
+  /// **'Add cost (optional)'**
+  String get maintenance_complete_cost;
+
+  /// No description provided for @maintenance_completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance completed.'**
+  String get maintenance_completed;
+
+  /// No description provided for @maintenance_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete reminder'**
+  String get maintenance_delete;
+
+  /// No description provided for @maintenance_delete_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this reminder?'**
+  String get maintenance_delete_confirm_title;
+
+  /// No description provided for @maintenance_delete_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'This can\'t be undone.'**
+  String get maintenance_delete_confirm_body;
+
+  /// No description provided for @maintenance_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder saved.'**
+  String get maintenance_saved;
+
+  /// No description provided for @recurring_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed commitments'**
+  String get recurring_section;
+
+  /// No description provided for @recurring_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed commitments'**
+  String get recurring_title;
+
+  /// No description provided for @recurring_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No fixed commitments yet'**
+  String get recurring_empty_title;
+
+  /// No description provided for @recurring_empty_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Add rent, installments or a salary to post them automatically.'**
+  String get recurring_empty_body;
+
+  /// No description provided for @recurring_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add commitment'**
+  String get recurring_add;
+
+  /// No description provided for @recurring_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit commitment'**
+  String get recurring_edit;
+
+  /// No description provided for @recurring_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (optional)'**
+  String get recurring_name;
+
+  /// No description provided for @recurring_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Apartment rent'**
+  String get recurring_name_hint;
+
+  /// No description provided for @recurring_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get recurring_amount;
+
+  /// No description provided for @recurring_frequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats'**
+  String get recurring_frequency;
+
+  /// No description provided for @frequency_weekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get frequency_weekly;
+
+  /// No description provided for @frequency_monthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get frequency_monthly;
+
+  /// No description provided for @frequency_yearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get frequency_yearly;
+
+  /// No description provided for @recurring_day_of_month.
+  ///
+  /// In en, this message translates to:
+  /// **'Day of month'**
+  String get recurring_day_of_month;
+
+  /// No description provided for @recurring_start_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get recurring_start_date;
+
+  /// No description provided for @recurring_end_date.
+  ///
+  /// In en, this message translates to:
+  /// **'End date (optional)'**
+  String get recurring_end_date;
+
+  /// No description provided for @recurring_next_due_line.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {date}'**
+  String recurring_next_due_line(String date);
+
+  /// No description provided for @recurring_active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get recurring_active;
+
+  /// No description provided for @recurring_paused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get recurring_paused;
+
+  /// No description provided for @recurring_pause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get recurring_pause;
+
+  /// No description provided for @recurring_resume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get recurring_resume;
+
+  /// No description provided for @recurring_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Commitment saved.'**
+  String get recurring_saved;
+
+  /// No description provided for @recurring_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete commitment'**
+  String get recurring_delete;
+
+  /// No description provided for @recurring_delete_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this commitment?'**
+  String get recurring_delete_confirm_title;
+
+  /// No description provided for @recurring_delete_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Already-posted transactions stay.'**
+  String get recurring_delete_confirm_body;
+
+  /// No description provided for @recurring_deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Commitment deleted.'**
+  String get recurring_deleted;
+
+  /// No description provided for @recurring_generated.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted {count} recurring transactions.'**
+  String recurring_generated(int count);
+
+  /// No description provided for @recurring_type_income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get recurring_type_income;
+
+  /// No description provided for @recurring_type_expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get recurring_type_expense;
+
+  /// No description provided for @recurring_inactive_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused commitments don\'t post.'**
+  String get recurring_inactive_hint;
+
+  /// No description provided for @error_invalid_vehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'That vehicle doesn\'t belong to this household.'**
+  String get error_invalid_vehicle;
+
+  /// No description provided for @error_invalid_item.
+  ///
+  /// In en, this message translates to:
+  /// **'That maintenance reminder doesn\'t exist.'**
+  String get error_invalid_item;
+
+  /// No description provided for @error_invalid_log.
+  ///
+  /// In en, this message translates to:
+  /// **'That fill-up doesn\'t exist.'**
+  String get error_invalid_log;
+
+  /// No description provided for @error_invalid_value.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter valid values.'**
+  String get error_invalid_value;
+
+  /// No description provided for @error_odometer_backwards.
+  ///
+  /// In en, this message translates to:
+  /// **'The odometer can\'t be lower than an earlier fill-up.'**
+  String get error_odometer_backwards;
+
+  /// No description provided for @error_no_car_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a car category first.'**
+  String get error_no_car_category;
+
+  /// No description provided for @error_no_linked_person.
+  ///
+  /// In en, this message translates to:
+  /// **'Link this account to a person first.'**
+  String get error_no_linked_person;
 }
 
 class _AppLocalizationsDelegate

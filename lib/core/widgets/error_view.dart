@@ -36,6 +36,13 @@ String errorMessage(BuildContext context, Object error) {
     AppErrorCode.childRequiresMember => l10n.error_child_requires_member,
     AppErrorCode.categoryInUse => l10n.error_category_in_use,
     AppErrorCode.memberInUse => l10n.error_member_in_use,
+    AppErrorCode.invalidVehicle => l10n.error_invalid_vehicle,
+    AppErrorCode.invalidItem => l10n.error_invalid_item,
+    AppErrorCode.invalidLog => l10n.error_invalid_log,
+    AppErrorCode.invalidValue => l10n.error_invalid_value,
+    AppErrorCode.odometerBackwards => l10n.error_odometer_backwards,
+    AppErrorCode.noCarCategory => l10n.error_no_car_category,
+    AppErrorCode.noLinkedPerson => l10n.error_no_linked_person,
     AppErrorCode.unknown => l10n.error_unknown,
   };
 }
