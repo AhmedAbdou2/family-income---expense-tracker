@@ -42,6 +42,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Future<void> _generateRecurring() async {
+    if (!mounted) return;
     try {
       final membership = await ref.read(membershipProvider.future);
       if (membership == null || membership.role == MemberRole.child) return;
@@ -50,14 +51,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       if (created > 0 && mounted) {
         ref
           ..invalidate(dashboardMonthTransactionsProvider)
-          ..invalidate(monthTransactionsProvider);
+          ..invalidate(monthTransactionsProvider)
+          ..invalidate(recurringRulesProvider);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.recurring_generated(created))),
         );
       }
-    } catch (_) {
+    } catch (error) {
       // Best-effort: a pending cloud migration or an offline launch must
-      // never block the dashboard.
+      // never block the dashboard - but do surface it so fixed commitments
+      // silently not posting is never a mystery.
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage(context, error))),
+      );
     }
   }
 
@@ -152,7 +159,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     incomeCategoryIds: incomeCategoryIds,
                     month: month,
                   );
-                  final remaining = income - fixed.totalMinor;
+                  var postedFixed = 0;
+                  for (final transaction in list) {
+                    if (transaction.type == TransactionType.expense &&
+                        transaction.recurringRuleId != null) {
+                      postedFixed += transaction.amountMinorUnits;
+                    }
+                  }
+                  final remaining = income - postedFixed - fixed.dueMinor;
 
                   if (list.isEmpty && fixed.totalMinor == 0) {
                     return EmptyState(
@@ -193,6 +207,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 title: l10n.dashboard_expenses,
                                 value: label(expense),
                                 color: Theme.of(context).colorScheme.error,
+                                help: l10n.dashboard_expenses_help,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -232,8 +247,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             Expanded(
                               child: _StatCard(
                                 title: l10n.dashboard_fixed_posted,
-                                value: label(fixed.postedMinor),
+                                value: label(postedFixed),
                                 color: Theme.of(context).colorScheme.error,
+                                help: l10n.dashboard_fixed_posted_help,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -242,6 +258,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 title: l10n.dashboard_fixed_due,
                                 value: label(fixed.dueMinor),
                                 color: Theme.of(context).colorScheme.tertiary,
+                                help: l10n.dashboard_fixed_due_help,
                               ),
                             ),
                           ],
@@ -282,6 +299,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 ),
                               ),
                             ],
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                          20, 6, 20, 0,
+                        ),
+                        child: Text(
+                          l10n.dashboard_after_fixed_help,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -368,11 +399,13 @@ class _StatCard extends StatelessWidget {
     required this.title,
     required this.value,
     required this.color,
+    this.help,
   });
 
   final String title;
   final String value;
   final Color color;
+  final String? help;
 
   @override
   Widget build(BuildContext context) {
@@ -404,6 +437,19 @@ class _StatCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
+          if (help != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              help!,
+              style: TextStyle(
+                fontSize: 10,
+                height: 1.2,
+                color: scheme.onSurfaceVariant,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ],
       ),
     );

@@ -2138,6 +2138,30 @@ abstract class AppLocalizations {
   /// **'Left after fixed'**
   String get dashboard_after_fixed;
 
+  /// No description provided for @dashboard_expenses_help.
+  ///
+  /// In en, this message translates to:
+  /// **'All expenses this month, including posted fixed ones.'**
+  String get dashboard_expenses_help;
+
+  /// No description provided for @dashboard_fixed_posted_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed commitments already posted this month.'**
+  String get dashboard_fixed_posted_help;
+
+  /// No description provided for @dashboard_fixed_due_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed commitments still to post later this month.'**
+  String get dashboard_fixed_due_help;
+
+  /// No description provided for @dashboard_after_fixed_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Income minus posted and still-due fixed commitments.'**
+  String get dashboard_after_fixed_help;
+
   /// No description provided for @error_invalid_pet.
   ///
   /// In en, this message translates to:

@@ -404,5 +404,9 @@
   "dashboard_fixed_posted": "Posted",
   "dashboard_fixed_due": "Still due",
   "dashboard_after_fixed": "Left after fixed",
+  "dashboard_expenses_help": "All expenses this month, including posted fixed ones.",
+  "dashboard_fixed_posted_help": "Fixed commitments already posted this month.",
+  "dashboard_fixed_due_help": "Fixed commitments still to post later this month.",
+  "dashboard_after_fixed_help": "Income minus posted and still-due fixed commitments.",
   "error_invalid_pet": "That pet doesn't belong to this household."
 }

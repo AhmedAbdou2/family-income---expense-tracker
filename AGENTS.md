@@ -32,7 +32,7 @@ Flutter (Riverpod 3, go_router 18, Supabase) + Postgres with RLS.
 ```sh
 flutter gen-l10n        # only if .arb files changed
 flutter analyze         # must be clean
-flutter test            # must pass (102 tests)
+flutter test            # must pass (119 tests)
 flutter build web --release   # compile check; ~3-4 min
 ```
 
@@ -81,9 +81,10 @@ lib/features  auth/  domain (AuthRepository, SignUpOutcome), data
                    presentation (petsProvider, pet_visuals, list/form/detail
                    screens: monthly total + expense list; adult-only)
               recurring/ domain (RecurrenceFrequency, RecurringRule +
-                   fixedMonthSummary pure helper), data, presentation
-                   (recurringRulesProvider + list/form screens with optional
-                   vehicle/pet links; due transactions posted by
+                   fixedMonthSummary + recurring_schedule pure helpers:
+                   firstOccurrence/resolveNextDue/occurrencesInMonth), data,
+                   presentation (recurringRulesProvider + list/form screens
+                   with optional vehicle/pet links; due transactions posted by
                    generate_recurring_transactions when an adult opens the
                    dashboard — idempotent)
               settings/  settings screen (language/theme/digits, invites with
@@ -297,4 +298,22 @@ owner can delete the leftover unlinked person from the Family tab.
   extended rail; collapsed-rail tooltip carries the role). Tests 102
   (`test/role_badge_test.dart`, `test/family_members_test.dart`,
   `test/family_members_layout_test.dart` sweep 360/800/1854 for all roles).
+- Fix (fixed commitments didn't affect the dashboard): the form/DB wrote
+  `next_due = start_date`, ignoring `day_of_month`, so the generator posted
+  the first occurrence on the wrong day and the dashboard projection skipped
+  an earlier day-of-month. New pure `recurring_schedule.dart`
+  (`firstOccurrence` — a monthly rule's start date picks the *starting
+  month* and `dayOfMonth` picks the day, clamped to the CURRENT month only
+  so there is no multi-month backfill; `resolveNextDue` keeps a future
+  cursor on edit; `occurrencesInMonth` compares by month). Repository
+  create/update now write the corrected `next_due`; the form no longer
+  resets the cursor to the start date on edit. The dashboard takes "Posted"
+  from the real generated transactions (`Transaction.recurringRuleId`, now
+  selected) and "Still due" from the rules, so a posted fixed expense counts
+  once; it also surfaces generator errors (SnackBar) and invalidates
+  `recurringRulesProvider`. One-line help added under the expenses / fixed /
+  after-fixed cards. No DB change. Tests 119
+  (`test/recurring_schedule_test.dart`, `test/dashboard_fixed_test.dart`,
+  extended `test/fixed_summary_test.dart`); generator re-validated in Docker
+  (3 posted incl. catch-up, no backfill, second call 0).
 - Phase 4: reports/charts/CSV export/polish.

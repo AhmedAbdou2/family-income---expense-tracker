@@ -370,5 +370,9 @@
   "dashboard_fixed_posted": "المُرحَّل",
   "dashboard_fixed_due": "المتبقي",
   "dashboard_after_fixed": "المتبقي بعد الثابتة",
+  "dashboard_expenses_help": "كل مصروفات الشهر، بما فيها الثابتة المُرحَّلة.",
+  "dashboard_fixed_posted_help": "الالتزامات الثابتة التي رُحِّلت هذا الشهر.",
+  "dashboard_fixed_due_help": "الالتزامات الثابتة التي ستُرحَّل لاحقًا هذا الشهر.",
+  "dashboard_after_fixed_help": "الدخل ناقص الالتزامات الثابتة المُرحَّلة والمتبقية.",
   "error_invalid_pet": "هذا الحيوان لا ينتمي إلى هذا المنزل."
 }

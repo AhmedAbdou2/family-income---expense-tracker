@@ -1093,5 +1093,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboard_after_fixed => 'Left after fixed';
 
   @override
+  String get dashboard_expenses_help =>
+      'All expenses this month, including posted fixed ones.';
+
+  @override
+  String get dashboard_fixed_posted_help =>
+      'Fixed commitments already posted this month.';
+
+  @override
+  String get dashboard_fixed_due_help =>
+      'Fixed commitments still to post later this month.';
+
+  @override
+  String get dashboard_after_fixed_help =>
+      'Income minus posted and still-due fixed commitments.';
+
+  @override
   String get error_invalid_pet => 'That pet doesn\'t belong to this household.';
 }

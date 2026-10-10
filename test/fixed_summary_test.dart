@@ -101,6 +101,40 @@ void main() {
     expect(summary.dueMinor, 0);
   });
 
+  test('monthly catches up the current month when the day already passed', () {
+    // Rule created this month with a day earlier than the start date: the
+    // occurrence still belongs to this month (month compare, catch-up).
+    final rule = _rule(
+      frequency: RecurrenceFrequency.monthly,
+      start: DateTime(2026, 10, 10),
+      dayOfMonth: 1,
+    );
+    final summary = fixedMonthSummary(
+      rules: [rule],
+      incomeCategoryIds: const <String>{},
+      month: month,
+      today: DateTime(2026, 10, 20),
+    );
+    expect(summary.postedMinor, 100000);
+    expect(summary.dueMinor, 0);
+  });
+
+  test('monthly with a later day this month is still due', () {
+    final rule = _rule(
+      frequency: RecurrenceFrequency.monthly,
+      start: DateTime(2026, 10, 10),
+      dayOfMonth: 25,
+    );
+    final summary = fixedMonthSummary(
+      rules: [rule],
+      incomeCategoryIds: const <String>{},
+      month: month,
+      today: DateTime(2026, 10, 20),
+    );
+    expect(summary.postedMinor, 0);
+    expect(summary.dueMinor, 100000);
+  });
+
   test('yearly rule only counts its own month', () {
     final rule = _rule(
       frequency: RecurrenceFrequency.yearly,

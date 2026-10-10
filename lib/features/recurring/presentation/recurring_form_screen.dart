@@ -532,7 +532,7 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
           memberId: _memberId!,
           amountMinorUnits: amountMinor,
           frequency: _frequency,
-          nextDue: _startDate ?? _existing?.nextDue ?? DateTime.now(),
+          nextDue: _existing?.nextDue ?? DateTime.now(),
           isActive: _isActive,
           dayOfMonth: dayOfMonth,
           name: _nameController.text,

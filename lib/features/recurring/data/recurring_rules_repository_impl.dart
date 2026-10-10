@@ -4,6 +4,7 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/utils/money.dart';
 import '../domain/entities.dart';
 import '../domain/recurring_rules_repository.dart';
+import '../domain/recurring_schedule.dart';
 
 const _columns =
     'id, household_id, category_id, member_id, amount::text, frequency, '
@@ -85,7 +86,13 @@ class RecurringRulesRepositoryImpl implements RecurringRulesRepository {
     String? petId,
   }) async {
     try {
-      final firstDue = startDate ?? DateTime.now();
+      final start = startDate ?? DateTime.now();
+      final firstDue = firstOccurrence(
+        frequency: frequency,
+        start: start,
+        dayOfMonth: dayOfMonth,
+        now: DateTime.now(),
+      );
       final row = await _client
           .from('recurring_rules')
           .insert({
@@ -129,15 +136,23 @@ class RecurringRulesRepositoryImpl implements RecurringRulesRepository {
     String? petId,
   }) async {
     try {
+      final start = startDate ?? nextDue;
+      final resolved = resolveNextDue(
+        frequency: frequency,
+        existingNextDue: nextDue,
+        start: start,
+        dayOfMonth: dayOfMonth,
+        now: DateTime.now(),
+      );
       await _client.from('recurring_rules').update({
         'category_id': categoryId,
         'member_id': memberId,
         'amount': Money.minorUnitsToDecimalString(amountMinorUnits),
         'frequency': frequency.dbValue,
         'day_of_month': frequency == RecurrenceFrequency.monthly
-            ? (dayOfMonth ?? nextDue.day)
+            ? (dayOfMonth ?? resolved.day)
             : dayOfMonth,
-        'next_due': _dateKey(nextDue),
+        'next_due': _dateKey(resolved),
         'is_active': isActive,
         'start_date': _dateKey(startDate),
         'end_date': _dateKey(endDate),

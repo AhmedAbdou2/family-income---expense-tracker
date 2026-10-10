@@ -1082,5 +1082,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dashboard_after_fixed => 'المتبقي بعد الثابتة';
 
   @override
+  String get dashboard_expenses_help =>
+      'كل مصروفات الشهر، بما فيها الثابتة المُرحَّلة.';
+
+  @override
+  String get dashboard_fixed_posted_help =>
+      'الالتزامات الثابتة التي رُحِّلت هذا الشهر.';
+
+  @override
+  String get dashboard_fixed_due_help =>
+      'الالتزامات الثابتة التي ستُرحَّل لاحقًا هذا الشهر.';
+
+  @override
+  String get dashboard_after_fixed_help =>
+      'الدخل ناقص الالتزامات الثابتة المُرحَّلة والمتبقية.';
+
+  @override
   String get error_invalid_pet => 'هذا الحيوان لا ينتمي إلى هذا المنزل.';
 }

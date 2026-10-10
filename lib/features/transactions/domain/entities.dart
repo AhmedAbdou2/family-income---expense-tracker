@@ -26,6 +26,7 @@ class Transaction {
     this.note,
     this.vehicleId,
     this.petId,
+    this.recurringRuleId,
     this.createdBy,
   });
 
@@ -44,5 +45,9 @@ class Transaction {
   /// Pet this expense is attributed to, or null. Same-household enforced
   /// by RLS (migration 14).
   final String? petId;
+
+  /// The recurring rule that generated this row, or null for manual
+  /// entries. Set by the generator RPC (migration 13+).
+  final String? recurringRuleId;
   final String? createdBy;
 }

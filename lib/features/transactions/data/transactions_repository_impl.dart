@@ -9,7 +9,7 @@ import '../domain/transactions_repository.dart';
 /// string goes straight through [Money.decimalStringToMinorUnits].
 const _columns =
     'id, household_id, type, amount::text, category_id, member_id, '
-    'vehicle_id, pet_id, date, note, created_by';
+    'vehicle_id, pet_id, recurring_rule_id, date, note, created_by';
 
 class TransactionsRepositoryImpl implements TransactionsRepository {
   TransactionsRepositoryImpl(this._client);
@@ -28,6 +28,7 @@ class TransactionsRepositoryImpl implements TransactionsRepository {
         note: row['note'] as String?,
         vehicleId: row['vehicle_id'] as String?,
         petId: row['pet_id'] as String?,
+        recurringRuleId: row['recurring_rule_id'] as String?,
         createdBy: row['created_by'] as String?,
       );
 
