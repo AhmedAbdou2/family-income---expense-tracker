@@ -9,6 +9,7 @@ import '../../../core/settings/settings_controller.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../auth/presentation/providers.dart';
 import '../../household/domain/entities.dart';
+import '../../household/presentation/home_shell.dart';
 import '../../household/presentation/providers.dart';
 import '../../members/presentation/providers.dart';
 
@@ -44,7 +45,12 @@ class SettingsScreen extends ConsumerWidget {
     final canLeave = !(isOwner && ownerCount == 1);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.settings_title)),
+      appBar: AppBar(
+        leading: ShellScope.maybeOf(context) == null
+            ? null
+            : const ShellMenuButton(),
+        title: Text(l10n.settings_title),
+      ),
       body: ListView(
         padding: const EdgeInsetsDirectional.only(bottom: 32),
         children: [
@@ -199,7 +205,16 @@ class SettingsScreen extends ConsumerWidget {
               child: ListTile(
                 leading: Icon(Icons.event_repeat_outlined, color: scheme.primary),
                 title: Text(l10n.recurring_title),
-                onTap: () => context.push('/recurring'),
+                onTap: () => context.go('/recurring'),
+              ),
+            ),
+
+            _SectionHeader(title: l10n.pets_section),
+            Card(
+              child: ListTile(
+                leading: Icon(Icons.pets_outlined, color: scheme.primary),
+                title: Text(l10n.pets_title),
+                onTap: () => context.go('/pets'),
               ),
             ),
 

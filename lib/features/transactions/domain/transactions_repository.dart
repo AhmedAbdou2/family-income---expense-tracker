@@ -4,11 +4,13 @@ import 'entities.dart';
 /// RLS narrows children to their own linked person.
 abstract interface class TransactionsRepository {
   /// Transactions of one calendar [month], newest first. When [memberId]
-  /// is given only that person's rows are returned.
+  /// is given only that person's rows are returned; [petId] narrows to one
+  /// pet.
   Future<List<Transaction>> listTransactions({
     required String householdId,
     required DateTime month,
     String? memberId,
+    String? petId,
   });
 
   /// One row by id, or null when it doesn't exist / RLS hides it.
@@ -22,6 +24,7 @@ abstract interface class TransactionsRepository {
     required String memberId,
     required DateTime date,
     String? note,
+    String? petId,
   });
 
   Future<void> updateTransaction({
@@ -32,6 +35,7 @@ abstract interface class TransactionsRepository {
     required String memberId,
     required DateTime date,
     String? note,
+    String? petId,
   });
 
   Future<void> deleteTransaction({required String id});

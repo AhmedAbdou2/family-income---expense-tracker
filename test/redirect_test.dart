@@ -317,6 +317,9 @@ void main() {
         '/vehicles/v1/fuel/new',
         '/recurring',
         '/recurring/new',
+        '/pets',
+        '/pets/new',
+        '/pets/p1',
       ]) {
         expect(
           appRedirect(
@@ -334,7 +337,12 @@ void main() {
     });
 
     test('adults may open adult-only routes', () {
-      for (final location in ['/vehicles', '/vehicles/v1', '/recurring']) {
+      for (final location in [
+        '/vehicles',
+        '/vehicles/v1',
+        '/recurring',
+        '/pets',
+      ]) {
         expect(
           appRedirect(
             authLoading: false,

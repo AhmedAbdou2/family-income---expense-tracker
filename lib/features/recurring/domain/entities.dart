@@ -30,6 +30,8 @@ class RecurringRule {
     this.dayOfMonth,
     this.startDate,
     this.endDate,
+    this.vehicleId,
+    this.petId,
   });
 
   final String id;
@@ -46,4 +48,8 @@ class RecurringRule {
   final int? dayOfMonth;
   final DateTime? startDate;
   final DateTime? endDate;
+
+  /// Optional links copied onto each generated transaction.
+  final String? vehicleId;
+  final String? petId;
 }

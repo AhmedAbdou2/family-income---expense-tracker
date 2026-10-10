@@ -9,7 +9,7 @@ import '../domain/transactions_repository.dart';
 /// string goes straight through [Money.decimalStringToMinorUnits].
 const _columns =
     'id, household_id, type, amount::text, category_id, member_id, '
-    'vehicle_id, date, note, created_by';
+    'vehicle_id, pet_id, date, note, created_by';
 
 class TransactionsRepositoryImpl implements TransactionsRepository {
   TransactionsRepositoryImpl(this._client);
@@ -27,6 +27,7 @@ class TransactionsRepositoryImpl implements TransactionsRepository {
         date: DateTime.parse(row['date'] as String),
         note: row['note'] as String?,
         vehicleId: row['vehicle_id'] as String?,
+        petId: row['pet_id'] as String?,
         createdBy: row['created_by'] as String?,
       );
 
@@ -40,6 +41,7 @@ class TransactionsRepositoryImpl implements TransactionsRepository {
     required String householdId,
     required DateTime month,
     String? memberId,
+    String? petId,
   }) async {
     try {
       final start = DateTime(month.year, month.month, 1);
@@ -53,6 +55,9 @@ class TransactionsRepositoryImpl implements TransactionsRepository {
           .lt('date', _dateKey(end));
       if (memberId != null) {
         query = query.eq('member_id', memberId);
+      }
+      if (petId != null) {
+        query = query.eq('pet_id', petId);
       }
       final rows = await query
           .order('date', ascending: false)
@@ -86,6 +91,7 @@ class TransactionsRepositoryImpl implements TransactionsRepository {
     required String memberId,
     required DateTime date,
     String? note,
+    String? petId,
   }) async {
     try {
       final row = await _client
@@ -97,6 +103,7 @@ class TransactionsRepositoryImpl implements TransactionsRepository {
             'category_id': categoryId,
             'member_id': memberId,
             'date': _dateKey(date),
+            'pet_id': petId,
             if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
           })
           .select(_columns)
@@ -116,6 +123,7 @@ class TransactionsRepositoryImpl implements TransactionsRepository {
     required String memberId,
     required DateTime date,
     String? note,
+    String? petId,
   }) async {
     try {
       await _client.from('transactions').update({
@@ -124,6 +132,7 @@ class TransactionsRepositoryImpl implements TransactionsRepository {
         'category_id': categoryId,
         'member_id': memberId,
         'date': _dateKey(date),
+        'pet_id': petId,
         'note': (note == null || note.trim().isEmpty) ? null : note.trim(),
       }).eq('id', id);
     } catch (error) {

@@ -18,7 +18,11 @@ import '../../features/household/presentation/providers.dart';
 import '../../features/household/presentation/setup_screen.dart';
 import '../../features/household/presentation/splash_screen.dart';
 import '../../features/members/presentation/members_screen.dart';
+import '../../features/members/presentation/profile_screen.dart';
 import '../../features/members/presentation/providers.dart';
+import '../../features/pets/presentation/pet_detail_screen.dart';
+import '../../features/pets/presentation/pet_form_screen.dart';
+import '../../features/pets/presentation/pets_screen.dart';
 import '../../features/recurring/presentation/recurring_form_screen.dart';
 import '../../features/recurring/presentation/recurring_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
@@ -98,7 +102,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       // and '/transactions/edit/:id' win over the plain branch path.
       GoRoute(
         path: '/transactions/new',
-        builder: (context, state) => const TransactionFormScreen(),
+        builder: (context, state) => TransactionFormScreen(
+          initialPetId: state.uri.queryParameters['petId'],
+        ),
       ),
       GoRoute(
         path: '/transactions/edit/:id',
@@ -159,9 +165,26 @@ final routerProvider = Provider<GoRouter>((ref) {
           ruleId: state.pathParameters['id'],
         ),
       ),
+
+      // Phase 3.5: pets (adult only) and per-person profile.
       GoRoute(
-        path: '/recurring',
-        builder: (context, state) => const RecurringScreen(),
+        path: '/pets/new',
+        builder: (context, state) => const PetFormScreen(),
+      ),
+      GoRoute(
+        path: '/pets/edit/:id',
+        builder: (context, state) =>
+            PetFormScreen(petId: state.pathParameters['id']),
+      ),
+      GoRoute(
+        path: '/pets/:id',
+        builder: (context, state) =>
+            PetDetailScreen(petId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/profile/:id',
+        builder: (context, state) =>
+            ProfileScreen(memberId: state.pathParameters['id']!),
       ),
 
       // Legacy logins (household but no linked person) must finish setup
@@ -195,19 +218,33 @@ final routerProvider = Provider<GoRouter>((ref) {
               builder: (context, state) => const MembersScreen(),
             ),
           ]),
+          // Fixed commitments (recurring) is adult-only and sits before
+          // settings so the bottom bar can show dashboards..fixed (0..3).
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/recurring',
+              builder: (context, state) => const RecurringScreen(),
+            ),
+          ]),
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/settings',
               builder: (context, state) => const SettingsScreen(),
             ),
           ]),
-          // Vehicles is the LAST branch on purpose: children (who don't get
-          // this destination) then keep a 1:1 index map for the first four
-          // destinations. See `HomeShell` + the redirect guard.
+          // Adult-only destinations sit LAST so a child (who is redirected
+          // away from them and whose drawer omits them) keeps the remaining
+          // destination indexes aligned with their branches. See `HomeShell`.
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/vehicles',
               builder: (context, state) => const VehiclesScreen(),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/pets',
+              builder: (context, state) => const PetsScreen(),
             ),
           ]),
         ],

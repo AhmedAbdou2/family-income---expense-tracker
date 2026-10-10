@@ -18,6 +18,8 @@ abstract interface class RecurringRulesRepository {
     String? name,
     DateTime? startDate,
     DateTime? endDate,
+    String? vehicleId,
+    String? petId,
   });
 
   Future<void> updateRule({
@@ -32,6 +34,8 @@ abstract interface class RecurringRulesRepository {
     String? name,
     DateTime? startDate,
     DateTime? endDate,
+    String? vehicleId,
+    String? petId,
   });
 
   Future<void> deleteRule({required String id});

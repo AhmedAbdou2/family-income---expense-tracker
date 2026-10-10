@@ -68,3 +68,30 @@ final dashboardMonthTransactionsProvider = FutureProvider<List<Transaction>>((
         month: month,
       );
 });
+
+/// The month's rows for ONE person (profile screen), following the
+/// dashboard month cursor. A child's RLS narrows this to their own rows.
+final memberMonthTransactionsProvider =
+    FutureProvider.family<List<Transaction>, String>((ref, memberId) async {
+  final membership = ref.watch(membershipProvider).value;
+  final month = ref.watch(dashboardMonthProvider);
+  if (membership == null) return const <Transaction>[];
+  return ref.watch(transactionsRepositoryProvider).listTransactions(
+        householdId: membership.household.id,
+        month: month,
+        memberId: memberId,
+      );
+});
+
+/// The current month's rows attributed to ONE pet (pet detail screen).
+final petMonthTransactionsProvider =
+    FutureProvider.family<List<Transaction>, String>((ref, petId) async {
+  final membership = ref.watch(membershipProvider).value;
+  if (membership == null) return const <Transaction>[];
+  final now = DateTime.now();
+  return ref.watch(transactionsRepositoryProvider).listTransactions(
+        householdId: membership.household.id,
+        month: DateTime(now.year, now.month),
+        petId: petId,
+      );
+});

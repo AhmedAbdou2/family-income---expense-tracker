@@ -7,7 +7,8 @@ import '../domain/recurring_rules_repository.dart';
 
 const _columns =
     'id, household_id, category_id, member_id, amount::text, frequency, '
-    'day_of_month, next_due, is_active, name, start_date, end_date';
+    'day_of_month, next_due, is_active, name, start_date, end_date, '
+    'vehicle_id, pet_id';
 
 class RecurringRulesRepositoryImpl implements RecurringRulesRepository {
   RecurringRulesRepositoryImpl(this._client);
@@ -37,6 +38,8 @@ class RecurringRulesRepositoryImpl implements RecurringRulesRepository {
         dayOfMonth: row['day_of_month'] as int?,
         startDate: _parse(row['start_date']),
         endDate: _parse(row['end_date']),
+        vehicleId: row['vehicle_id'] as String?,
+        petId: row['pet_id'] as String?,
       );
 
   @override
@@ -78,6 +81,8 @@ class RecurringRulesRepositoryImpl implements RecurringRulesRepository {
     String? name,
     DateTime? startDate,
     DateTime? endDate,
+    String? vehicleId,
+    String? petId,
   }) async {
     try {
       final firstDue = startDate ?? DateTime.now();
@@ -96,6 +101,8 @@ class RecurringRulesRepositoryImpl implements RecurringRulesRepository {
             'start_date': _dateKey(startDate),
             'end_date': _dateKey(endDate),
             'name': (name == null || name.trim().isEmpty) ? null : name.trim(),
+            'vehicle_id': vehicleId,
+            'pet_id': petId,
           })
           .select(_columns)
           .single();
@@ -118,6 +125,8 @@ class RecurringRulesRepositoryImpl implements RecurringRulesRepository {
     String? name,
     DateTime? startDate,
     DateTime? endDate,
+    String? vehicleId,
+    String? petId,
   }) async {
     try {
       await _client.from('recurring_rules').update({
@@ -133,6 +142,8 @@ class RecurringRulesRepositoryImpl implements RecurringRulesRepository {
         'start_date': _dateKey(startDate),
         'end_date': _dateKey(endDate),
         'name': (name == null || name.trim().isEmpty) ? null : name.trim(),
+        'vehicle_id': vehicleId,
+        'pet_id': petId,
       }).eq('id', id);
     } catch (error) {
       throw ExceptionMapper.map(error);

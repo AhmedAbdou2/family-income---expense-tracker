@@ -927,4 +927,151 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get error_no_linked_person => 'Link this account to a person first.';
+
+  @override
+  String get nav_fixed => 'Fixed';
+
+  @override
+  String get nav_pets => 'Pets';
+
+  @override
+  String get account_fallback => 'My account';
+
+  @override
+  String get profile_title => 'Profile';
+
+  @override
+  String get profile_month => 'This month';
+
+  @override
+  String get group_pet => 'Pets';
+
+  @override
+  String get pets_section => 'Pets';
+
+  @override
+  String get pets_title => 'Pets';
+
+  @override
+  String get pets_empty_title => 'No pets yet';
+
+  @override
+  String get pets_empty_body =>
+      'Add your cats, dogs and other companions to track their costs.';
+
+  @override
+  String get pet_add => 'Add pet';
+
+  @override
+  String get pet_edit => 'Edit pet';
+
+  @override
+  String get pet_name => 'Name';
+
+  @override
+  String get pet_name_hint => 'e.g. Simba';
+
+  @override
+  String get pet_type => 'Type';
+
+  @override
+  String get pet_type_cat => 'Cat';
+
+  @override
+  String get pet_type_dog => 'Dog';
+
+  @override
+  String get pet_type_bird => 'Bird';
+
+  @override
+  String get pet_type_fish => 'Fish';
+
+  @override
+  String get pet_type_other => 'Other';
+
+  @override
+  String get pet_birth_date => 'Birth date (optional)';
+
+  @override
+  String get pet_notes => 'Notes (optional)';
+
+  @override
+  String get pet_notes_hint => 'Allergies, vet, food…';
+
+  @override
+  String get pet_archive => 'Archive';
+
+  @override
+  String get pet_restore => 'Restore';
+
+  @override
+  String get pet_archived => 'Archived';
+
+  @override
+  String get pet_saved => 'Pet saved.';
+
+  @override
+  String get pet_archive_confirm_title => 'Archive this pet?';
+
+  @override
+  String get pet_archive_confirm_body =>
+      'It stays under Archived and keeps its expenses.';
+
+  @override
+  String pet_monthly_total(String amount) {
+    return 'This month: $amount';
+  }
+
+  @override
+  String get pet_expenses_title => 'Expenses';
+
+  @override
+  String get pet_expenses_empty => 'No expenses this month.';
+
+  @override
+  String get pet_add_expense => 'Add expense';
+
+  @override
+  String get transaction_none => 'None';
+
+  @override
+  String get transaction_pet => 'Pet';
+
+  @override
+  String get transaction_pin_fixed => 'Make monthly fixed';
+
+  @override
+  String get transaction_pin_fixed_confirm_title =>
+      'Make this a monthly fixed expense?';
+
+  @override
+  String get transaction_pin_fixed_confirm_body =>
+      'A monthly commitment will be created and posted automatically.';
+
+  @override
+  String get transaction_pinned_fixed => 'Added to fixed commitments.';
+
+  @override
+  String get recurring_link_none => 'None';
+
+  @override
+  String get recurring_link_vehicle => 'Vehicle (optional)';
+
+  @override
+  String get recurring_link_pet => 'Pet (optional)';
+
+  @override
+  String get dashboard_fixed_header => 'Fixed this month';
+
+  @override
+  String get dashboard_fixed_posted => 'Posted';
+
+  @override
+  String get dashboard_fixed_due => 'Still due';
+
+  @override
+  String get dashboard_after_fixed => 'Left after fixed';
+
+  @override
+  String get error_invalid_pet => 'That pet doesn\'t belong to this household.';
 }

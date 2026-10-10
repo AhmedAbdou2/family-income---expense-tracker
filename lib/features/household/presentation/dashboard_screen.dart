@@ -9,13 +9,17 @@ import '../../../core/utils/money.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_view.dart';
+import '../../categories/domain/entities.dart';
 import '../../categories/presentation/category_visuals.dart';
 import '../../categories/presentation/providers.dart';
 import '../../members/presentation/providers.dart';
+import '../../recurring/domain/entities.dart';
+import '../../recurring/domain/fixed_summary.dart';
 import '../../recurring/presentation/providers.dart';
 import '../../transactions/domain/entities.dart';
 import '../../transactions/presentation/providers.dart';
 import '../domain/entities.dart';
+import 'home_shell.dart';
 import 'providers.dart';
 
 /// Month summary (income / expenses / balance) + the latest rows.
@@ -66,12 +70,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final transactions = ref.watch(dashboardMonthTransactionsProvider);
     final categories = ref.watch(categoriesProvider).value ?? const [];
     final members = ref.watch(membersProvider).value ?? const [];
+    final rules =
+        ref.watch(recurringRulesProvider).value ?? const <RecurringRule>[];
     final arabicDigits = ref.watch(settingsProvider).arabicDigits;
     final currency = membership.value?.household.currency;
     final locale = Localizations.localeOf(context).toString();
+    final incomeCategoryIds = <String>{
+      for (final category in categories)
+        if (category.group == CategoryGroup.income) category.id,
+    };
 
     return Scaffold(
       appBar: AppBar(
+        leading: ShellScope.maybeOf(context) == null
+            ? null
+            : const ShellMenuButton(),
         title: Text(membership.value?.household.name ?? l10n.nav_dashboard),
       ),
       body: membership.when(
@@ -134,8 +147,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     }
                   }
                   final balance = income - expense;
+                  final fixed = fixedMonthSummary(
+                    rules: rules,
+                    incomeCategoryIds: incomeCategoryIds,
+                    month: month,
+                  );
+                  final remaining = income - fixed.totalMinor;
 
-                  if (list.isEmpty) {
+                  if (list.isEmpty && fixed.totalMinor == 0) {
                     return EmptyState(
                       icon: Icons.pie_chart_outline_rounded,
                       title: l10n.month_no_data,
@@ -197,6 +216,80 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           start: 20, end: 20, top: 20, bottom: 4,
                         ),
                         child: Text(
+                          l10n.dashboard_fixed_header,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsetsDirectional.symmetric(
+                          horizontal: 16,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _StatCard(
+                                title: l10n.dashboard_fixed_posted,
+                                value: label(fixed.postedMinor),
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _StatCard(
+                                title: l10n.dashboard_fixed_due,
+                                value: label(fixed.dueMinor),
+                                color: Theme.of(context).colorScheme.tertiary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                          16, 10, 16, 0,
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  l10n.dashboard_after_fixed,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelLarge,
+                                ),
+                              ),
+                              Text(
+                                label(remaining, sign: remaining < 0 ? '-' : null),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  color: remaining < 0
+                                      ? Theme.of(context).colorScheme.error
+                                      : Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          start: 20, end: 20, top: 20, bottom: 4,
+                        ),
+                        child: Text(
                           l10n.dashboard_recent,
                           style: Theme.of(context)
                               .textTheme
@@ -204,8 +297,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               ?.copyWith(fontWeight: FontWeight.w700),
                         ),
                       ),
-                      for (final transaction in list.take(5))
-                        _RecentTile(
+                      if (list.isEmpty)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.symmetric(
+                            horizontal: 20,
+                          ),
+                          child: Text(
+                            l10n.month_no_data,
+                            style: TextStyle(
+                              color:
+                                  Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        )
+                      else
+                        for (final transaction in list.take(5))
+                          _RecentTile(
                           transaction: transaction,
                           label: label(
                             transaction.amountMinorUnits,

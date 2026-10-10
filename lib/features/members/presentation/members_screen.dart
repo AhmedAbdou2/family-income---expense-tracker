@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/widgets/empty_state.dart';
@@ -7,6 +8,7 @@ import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_view.dart';
 import '../../auth/presentation/providers.dart';
 import '../../household/domain/entities.dart';
+import '../../household/presentation/home_shell.dart';
 import '../../household/presentation/providers.dart';
 import '../domain/entities.dart';
 import 'providers.dart';
@@ -26,9 +28,13 @@ class MembersScreen extends ConsumerWidget {
     final membership = ref.watch(membershipProvider).value;
     final members = ref.watch(membersProvider);
     final canManage = membership != null && _canManage(membership.role);
+    final isOwner = membership?.role == MemberRole.owner;
 
     return Scaffold(
       appBar: AppBar(
+        leading: ShellScope.maybeOf(context) == null
+            ? null
+            : const ShellMenuButton(),
         title: Text(l10n.members_title),
         // Add lives in the app bar, not a FAB: the shell already owns the
         // only FAB (quick-add), and two default-tagged FABs in one Navigator
@@ -60,8 +66,11 @@ class MembersScreen extends ConsumerWidget {
             padding: const EdgeInsetsDirectional.only(bottom: 96),
             itemCount: list.length,
             separatorBuilder: (_, _) => const Divider(height: 1),
-            itemBuilder: (context, index) =>
-                _MemberTile(member: list[index], canManage: canManage),
+            itemBuilder: (context, index) => _MemberTile(
+              member: list[index],
+              canManage: canManage,
+              isOwner: isOwner,
+            ),
           );
         },
       ),
@@ -120,10 +129,15 @@ class MembersScreen extends ConsumerWidget {
 }
 
 class _MemberTile extends ConsumerWidget {
-  const _MemberTile({required this.member, required this.canManage});
+  const _MemberTile({
+    required this.member,
+    required this.canManage,
+    required this.isOwner,
+  });
 
   final Member member;
   final bool canManage;
+  final bool isOwner;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -142,10 +156,11 @@ class _MemberTile extends ConsumerWidget {
       badge = null;
     }
 
-    // owner/adult manage everyone; any login may rename its own person;
-    // only unlinked persons can be deleted (RLS restricts anyway).
+    // owner may rename anyone; any login may rename its own person (an
+    // adult cannot rename someone else); only unlinked persons can be
+    // deleted (RLS restricts anyway).
     final isOwnPerson = member.isLinked && member.userId == me;
-    final canRename = canManage || isOwnPerson;
+    final canRename = isOwner || isOwnPerson;
     final canDelete = canManage && !member.isLinked;
     final canToggle = canManage;
 
@@ -159,6 +174,7 @@ class _MemberTile extends ConsumerWidget {
       ),
       title: Text(member.name),
       subtitle: badge == null ? null : Text(badge),
+      onTap: () => context.push('/profile/${member.id}'),
       trailing: (canRename || canToggle || canDelete)
           ? PopupMenuButton<String>(
               onSelected: (action) => _handle(context, ref, action),

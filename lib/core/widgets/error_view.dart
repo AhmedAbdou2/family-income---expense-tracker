@@ -43,6 +43,7 @@ String errorMessage(BuildContext context, Object error) {
     AppErrorCode.odometerBackwards => l10n.error_odometer_backwards,
     AppErrorCode.noCarCategory => l10n.error_no_car_category,
     AppErrorCode.noLinkedPerson => l10n.error_no_linked_person,
+    AppErrorCode.invalidPet => l10n.error_invalid_pet,
     AppErrorCode.unknown => l10n.error_unknown,
   };
 }

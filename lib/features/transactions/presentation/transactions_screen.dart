@@ -11,6 +11,7 @@ import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_view.dart';
 import '../../categories/presentation/category_visuals.dart';
 import '../../categories/presentation/providers.dart';
+import '../../household/presentation/home_shell.dart';
 import '../../household/presentation/providers.dart';
 import '../../members/presentation/providers.dart';
 import '../domain/entities.dart';
@@ -35,7 +36,12 @@ class TransactionsScreen extends ConsumerWidget {
     final locale = Localizations.localeOf(context).toString();
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.nav_transactions)),
+      appBar: AppBar(
+        leading: ShellScope.maybeOf(context) == null
+            ? null
+            : const ShellMenuButton(),
+        title: Text(l10n.nav_transactions),
+      ),
       body: Column(
         children: [
           // Month navigation: [previous] month label [next] - the Row

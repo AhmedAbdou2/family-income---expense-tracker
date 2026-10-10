@@ -17,6 +17,7 @@ String groupLabel(BuildContext context, CategoryGroup group) {
     CategoryGroup.general => l10n.group_general,
     CategoryGroup.car => l10n.group_car,
     CategoryGroup.fixed => l10n.group_fixed,
+    CategoryGroup.pet => l10n.group_pet,
     CategoryGroup.income => l10n.group_income,
   };
 }

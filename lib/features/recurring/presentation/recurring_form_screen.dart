@@ -13,8 +13,13 @@ import '../../categories/presentation/providers.dart';
 import '../../household/presentation/providers.dart';
 import '../../members/domain/entities.dart';
 import '../../members/presentation/providers.dart';
+import '../../pets/domain/entities.dart';
+import '../../pets/presentation/pet_visuals.dart';
+import '../../pets/presentation/providers.dart';
 import '../../transactions/domain/entities.dart';
 import '../../transactions/presentation/providers.dart';
+import '../../vehicles/domain/entities.dart';
+import '../../vehicles/presentation/providers.dart';
 import '../domain/entities.dart';
 import 'providers.dart';
 import 'recurring_visuals.dart';
@@ -40,6 +45,8 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
   TransactionType _type = TransactionType.expense;
   String? _categoryId;
   String? _memberId;
+  String? _vehicleId;
+  String? _petId;
   RecurrenceFrequency _frequency = RecurrenceFrequency.monthly;
   DateTime? _startDate;
   DateTime? _endDate;
@@ -84,6 +91,8 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
         _existing = rule;
         _categoryId = rule.categoryId;
         _memberId = rule.memberId;
+        _vehicleId = rule.vehicleId;
+        _petId = rule.petId;
         _amountController.text =
             Money.minorUnitsToDecimalString(rule.amountMinorUnits);
         _nameController.text = rule.name ?? '';
@@ -122,6 +131,8 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
     final currency = ref.watch(membershipProvider).value?.household.currency;
     final categories = ref.watch(categoriesProvider).value ?? const <Category>[];
     final members = ref.watch(membersProvider).value ?? const <Member>[];
+    final vehicles = ref.watch(vehiclesProvider).value ?? const <Vehicle>[];
+    final pets = ref.watch(petsProvider).value ?? const <Pet>[];
 
     if (_loading) {
       return Scaffold(
@@ -145,6 +156,13 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
     if (_memberId != null && !members.any((member) => member.id == _memberId)) {
       _memberId = null;
     }
+    if (_vehicleId != null &&
+        !vehicles.any((vehicle) => vehicle.id == _vehicleId)) {
+      _vehicleId = null;
+    }
+    if (_petId != null && !pets.any((pet) => pet.id == _petId)) {
+      _petId = null;
+    }
 
     final languageCode = Localizations.localeOf(context).languageCode;
     Category? category;
@@ -158,6 +176,20 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
     for (final item in members) {
       if (item.id == _memberId) {
         member = item;
+        break;
+      }
+    }
+    Vehicle? vehicle;
+    for (final item in vehicles) {
+      if (item.id == _vehicleId) {
+        vehicle = item;
+        break;
+      }
+    }
+    Pet? pet;
+    for (final item in pets) {
+      if (item.id == _petId) {
+        pet = item;
         break;
       }
     }
@@ -255,6 +287,30 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
               onTap: () => _pickMember(members),
             ),
             const Divider(height: 1),
+            if (_type == TransactionType.expense && vehicles.isNotEmpty) ...[
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.directions_car_rounded),
+                title: Text(vehicle?.name ?? l10n.recurring_link_none),
+                subtitle: Text(l10n.recurring_link_vehicle),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => _pickVehicle(vehicles),
+              ),
+              const Divider(height: 1),
+            ],
+            if (_type == TransactionType.expense && pets.isNotEmpty) ...[
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(
+                  pet == null ? Icons.pets_rounded : petTypeIcon(pet.type),
+                ),
+                title: Text(pet?.name ?? l10n.recurring_link_none),
+                subtitle: Text(l10n.recurring_link_pet),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => _pickPet(pets),
+              ),
+              const Divider(height: 1),
+            ],
             DropdownButtonFormField<RecurrenceFrequency>(
               initialValue: _frequency,
               decoration: InputDecoration(labelText: l10n.recurring_frequency),
@@ -386,6 +442,48 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
     if (selected != null) setState(() => _memberId = selected.id);
   }
 
+  Future<void> _pickVehicle(List<Vehicle> vehicles) async {
+    final selected = await showDialog<Vehicle?>(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: Text(dialogContext.l10n.recurring_link_vehicle),
+        children: [
+          SimpleDialogOption(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(dialogContext.l10n.recurring_link_none),
+          ),
+          for (final vehicle in vehicles)
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(dialogContext).pop(vehicle),
+              child: Text(vehicle.name),
+            ),
+        ],
+      ),
+    );
+    setState(() => _vehicleId = selected?.id);
+  }
+
+  Future<void> _pickPet(List<Pet> pets) async {
+    final selected = await showDialog<Pet?>(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: Text(dialogContext.l10n.recurring_link_pet),
+        children: [
+          SimpleDialogOption(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(dialogContext.l10n.recurring_link_none),
+          ),
+          for (final pet in pets)
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(dialogContext).pop(pet),
+              child: Text(pet.name),
+            ),
+        ],
+      ),
+    );
+    setState(() => _petId = selected?.id);
+  }
+
   Future<void> _pickDate({required bool isStart}) async {
     final picked = await showDatePicker(
       context: context,
@@ -440,6 +538,8 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
           name: _nameController.text,
           startDate: _startDate,
           endDate: _endDate,
+          vehicleId: _vehicleId,
+          petId: _petId,
         );
       } else {
         await repository.createRule(
@@ -452,6 +552,8 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
           name: _nameController.text,
           startDate: _startDate,
           endDate: _endDate,
+          vehicleId: _vehicleId,
+          petId: _petId,
         );
       }
       // Post anything already due right away (idempotent).

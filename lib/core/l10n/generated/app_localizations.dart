@@ -1825,6 +1825,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Link this account to a person first.'**
   String get error_no_linked_person;
+
+  /// No description provided for @nav_fixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed'**
+  String get nav_fixed;
+
+  /// No description provided for @nav_pets.
+  ///
+  /// In en, this message translates to:
+  /// **'Pets'**
+  String get nav_pets;
+
+  /// No description provided for @account_fallback.
+  ///
+  /// In en, this message translates to:
+  /// **'My account'**
+  String get account_fallback;
+
+  /// No description provided for @profile_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profile_title;
+
+  /// No description provided for @profile_month.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get profile_month;
+
+  /// No description provided for @group_pet.
+  ///
+  /// In en, this message translates to:
+  /// **'Pets'**
+  String get group_pet;
+
+  /// No description provided for @pets_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Pets'**
+  String get pets_section;
+
+  /// No description provided for @pets_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pets'**
+  String get pets_title;
+
+  /// No description provided for @pets_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No pets yet'**
+  String get pets_empty_title;
+
+  /// No description provided for @pets_empty_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your cats, dogs and other companions to track their costs.'**
+  String get pets_empty_body;
+
+  /// No description provided for @pet_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add pet'**
+  String get pet_add;
+
+  /// No description provided for @pet_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit pet'**
+  String get pet_edit;
+
+  /// No description provided for @pet_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get pet_name;
+
+  /// No description provided for @pet_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Simba'**
+  String get pet_name_hint;
+
+  /// No description provided for @pet_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get pet_type;
+
+  /// No description provided for @pet_type_cat.
+  ///
+  /// In en, this message translates to:
+  /// **'Cat'**
+  String get pet_type_cat;
+
+  /// No description provided for @pet_type_dog.
+  ///
+  /// In en, this message translates to:
+  /// **'Dog'**
+  String get pet_type_dog;
+
+  /// No description provided for @pet_type_bird.
+  ///
+  /// In en, this message translates to:
+  /// **'Bird'**
+  String get pet_type_bird;
+
+  /// No description provided for @pet_type_fish.
+  ///
+  /// In en, this message translates to:
+  /// **'Fish'**
+  String get pet_type_fish;
+
+  /// No description provided for @pet_type_other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get pet_type_other;
+
+  /// No description provided for @pet_birth_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Birth date (optional)'**
+  String get pet_birth_date;
+
+  /// No description provided for @pet_notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes (optional)'**
+  String get pet_notes;
+
+  /// No description provided for @pet_notes_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Allergies, vet, food…'**
+  String get pet_notes_hint;
+
+  /// No description provided for @pet_archive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get pet_archive;
+
+  /// No description provided for @pet_restore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get pet_restore;
+
+  /// No description provided for @pet_archived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get pet_archived;
+
+  /// No description provided for @pet_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet saved.'**
+  String get pet_saved;
+
+  /// No description provided for @pet_archive_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive this pet?'**
+  String get pet_archive_confirm_title;
+
+  /// No description provided for @pet_archive_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'It stays under Archived and keeps its expenses.'**
+  String get pet_archive_confirm_body;
+
+  /// No description provided for @pet_monthly_total.
+  ///
+  /// In en, this message translates to:
+  /// **'This month: {amount}'**
+  String pet_monthly_total(String amount);
+
+  /// No description provided for @pet_expenses_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get pet_expenses_title;
+
+  /// No description provided for @pet_expenses_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No expenses this month.'**
+  String get pet_expenses_empty;
+
+  /// No description provided for @pet_add_expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add expense'**
+  String get pet_add_expense;
+
+  /// No description provided for @transaction_none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get transaction_none;
+
+  /// No description provided for @transaction_pet.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet'**
+  String get transaction_pet;
+
+  /// No description provided for @transaction_pin_fixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Make monthly fixed'**
+  String get transaction_pin_fixed;
+
+  /// No description provided for @transaction_pin_fixed_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Make this a monthly fixed expense?'**
+  String get transaction_pin_fixed_confirm_title;
+
+  /// No description provided for @transaction_pin_fixed_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'A monthly commitment will be created and posted automatically.'**
+  String get transaction_pin_fixed_confirm_body;
+
+  /// No description provided for @transaction_pinned_fixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to fixed commitments.'**
+  String get transaction_pinned_fixed;
+
+  /// No description provided for @recurring_link_none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get recurring_link_none;
+
+  /// No description provided for @recurring_link_vehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle (optional)'**
+  String get recurring_link_vehicle;
+
+  /// No description provided for @recurring_link_pet.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet (optional)'**
+  String get recurring_link_pet;
+
+  /// No description provided for @dashboard_fixed_header.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed this month'**
+  String get dashboard_fixed_header;
+
+  /// No description provided for @dashboard_fixed_posted.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted'**
+  String get dashboard_fixed_posted;
+
+  /// No description provided for @dashboard_fixed_due.
+  ///
+  /// In en, this message translates to:
+  /// **'Still due'**
+  String get dashboard_fixed_due;
+
+  /// No description provided for @dashboard_after_fixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Left after fixed'**
+  String get dashboard_after_fixed;
+
+  /// No description provided for @error_invalid_pet.
+  ///
+  /// In en, this message translates to:
+  /// **'That pet doesn\'t belong to this household.'**
+  String get error_invalid_pet;
 }
 
 class _AppLocalizationsDelegate

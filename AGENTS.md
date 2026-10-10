@@ -32,7 +32,7 @@ Flutter (Riverpod 3, go_router 18, Supabase) + Postgres with RLS.
 ```sh
 flutter gen-l10n        # only if .arb files changed
 flutter analyze         # must be clean
-flutter test            # must pass (60 tests)
+flutter test            # must pass (64 tests)
 flutter build web --release   # compile check; ~3-4 min
 ```
 
@@ -55,30 +55,39 @@ lib/features  auth/  domain (AuthRepository, SignUpOutcome), data
                    embed query), presentation (membershipProvider,
                    invitesProvider, householdLoginsProvider, splash, setup,
                    create (with own person name), join (2-step), claim,
-                   home shell (4 tabs + quick-add FAB), dashboard (month
-                   summary + recent 5), household members (owner-only))
+                   home shell (adaptive bottom bar + drawer/rail; quick-add
+                   FAB; ShellScope/ShellMenuButton), dashboard (month
+                   summary + fixed posted/due/remaining + recent 5),
+                   household members (owner-only))
               members/  domain (Member, MembersRepository), data,
                    presentation (membersProvider, linkedMemberProvider, People
-                   tab: add / rename / deactivate / delete; children see only
-                   their own row, rename own person, no manage controls)
+                   tab: add / rename / deactivate / delete; profile screen;
+                   children see only their own row, rename own person,
+                   no manage controls)
               categories/ domain (Category, CategoryGroup), data, presentation
                    (categoriesProvider, category_visuals icon/color maps,
                    grouped list + editor dialog)
               transactions/ domain (Transaction, TransactionType), data,
-                   presentation (month/member-filtered list, create/edit form,
+                   presentation (month/member/pet-filtered list, create/edit
+                   form with pet picker + "Make monthly fixed",
                    QuickAddAmountController + quick-add sheet, month providers)
               vehicles/  domain (Vehicle, FuelType, FuelLog, MaintenanceItem,
                    FuelStats full-to-full, MaintenanceReminder), data,
                    presentation (vehiclesProvider, fuelLogsProvider(vehicleId),
                    maintenanceProvider(vehicleId): list/form/detail screens,
                    fuel-log form, maintenance form; L/100km + cost/km)
-              recurring/ domain (RecurrenceFrequency, RecurringRule), data,
-                   presentation (recurringRulesProvider + list/form screens;
-                   due transactions posted by generate_recurring_transactions
-                   when an adult opens the dashboard — idempotent)
+              pets/     domain (Pet, PetType, PetsRepository), data,
+                   presentation (petsProvider, pet_visuals, list/form/detail
+                   screens: monthly total + expense list; adult-only)
+              recurring/ domain (RecurrenceFrequency, RecurringRule +
+                   fixedMonthSummary pure helper), data, presentation
+                   (recurringRulesProvider + list/form screens with optional
+                   vehicle/pet links; due transactions posted by
+                   generate_recurring_transactions when an adult opens the
+                   dashboard — idempotent)
               settings/  settings screen (language/theme/digits, invites with
-                   optional person link, manage categories, vehicles + fixed
-                   commitments entries, sign out)
+                   optional person link, manage categories, vehicles + pets +
+                   fixed commitments entries, sign out)
 ```
 
 - Providers: Riverpod 3 `NotifierProvider`/`StreamProvider`/`FutureProvider`.
@@ -91,9 +100,13 @@ lib/features  auth/  domain (AuthRepository, SignUpOutcome), data
   `/transactions/new`, `/transactions/edit/:id`, `/members`, `/categories`,
   `/vehicles`, `/vehicles/new`, `/vehicles/edit/:id`, `/vehicles/:id`,
   `/vehicles/:id/fuel/new`, `/vehicles/:id/maintenance/new`,
-  `/vehicles/:id/maintenance/edit/:itemId`, `/recurring`,
-  `/recurring/new`, `/recurring/edit/:id`, `/settings`. Detail routes are
-  declared before the shell (and `/vehicles/new` before `/vehicles/:id`). A
+  `/vehicles/:id/maintenance/edit/:itemId`, `/recurring` (shell branch),
+  `/recurring/new`, `/recurring/edit/:id`, `/pets` (shell branch),
+  `/pets/new`, `/pets/edit/:id`, `/pets/:id`, `/profile/:id` (`me` resolves
+  to the caller's own person), `/settings`. Adult-only: `/vehicles`,
+  `/recurring`, `/pets`. Detail routes are
+  declared before the shell (and `/vehicles/new` before `/vehicles/:id`,
+  `/pets/new` before `/pets/:id`). A
   household login with no linked person is held on `/claim` until it picks a
   name (`linkedMemberProvider`; errors assume "linked" so a failure never
   blocks the app).
@@ -126,13 +139,21 @@ Supabase SQL Editor (user does this manually):
    `(recurring_rule_id, recurrence_date)`, and the idempotent
    `generate_recurring_transactions`; vehicles/recurring/fuel/maintenance
    SELECT narrowed to **adults only** — children get zero access; new
-   definer fns REVOKE/GRANT hardened).
+   definer fns REVOKE/GRANT hardened) → 14. pets + fixed links (new `pets`
+   table, `pet` category group + 6 seeded pet categories, `pets_validate_name`
+   trigger, `transactions.pet_id`, `recurring_rules.vehicle_id`/`pet_id`,
+   `pet_in_household` helper, updated `seed_default_categories` (37
+   defaults) and `generate_recurring_transactions`, RLS: pets are
+   adult-only, child may still reference a same-household `pet_id`).
 
 Migration 11 is **frozen** (run green on the cloud DB together with the
 isolation test). Migration 12 is **frozen** too. Migration 13 is validated
 in Docker (all 13 files + extended isolation test green, privilege matrix
-clean) — the user runs it on the cloud next; after that it is frozen. Any
-further DB change must be a NEW migration file.
+clean) — the user runs it on the cloud next; after that it is frozen.
+Migration 14 is validated in Docker (all 14 files + the extended isolation
+test green, privilege matrix clean) — the user runs it on the cloud next;
+after that it is frozen. Any further DB change must be a NEW migration
+file.
 
 Indexes: `household_id` on every table; `(household_id, date)` on
 transactions.
@@ -150,7 +171,7 @@ RLS design (full plain-language comments in migration 10):
 - SELECT: members see their household's rows. Children additionally see
   only their own `members` row and that person's transactions; they can
   read categories (needed to record spending). Vehicles, fuel logs,
-  maintenance reminders and recurring rules are **adult-only — a child
+  maintenance reminders, recurring rules and pets are **adult-only — a child
   gets zero SELECT access** to them.
 - INSERT/UPDATE/DELETE on `members`, `categories`, `vehicles`,
   `maintenance_items`, `recurring_rules`, `budgets`: owner/adult only.
@@ -231,4 +252,20 @@ owner can delete the leftover unlinked person from the People tab.
   are redirected away from `/vehicles` and `/recurring`; the Vehicles tab
   uses an AppBar add action instead of its own FAB. Tests:
   `test/home_shell_vehicles_nav_test.dart`.
+- Phase 3.5 (done, awaiting approval): migration 14 + extended isolation
+  test (section 9: pet name trigger, 37 categories incl. 6 pet ones, pet
+  expense stores `pet_id`, child zero pet access, foreign-household pet id
+  rejected, recurring rule links carried onto generated transactions;
+  Docker-green, all 14 files + privilege matrix clean, user runs it on
+  cloud next), Pets feature (list/form/detail with this-month total +
+  expenses), profile screen (month income/expenses/balance + recent),
+  People-tab tap-to-profile, owner-or-own-person rename gating, adaptive
+  navigation reworked (bottom bar = dashboard/transactions/people/fixed;
+  drawer + rail carry every allowed destination incl. settings, vehicles,
+  pets, with an account header; `ShellScope` + `ShellMenuButton` open the
+  drawer from any branch AppBar), dashboard fixed posted/still-due/left
+  after fixed (`fixedMonthSummary` pure helper), "Make monthly fixed" from
+  the transaction form, recurring-rules vehicle/pet links, new `pet`
+  category group, `invalidPet` error code, tests (64), web release build
+  OK.
 - Phase 4: reports/charts/CSV export/polish.

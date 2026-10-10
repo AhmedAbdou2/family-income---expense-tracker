@@ -40,6 +40,7 @@ enum AppErrorCode {
   odometerBackwards,
   noCarCategory,
   noLinkedPerson,
+  invalidPet,
   unknown,
 }
 
@@ -170,6 +171,8 @@ abstract final class ExceptionMapper {
         return const AppException(AppErrorCode.noCarCategory);
       case 'no_linked_person':
         return const AppException(AppErrorCode.noLinkedPerson);
+      case 'invalid_pet':
+        return const AppException(AppErrorCode.invalidPet);
     }
 
     final message = error.message.toLowerCase();

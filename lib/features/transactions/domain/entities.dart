@@ -25,6 +25,7 @@ class Transaction {
     required this.date,
     this.note,
     this.vehicleId,
+    this.petId,
     this.createdBy,
   });
 
@@ -39,5 +40,9 @@ class Transaction {
   final DateTime date;
   final String? note;
   final String? vehicleId;
+
+  /// Pet this expense is attributed to, or null. Same-household enforced
+  /// by RLS (migration 14).
+  final String? petId;
   final String? createdBy;
 }

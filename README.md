@@ -60,6 +60,7 @@ its own data.
    supabase/migrations/20261007000011_invite_member_link.sql
    supabase/migrations/20261008000012_self_service_members.sql
    supabase/migrations/20261010000013_fuel_maintenance_recurring.sql
+   supabase/migrations/20261011000014_pets_fixed_expenses.sql
    ```
 
    Then run the isolation proof in the SQL Editor as well:
@@ -71,7 +72,8 @@ its own data.
    It creates two throwaway households, proves household B can select /
    insert / update / delete nothing of household A (including the
    self-service flows: claim, rename, role change, leave, account
-   removal, plus vehicles / fuel logs / maintenance / recurring rules),
+   removal, plus vehicles / fuel logs / maintenance / recurring rules and
+   pets / pet-linked expenses),
    prints `ALL RLS ISOLATION TESTS PASSED`, and **rolls everything
    back**.
 
@@ -79,7 +81,9 @@ its own data.
    signatures and adds `claim_member`, `rename_member`,
    `update_household_role`, `leave_household`,
    `remove_household_login`. Migration 13 adds the fuel-log / maintenance
-   / recurring-generation RPCs and a new `fuel_logs` table. **Refresh
+   / recurring-generation RPCs and a new `fuel_logs` table. Migration 14
+   adds the `pets` table, a new `pet` category group, `transactions.pet_id`
+   and `recurring_rules.vehicle_id` / `pet_id` links. **Refresh
    any open app tabs** after running them: browsers cache the old
    function definitions.
 
@@ -99,7 +103,7 @@ its own data.
 | --- | --- |
 | `flutter gen-l10n` | Regenerate `lib/core/l10n/generated/` from the `.arb` files |
 | `flutter analyze` | Lint/typecheck (must stay at 0 issues) |
-| `flutter test` | Unit tests: redirect (incl. /claim + adult-only guards), money, l10n parity, error mapping, validators, quick-add keypad, shell FAB heroes, fuel stats, maintenance status, vehicle-detail layout, vehicles nav |
+| `flutter test` | Unit tests: redirect (incl. /claim + adult-only guards), money, l10n parity, error mapping, validators, quick-add keypad, shell FAB heroes, shell navigation/drawer, fuel stats, maintenance status, fixed-month summary, vehicle-detail layout, vehicles/pets nav |
 | `flutter build web --release` | Release build (verified working) |
 | `flutter build apk --debug` | Android build (requires a JDK, see above) |
 
@@ -181,4 +185,5 @@ supabase/
 | 2 | Member management, transaction CRUD, categories UI, quick-add, month dashboard | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
 | 2.5 | Self-service membership: joiner picks their own name, claim screen for legacy logins, owner-only Household-members screen, role/removal/leave RPCs | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
 | 3 | Vehicles + fuel log (L/100km, cost/km), maintenance reminders, recurring fixed commitments (idempotent generator) | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
+| 3.5 | Profile screen + drawer/rail navigation, Pets, fixed commitments linked to vehicle/pet/person, dashboard fixed posted/due/remaining, "Make monthly fixed" | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
 | 4 | Reports, charts, CSV export, polish | pending |

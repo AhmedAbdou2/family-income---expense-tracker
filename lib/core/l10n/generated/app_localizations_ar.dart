@@ -917,4 +917,150 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get error_no_linked_person => 'اربط هذا الحساب بشخص أولًا.';
+
+  @override
+  String get nav_fixed => 'الثابتة';
+
+  @override
+  String get nav_pets => 'الحيوانات';
+
+  @override
+  String get account_fallback => 'حسابي';
+
+  @override
+  String get profile_title => 'الملف الشخصي';
+
+  @override
+  String get profile_month => 'هذا الشهر';
+
+  @override
+  String get group_pet => 'الحيوانات';
+
+  @override
+  String get pets_section => 'الحيوانات';
+
+  @override
+  String get pets_title => 'الحيوانات';
+
+  @override
+  String get pets_empty_title => 'لا توجد حيوانات بعد';
+
+  @override
+  String get pets_empty_body =>
+      'أضف قططك وكلابك ورفاقك الآخرين لتتبع تكاليفهم.';
+
+  @override
+  String get pet_add => 'إضافة حيوان';
+
+  @override
+  String get pet_edit => 'تعديل الحيوان';
+
+  @override
+  String get pet_name => 'الاسم';
+
+  @override
+  String get pet_name_hint => 'مثال: سيمبا';
+
+  @override
+  String get pet_type => 'النوع';
+
+  @override
+  String get pet_type_cat => 'قطة';
+
+  @override
+  String get pet_type_dog => 'كلب';
+
+  @override
+  String get pet_type_bird => 'طائر';
+
+  @override
+  String get pet_type_fish => 'سمكة';
+
+  @override
+  String get pet_type_other => 'أخرى';
+
+  @override
+  String get pet_birth_date => 'تاريخ الميلاد (اختياري)';
+
+  @override
+  String get pet_notes => 'ملاحظات (اختياري)';
+
+  @override
+  String get pet_notes_hint => 'حساسية، طبيب بيطري، طعام…';
+
+  @override
+  String get pet_archive => 'أرشفة';
+
+  @override
+  String get pet_restore => 'استعادة';
+
+  @override
+  String get pet_archived => 'مؤرشف';
+
+  @override
+  String get pet_saved => 'تم حفظ الحيوان.';
+
+  @override
+  String get pet_archive_confirm_title => 'أرشفة هذا الحيوان؟';
+
+  @override
+  String get pet_archive_confirm_body => 'سيبقى ضمن المؤرشفة مع مصروفاته.';
+
+  @override
+  String pet_monthly_total(String amount) {
+    return 'هذا الشهر: $amount';
+  }
+
+  @override
+  String get pet_expenses_title => 'المصروفات';
+
+  @override
+  String get pet_expenses_empty => 'لا مصروفات هذا الشهر.';
+
+  @override
+  String get pet_add_expense => 'إضافة مصروف';
+
+  @override
+  String get transaction_none => 'بدون';
+
+  @override
+  String get transaction_pet => 'الحيوان';
+
+  @override
+  String get transaction_pin_fixed => 'اجعله ثابتًا شهريًا';
+
+  @override
+  String get transaction_pin_fixed_confirm_title =>
+      'تحويل هذا إلى مصروف ثابت شهري؟';
+
+  @override
+  String get transaction_pin_fixed_confirm_body =>
+      'سيتم إنشاء التزام شهري وترحيله تلقائيًا.';
+
+  @override
+  String get transaction_pinned_fixed => 'أُضيف إلى الالتزامات الثابتة.';
+
+  @override
+  String get recurring_link_none => 'بدون';
+
+  @override
+  String get recurring_link_vehicle => 'السيارة (اختياري)';
+
+  @override
+  String get recurring_link_pet => 'الحيوان (اختياري)';
+
+  @override
+  String get dashboard_fixed_header => 'الثابتة هذا الشهر';
+
+  @override
+  String get dashboard_fixed_posted => 'المُرحَّل';
+
+  @override
+  String get dashboard_fixed_due => 'المتبقي';
+
+  @override
+  String get dashboard_after_fixed => 'المتبقي بعد الثابتة';
+
+  @override
+  String get error_invalid_pet => 'هذا الحيوان لا ينتمي إلى هذا المنزل.';
 }

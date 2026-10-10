@@ -4,6 +4,7 @@ enum CategoryGroup {
   general('general'),
   car('car'),
   fixed('fixed'),
+  pet('pet'),
   income('income');
 
   const CategoryGroup(this.dbValue);

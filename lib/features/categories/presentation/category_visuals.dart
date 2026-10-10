@@ -36,6 +36,10 @@ const Map<String, IconData> kCategoryIcons = {
   'pets': Icons.pets_rounded,
   'fitness_center': Icons.fitness_center_rounded,
   'flight': Icons.flight_rounded,
+  'delete_sweep': Icons.delete_sweep_rounded,
+  'medical_services': Icons.medical_services_rounded,
+  'vaccines': Icons.vaccines_rounded,
+  'content_cut': Icons.content_cut_rounded,
 };
 
 IconData iconFor(String name) => kCategoryIcons[name] ?? Icons.category_rounded;

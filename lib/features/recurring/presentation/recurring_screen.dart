@@ -13,6 +13,7 @@ import '../../categories/domain/entities.dart';
 import '../../categories/presentation/category_visuals.dart';
 import '../../categories/presentation/providers.dart';
 import '../../household/domain/entities.dart';
+import '../../household/presentation/home_shell.dart';
 import '../../household/presentation/providers.dart';
 import '../../members/domain/entities.dart';
 import '../../members/presentation/providers.dart';
@@ -36,7 +37,12 @@ class RecurringScreen extends ConsumerWidget {
     final rules = ref.watch(recurringRulesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.recurring_title)),
+      appBar: AppBar(
+        leading: ShellScope.maybeOf(context) == null
+            ? null
+            : const ShellMenuButton(),
+        title: Text(l10n.recurring_title),
+      ),
       body: rules.when(
         loading: () => const LoadingView(),
         error: (error, _) => ErrorView(

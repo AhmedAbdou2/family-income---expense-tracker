@@ -32,3 +32,6 @@ windows/flutter/ephemeral/
 # Supabase local (unused in Phase 1, but keep out of the repo)
 supabase/.temp/
 supabase/.branches/
+
+# Terminal Log
+run.log

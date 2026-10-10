@@ -7,6 +7,7 @@ import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_view.dart';
 import '../../household/domain/entities.dart';
+import '../../household/presentation/home_shell.dart';
 import '../../household/presentation/providers.dart';
 import '../domain/entities.dart';
 import 'providers.dart';
@@ -30,6 +31,9 @@ class VehiclesScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: ShellScope.maybeOf(context) == null
+            ? null
+            : const ShellMenuButton(),
         title: Text(l10n.vehicles_title),
         actions: [
           if (canManage)
