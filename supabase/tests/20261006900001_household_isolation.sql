@@ -50,6 +50,17 @@
 --     writes, RPCs raise forbidden) of vehicles / fuel / maintenance /
 --     recurring rules.
 --
+-- Phase 3.5 additions (section 9):
+--   * the new 'pet' category group: a household gets 37 default
+--     categories (31 + 6 pet);
+--   * pets are owner/adult-only: a child and an outsider see ZERO pet
+--     rows and cannot insert/update/delete them; pet names are trimmed
+--     + length-checked (1..40);
+--   * transactions.pet_id integrity: an expense may reference a pet of
+--     the SAME household only (foreign pet id -> denied);
+--   * recurring rules carry vehicle_id + pet_id onto the transactions
+--     they post.
+--
 -- Logins used: A + B (isolation), C + D + E (phase 2), F + G + H
 -- (phase 2.5 joiners/legacy), J + K + L (role / leave / remove cast).
 --
@@ -58,7 +69,7 @@
 -- leaves no data behind. Success = green notice below; any failure =
 -- red error starting with "FAIL:" or "TEST SETUP FAILED:".
 --
--- Prerequisite: migrations 1..13 have been run in that order.
+-- Prerequisite: migrations 1..14 have been run in that order.
 -- ===================================================================
 
 begin;
@@ -611,7 +622,7 @@ begin
   select count(*) into n from public.budgets;
   if n <> 1 then raise exception 'FAIL: owner sees % budgets (expected 1)', n; end if;
   select count(*) into n from public.categories;
-  if n <> 31 then raise exception 'FAIL: owner sees % categories (expected 31)', n; end if;
+  if n <> 37 then raise exception 'FAIL: owner sees % categories (expected 37)', n; end if;
   -- Both bound codes exist; the failed acceptance consumed neither usage.
   select count(*) into n from public.invites where used_by is not null;
   if n <> 3 then raise exception 'FAIL: owner sees % used invites (expected 3: plain, C, D1)', n; end if;
@@ -1783,6 +1794,177 @@ begin
   if n <> 4 then raise exception 'FAIL: owner sees % recurring rules (expected 4)', n; end if;
   select count(*) into n from public.transactions where recurring_rule_id is not null;
   if n <> 9 then raise exception 'FAIL: owner sees % generated transactions (expected 9)', n; end if;
+end $$;
+
+-- --------------------------------------------------------------------
+-- 9. PHASE 3.5: pets (owner/adult-only) + pet categories + pet/vehicle
+--    links on fixed commitments.
+-- --------------------------------------------------------------------
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
+set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
+
+-- 9.0 Owner A seeds a pet; the name trigger trims + validates.
+do $$
+declare v_pet uuid; n int;
+begin
+  begin
+    insert into public.pets (household_id, name, type)
+    values (current_setting('test.hh_a')::uuid, '   ', 'cat');
+    raise exception 'FAIL: blank pet name accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_name' then raise; end if;
+  end;
+
+  begin
+    insert into public.pets (household_id, name, type)
+    values (current_setting('test.hh_a')::uuid, repeat('p', 41), 'cat');
+    raise exception 'FAIL: 41-char pet name accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_name' then raise; end if;
+  end;
+
+  insert into public.pets (household_id, name, type, birth_date)
+  values (current_setting('test.hh_a')::uuid, '  Simba  ', 'cat', current_date - 365)
+  returning id into v_pet;
+  perform set_config('test.pet_a', v_pet::text, false);
+
+  select count(*) into n from public.pets
+   where id = v_pet and name = 'Simba';
+  if n <> 1 then raise exception 'FAIL: pet name trigger did not trim (%)', n; end if;
+end $$;
+
+-- 9.1 The household has 37 default categories (31 + 6 pet).
+do $$
+declare n int;
+begin
+  select count(*) into n from public.categories
+   where household_id = current_setting('test.hh_a')::uuid and "group" = 'pet';
+  if n <> 6 then raise exception 'FAIL: owner sees % pet categories (expected 6)', n; end if;
+  select count(*) into n from public.categories
+   where household_id = current_setting('test.hh_a')::uuid;
+  if n <> 37 then raise exception 'FAIL: owner sees % categories (expected 37)', n; end if;
+end $$;
+
+-- 9.2 Owner records a pet expense: allowed; it stores pet_id.
+do $$
+declare v_cat uuid; n int;
+begin
+  select c.id into v_cat from public.categories c
+   where c.household_id = current_setting('test.hh_a')::uuid and c."group" = 'pet'
+   order by c.name_en limit 1;
+
+  insert into public.transactions (household_id, type, amount, category_id, member_id, pet_id, date)
+  values (current_setting('test.hh_a')::uuid, 'expense', 15.00, v_cat,
+          current_setting('test.member_a')::uuid,
+          current_setting('test.pet_a')::uuid, current_date);
+
+  select count(*) into n from public.transactions
+   where pet_id = current_setting('test.pet_a')::uuid;
+  if n <> 1 then raise exception 'FAIL: pet expense not stored (%)', n; end if;
+end $$;
+
+-- 9.3 Child C: zero pet access (SELECT + all writes).
+set local request.jwt.claims to '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated"}';
+set local request.jwt.claim.sub to '33333333-3333-4333-8333-333333333333';
+
+do $$
+declare n int;
+begin
+  select count(*) into n from public.pets;
+  if n <> 0 then raise exception 'FAIL: child sees % pets (expected 0)', n; end if;
+
+  begin
+    insert into public.pets (household_id, name, type)
+    values (current_setting('test.hh_a')::uuid, 'Kid Pet', 'dog');
+    raise exception 'FAIL: child inserted a pet';
+  exception when insufficient_privilege then null;
+  end;
+
+  update public.pets set name = 'pwned';
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'FAIL: child updated % pets', n; end if;
+  delete from public.pets;
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'FAIL: child deleted % pets', n; end if;
+end $$;
+
+-- Outsider H sees zero pets too.
+set local request.jwt.claims to '{"sub":"88888888-8888-4888-8888-888888888888","role":"authenticated"}';
+set local request.jwt.claim.sub to '88888888-8888-4888-8888-888888888888';
+
+do $$
+declare n int;
+begin
+  select count(*) into n from public.pets;
+  if n <> 0 then raise exception 'FAIL: outsider sees % pets (expected 0)', n; end if;
+end $$;
+
+-- 9.4 Transaction integrity: a pet of ANOTHER household is rejected.
+set local role none;
+insert into public.pets (household_id, name, type)
+values (current_setting('test.hh_j')::uuid, 'Foreign Pet', 'dog');
+select set_config('test.pet_j', (
+  select p.id from public.pets p
+   where p.household_id = current_setting('test.hh_j')::uuid limit 1)::text, false);
+
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
+set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
+
+do $$
+declare v_cat uuid;
+begin
+  select c.id into v_cat from public.categories c
+   where c.household_id = current_setting('test.hh_a')::uuid and c."group" = 'pet'
+   order by c.name_en limit 1;
+
+  begin
+    insert into public.transactions (household_id, type, amount, category_id, member_id, pet_id, date)
+    values (current_setting('test.hh_a')::uuid, 'expense', 9.00, v_cat,
+            current_setting('test.member_a')::uuid,
+            current_setting('test.pet_j')::uuid, current_date);
+    raise exception 'FAIL: transaction accepted a foreign household''s pet';
+  exception when insufficient_privilege then null;
+  end;
+end $$;
+
+-- 9.5 A fixed commitment can carry a vehicle + pet link, and the posted
+--     transaction inherits both.
+do $$
+declare v_rule uuid; v_cat uuid; n int;
+begin
+  select c.id into v_cat from public.categories c
+   where c.household_id = current_setting('test.hh_a')::uuid and c."group" = 'pet'
+   order by c.name_en limit 1;
+
+  insert into public.recurring_rules
+    (household_id, category_id, member_id, amount, frequency, next_due,
+     name, vehicle_id, pet_id)
+  values (current_setting('test.hh_a')::uuid, v_cat,
+          current_setting('test.member_a')::uuid, 120.00, 'monthly',
+          current_date - 1, 'Pet Insurance',
+          current_setting('test.vehicle_a')::uuid,
+          current_setting('test.pet_a')::uuid)
+  returning id into v_rule;
+
+  perform public.generate_recurring_transactions();
+
+  select count(*) into n from public.transactions
+   where recurring_rule_id = v_rule
+     and vehicle_id = current_setting('test.vehicle_a')::uuid
+     and pet_id = current_setting('test.pet_a')::uuid;
+  if n <> 1 then raise exception 'FAIL: linked fixed commitment lost its links (%)', n; end if;
+end $$;
+
+-- 9.6 Owner still sees the pets + linked rows.
+do $$
+declare n int;
+begin
+  select count(*) into n from public.pets;
+  if n <> 1 then raise exception 'FAIL: owner sees % pets (expected 1)', n; end if;
 end $$;
 
 -- --------------------------------------------------------------------
