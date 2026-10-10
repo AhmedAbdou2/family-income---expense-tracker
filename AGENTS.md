@@ -32,7 +32,7 @@ Flutter (Riverpod 3, go_router 18, Supabase) + Postgres with RLS.
 ```sh
 flutter gen-l10n        # only if .arb files changed
 flutter analyze         # must be clean
-flutter test            # must pass (64 tests)
+flutter test            # must pass (79 tests)
 flutter build web --release   # compile check; ~3-4 min
 ```
 
@@ -268,4 +268,15 @@ owner can delete the leftover unlinked person from the People tab.
   the transaction form, recurring-rules vehicle/pet links, new `pet`
   category group, `invalidPet` error code, tests (64), web release build
   OK.
+- Phase 3.5 fix (wide-window crash): the account tile in the rail's
+  `leading` held a `Row` with an `Expanded`, but a `Row` nested in a `Row`
+  is laid out with unbounded width, so opening at >=840px threw
+  "RenderFlex children have non-zero flex but incoming width constraints
+  are unbounded" and the shell failed. The tile now uses
+  `mainAxisSize: MainAxisSize.min` + a `ConstrainedBox(maxWidth: 200)` on
+  the name (collapsed rail = avatar only, tooltip carries the name;
+  extended = avatar + ellipsized name). Regression sweep
+  `test/home_shell_layout_test.dart` pumps the shell at 360/800/900/1854px
+  for owner/adult/child (collapsed + extended rail, drawer) and fails on
+  any layout exception. Tests now 79.
 - Phase 4: reports/charts/CSV export/polish.

@@ -257,12 +257,15 @@ class _AccountButton extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: extended
               ? Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     avatar,
                     const SizedBox(width: 10),
-                    Expanded(
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 200),
                       child: Text(
                         name,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
@@ -329,6 +332,8 @@ class _AppDrawer extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: Theme.of(context)
                         .textTheme
                         .titleMedium
