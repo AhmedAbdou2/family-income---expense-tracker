@@ -103,10 +103,16 @@
   "error_invalid_role": "دور الدعوة هذا غير مسموح.",
   "error_membership_immutable": "لا يمكن تغيير بيانات العضوية من هنا.",
 
-  "nav_people": "الأشخاص",
+  "nav_people": "العائلة",
   "nav_vehicles": "المركبات",
 
-  "members_title": "الأشخاص",
+  "members_title": "العائلة",
+  "family_invite_someone": "دعوة شخص جديد",
+  "role_no_login": "بدون حساب",
+  "member_connect_login": "ربط حساب",
+  "member_connect_hint": "أنشئ رمز دعوة لـ {name}. عند القبول يصبح ذلك الحساب هو حساب هذا الشخص.",
+  "member_archive": "أرشفة",
+  "member_restore": "استعادة",
   "member_add": "إضافة شخص",
   "member_name": "اسم الشخص",
   "member_name_hint": "مثال: سارة",

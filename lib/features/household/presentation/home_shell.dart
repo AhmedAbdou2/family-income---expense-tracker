@@ -9,6 +9,7 @@ import '../../members/presentation/providers.dart';
 import '../../transactions/presentation/quick_add_sheet.dart';
 import '../domain/entities.dart';
 import 'providers.dart';
+import 'role_badge.dart';
 
 /// Gives descendants access to the shell's [ScaffoldState] so a branch
 /// screen can open the navigation drawer from its own AppBar.
@@ -236,8 +237,11 @@ class _AccountButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
-    final name = _ownName(ref) ?? context.l10n.account_fallback;
+    final name = _ownName(ref) ?? l10n.account_fallback;
+    final role = ref.watch(membershipProvider).value?.role;
+    final roleText = role == null ? l10n.role_no_login : roleLabel(context, role);
     final avatar = CircleAvatar(
       backgroundColor: scheme.primaryContainer,
       child: Text(
@@ -249,7 +253,7 @@ class _AccountButton extends ConsumerWidget {
       ),
     );
     return Tooltip(
-      message: name,
+      message: '$name · $roleText',
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () => context.push('/profile/me'),
@@ -262,12 +266,20 @@ class _AccountButton extends ConsumerWidget {
                     avatar,
                     const SizedBox(width: 10),
                     ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 200),
-                      child: Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      constraints: const BoxConstraints(maxWidth: 170),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 2),
+                          RoleBadge(role: role, dense: true),
+                        ],
                       ),
                     ),
                   ],
@@ -297,6 +309,7 @@ class _AppDrawer extends ConsumerWidget {
     final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
     final name = _ownName(ref) ?? l10n.account_fallback;
+    final role = ref.watch(membershipProvider).value?.role;
     final selectedPosition = allowedIndexes.contains(currentIndex)
         ? allowedIndexes.indexOf(currentIndex)
         : null;
@@ -330,14 +343,22 @@ class _AppDrawer extends ConsumerWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w700),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 4),
+                      RoleBadge(role: role, dense: true),
+                    ],
                   ),
                 ),
               ],

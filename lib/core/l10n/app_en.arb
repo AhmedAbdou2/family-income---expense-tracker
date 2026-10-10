@@ -114,10 +114,21 @@
   "error_invalid_role": "That invite role is not allowed.",
   "error_membership_immutable": "Membership details can't be changed here.",
 
-  "nav_people": "People",
+  "nav_people": "Family",
   "nav_vehicles": "Vehicles",
 
-  "members_title": "People",
+  "members_title": "Family members",
+  "family_invite_someone": "Invite someone new",
+  "role_no_login": "No login",
+  "member_connect_login": "Connect a login",
+  "member_connect_hint": "Create an invite code for {name}. When it's accepted, that login becomes this person's account.",
+  "@member_connect_hint": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "member_archive": "Archive",
+  "member_restore": "Restore",
   "member_add": "Add person",
   "member_name": "Person name",
   "member_name_hint": "e.g. Sara",

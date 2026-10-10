@@ -32,7 +32,7 @@ Flutter (Riverpod 3, go_router 18, Supabase) + Postgres with RLS.
 ```sh
 flutter gen-l10n        # only if .arb files changed
 flutter analyze         # must be clean
-flutter test            # must pass (79 tests)
+flutter test            # must pass (102 tests)
 flutter build web --release   # compile check; ~3-4 min
 ```
 
@@ -58,12 +58,13 @@ lib/features  auth/  domain (AuthRepository, SignUpOutcome), data
                    home shell (adaptive bottom bar + drawer/rail; quick-add
                    FAB; ShellScope/ShellMenuButton), dashboard (month
                    summary + fixed posted/due/remaining + recent 5),
-                   household members (owner-only))
+                   family members (unified People + logins, role badge,
+                   permission-gated actions) + role_badge.dart)
               members/  domain (Member, MembersRepository), data,
-                   presentation (membersProvider, linkedMemberProvider, People
-                   tab: add / rename / deactivate / delete; profile screen;
-                   children see only their own row, rename own person,
-                   no manage controls)
+                   presentation (membersProvider, linkedMemberProvider,
+                   profile screen; the Family tab itself lives in
+                   household/ as family_members_screen.dart; children see
+                   only their own row, rename own person, no manage controls)
               categories/ domain (Category, CategoryGroup), data, presentation
                    (categoriesProvider, category_visuals icon/color maps,
                    grouped list + editor dialog)
@@ -96,8 +97,10 @@ lib/features  auth/  domain (AuthRepository, SignUpOutcome), data
 - Routing: go_router `redirect` = `appRedirect(location, auth, membership,
   member)` (pure, unit-tested). Paths: `/splash`, `/sign-in`, `/sign-up`,
   `/forgot-password`, `/setup`, `/setup/create`, `/setup/join`, `/claim`,
-  `/household-members`, `/` (dashboard), `/transactions`,
-  `/transactions/new`, `/transactions/edit/:id`, `/members`, `/categories`,
+  `/household-members` (redirects to `/members`), `/` (dashboard),
+  `/transactions`,
+  `/transactions/new`, `/transactions/edit/:id`, `/members` (Family),
+  `/categories`,
   `/vehicles`, `/vehicles/new`, `/vehicles/edit/:id`, `/vehicles/:id`,
   `/vehicles/:id/fuel/new`, `/vehicles/:id/maintenance/new`,
   `/vehicles/:id/maintenance/edit/:itemId`, `/recurring` (shell branch),
@@ -191,7 +194,7 @@ Joining via invite with a person link auto-links `members.user_id` at
 accept time (member-bound invites, migration 11); join-only invites now
 let the joiner choose their own name (migration 12). A login that leaves
 and later rejoins as a "New person" gets a **duplicate** person — the
-owner can delete the leftover unlinked person from the People tab.
+owner can delete the leftover unlinked person from the Family tab.
 
 ## Phase status
 
@@ -279,4 +282,19 @@ owner can delete the leftover unlinked person from the People tab.
   `test/home_shell_layout_test.dart` pumps the shell at 360/800/900/1854px
   for owner/adult/child (collapsed + extended rail, drawer) and fails on
   any layout exception. Tests now 79.
+- UX: Family members merge (People + Household members into one screen).
+  One row per person with a reusable `RoleBadge` (role_badge.dart: text +
+  icon + tonal color; owner/adult/child when linked, "No login" otherwise);
+  row actions gated by role (owner: rename anyone, change role, remove
+  login, connect login, delete unlinked person; adult: add person, invite
+  adult/child, rename own person, connect/delete unlinked; child: sees only
+  own row, rename self, leave). No DB change - reuses `rename_member`,
+  `update_household_role`, `remove_household_login`, `create_invite`,
+  `leave_household`. Invite picker never offers the owner role. The old
+  `/household-members` route redirects to `/members`; `members_screen.dart`
+  and `household_members_screen.dart` deleted; the nav entry is "Family".
+  Badge also shown on the profile header and the account header (drawer +
+  extended rail; collapsed-rail tooltip carries the role). Tests 102
+  (`test/role_badge_test.dart`, `test/family_members_test.dart`,
+  `test/family_members_layout_test.dart` sweep 360/800/1854 for all roles).
 - Phase 4: reports/charts/CSV export/polish.

@@ -307,13 +307,33 @@ class AppLocalizationsEn extends AppLocalizations {
       'Membership details can\'t be changed here.';
 
   @override
-  String get nav_people => 'People';
+  String get nav_people => 'Family';
 
   @override
   String get nav_vehicles => 'Vehicles';
 
   @override
-  String get members_title => 'People';
+  String get members_title => 'Family members';
+
+  @override
+  String get family_invite_someone => 'Invite someone new';
+
+  @override
+  String get role_no_login => 'No login';
+
+  @override
+  String get member_connect_login => 'Connect a login';
+
+  @override
+  String member_connect_hint(String name) {
+    return 'Create an invite code for $name. When it\'s accepted, that login becomes this person\'s account.';
+  }
+
+  @override
+  String get member_archive => 'Archive';
+
+  @override
+  String get member_restore => 'Restore';
 
   @override
   String get member_add => 'Add person';

@@ -11,6 +11,7 @@ import '../../auth/presentation/providers.dart';
 import '../../categories/presentation/category_visuals.dart';
 import '../../categories/presentation/providers.dart';
 import '../../household/presentation/providers.dart';
+import '../../household/presentation/role_badge.dart';
 import '../../transactions/domain/entities.dart';
 import '../../transactions/presentation/providers.dart';
 import '../domain/entities.dart';
@@ -29,9 +30,12 @@ class ProfileScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
     final arabicDigits = ref.watch(settingsProvider).arabicDigits;
-    final currency = ref.watch(membershipProvider).value?.household.currency;
+    final membership = ref.watch(membershipProvider).value;
+    final currency = membership?.household.currency;
     final members = ref.watch(membersProvider);
     final categories = ref.watch(categoriesProvider).value ?? const [];
+    final logins = ref.watch(householdLoginsProvider).value ?? const [];
+    final roleByUser = {for (final login in logins) login.userId: login.role};
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.profile_title)),
@@ -63,6 +67,11 @@ class ProfileScreen extends ConsumerWidget {
           }
           final person = member;
           final isMe = person.isLinked && person.userId == me;
+          final personRole = person.userId == null
+              ? null
+              : person.userId == me
+                  ? (membership?.role ?? roleByUser[person.userId])
+                  : roleByUser[person.userId];
           final transactions = ref.watch(
             memberMonthTransactionsProvider(person.id),
           );
@@ -124,16 +133,29 @@ class ProfileScreen extends ConsumerWidget {
                             children: [
                               Text(
                                 person.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge
                                     ?.copyWith(fontWeight: FontWeight.w700),
                               ),
-                              if (isMe)
-                                Text(
-                                  l10n.member_you,
-                                  style: TextStyle(color: scheme.onSurfaceVariant),
-                                ),
+                              const SizedBox(height: 6),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  RoleBadge(role: personRole, dense: true),
+                                  if (isMe) ...[
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      l10n.member_you,
+                                      style: TextStyle(
+                                        color: scheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ],
                           ),
                         ),

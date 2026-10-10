@@ -310,13 +310,33 @@ class AppLocalizationsAr extends AppLocalizations {
       'لا يمكن تغيير بيانات العضوية من هنا.';
 
   @override
-  String get nav_people => 'الأشخاص';
+  String get nav_people => 'العائلة';
 
   @override
   String get nav_vehicles => 'المركبات';
 
   @override
-  String get members_title => 'الأشخاص';
+  String get members_title => 'العائلة';
+
+  @override
+  String get family_invite_someone => 'دعوة شخص جديد';
+
+  @override
+  String get role_no_login => 'بدون حساب';
+
+  @override
+  String get member_connect_login => 'ربط حساب';
+
+  @override
+  String member_connect_hint(String name) {
+    return 'أنشئ رمز دعوة لـ $name. عند القبول يصبح ذلك الحساب هو حساب هذا الشخص.';
+  }
+
+  @override
+  String get member_archive => 'أرشفة';
+
+  @override
+  String get member_restore => 'استعادة';
 
   @override
   String get member_add => 'إضافة شخص';

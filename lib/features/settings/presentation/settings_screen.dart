@@ -139,19 +139,6 @@ class SettingsScreen extends ConsumerWidget {
           _SectionHeader(title: l10n.household_section),
           const _HouseholdCard(),
 
-          // Owner-only: manage the household's *logins* (roles, removal,
-          // person names). Members list itself stays in the People tab.
-          if (isOwner) ...[
-            Card(
-              child: ListTile(
-                leading:
-                    Icon(Icons.manage_accounts_outlined, color: scheme.primary),
-                title: Text(l10n.household_members_title),
-                onTap: () => context.push('/household-members'),
-              ),
-            ),
-          ],
-
           // Leave is available to everyone - but the last owner sees it
           // disabled with a hint (make someone else an owner first).
           Card(

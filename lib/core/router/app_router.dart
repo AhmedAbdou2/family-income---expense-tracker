@@ -11,13 +11,12 @@ import '../../features/household/domain/entities.dart';
 import '../../features/household/presentation/claim_screen.dart';
 import '../../features/household/presentation/create_household_screen.dart';
 import '../../features/household/presentation/dashboard_screen.dart';
+import '../../features/household/presentation/family_members_screen.dart';
 import '../../features/household/presentation/home_shell.dart';
-import '../../features/household/presentation/household_members_screen.dart';
 import '../../features/household/presentation/join_household_screen.dart';
 import '../../features/household/presentation/providers.dart';
 import '../../features/household/presentation/setup_screen.dart';
 import '../../features/household/presentation/splash_screen.dart';
-import '../../features/members/presentation/members_screen.dart';
 import '../../features/members/presentation/profile_screen.dart';
 import '../../features/members/presentation/providers.dart';
 import '../../features/pets/presentation/pet_detail_screen.dart';
@@ -193,9 +192,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: claimRoute,
         builder: (context, state) => const ClaimScreen(),
       ),
+      // The old separate Household-members screen is gone: its job is now
+      // part of the unified Family members tab at /members.
       GoRoute(
         path: '/household-members',
-        builder: (context, state) => const HouseholdMembersScreen(),
+        redirect: (context, state) => '/members',
       ),
 
       // Main shell: bottom nav on mobile, side rail on web/desktop
@@ -215,7 +216,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(routes: [
             GoRoute(
               path: '/members',
-              builder: (context, state) => const MembersScreen(),
+              builder: (context, state) => const FamilyMembersScreen(),
             ),
           ]),
           // Fixed commitments (recurring) is adult-only and sits before

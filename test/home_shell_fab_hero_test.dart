@@ -1,10 +1,10 @@
 import 'package:family_income_expense_tracker/core/l10n/l10n.dart';
 import 'package:family_income_expense_tracker/features/auth/presentation/providers.dart';
 import 'package:family_income_expense_tracker/features/household/domain/entities.dart';
+import 'package:family_income_expense_tracker/features/household/presentation/family_members_screen.dart';
 import 'package:family_income_expense_tracker/features/household/presentation/home_shell.dart';
 import 'package:family_income_expense_tracker/features/household/presentation/providers.dart';
 import 'package:family_income_expense_tracker/features/members/domain/entities.dart';
-import 'package:family_income_expense_tracker/features/members/presentation/members_screen.dart';
 import 'package:family_income_expense_tracker/features/members/presentation/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -58,7 +58,7 @@ GoRouter buildTestRouter() => GoRouter(
             StatefulShellBranch(routes: [
               GoRoute(
                 path: '/members',
-                builder: (context, state) => const MembersScreen(),
+                builder: (context, state) => const FamilyMembersScreen(),
               ),
             ]),
             StatefulShellBranch(routes: [

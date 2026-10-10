@@ -665,7 +665,7 @@ abstract class AppLocalizations {
   /// No description provided for @nav_people.
   ///
   /// In en, this message translates to:
-  /// **'People'**
+  /// **'Family'**
   String get nav_people;
 
   /// No description provided for @nav_vehicles.
@@ -677,8 +677,44 @@ abstract class AppLocalizations {
   /// No description provided for @members_title.
   ///
   /// In en, this message translates to:
-  /// **'People'**
+  /// **'Family members'**
   String get members_title;
+
+  /// No description provided for @family_invite_someone.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite someone new'**
+  String get family_invite_someone;
+
+  /// No description provided for @role_no_login.
+  ///
+  /// In en, this message translates to:
+  /// **'No login'**
+  String get role_no_login;
+
+  /// No description provided for @member_connect_login.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect a login'**
+  String get member_connect_login;
+
+  /// No description provided for @member_connect_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an invite code for {name}. When it\'s accepted, that login becomes this person\'s account.'**
+  String member_connect_hint(String name);
+
+  /// No description provided for @member_archive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get member_archive;
+
+  /// No description provided for @member_restore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get member_restore;
 
   /// No description provided for @member_add.
   ///
