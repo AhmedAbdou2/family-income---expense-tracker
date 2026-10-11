@@ -887,7 +887,7 @@ abstract class AppLocalizations {
   /// No description provided for @group_fixed.
   ///
   /// In en, this message translates to:
-  /// **'Fixed commitments'**
+  /// **'Fixed expenses'**
   String get group_fixed;
 
   /// No description provided for @group_income.
@@ -991,6 +991,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This can\'t be undone.'**
   String get transaction_delete_confirm_body;
+
+  /// No description provided for @transaction_delete_from_fixed.
+  ///
+  /// In en, this message translates to:
+  /// **'This transaction came from a fixed expense. Deleting it will not cause regeneration.'**
+  String get transaction_delete_from_fixed;
 
   /// No description provided for @transaction_deleted.
   ///
@@ -1643,37 +1649,37 @@ abstract class AppLocalizations {
   /// No description provided for @recurring_section.
   ///
   /// In en, this message translates to:
-  /// **'Fixed commitments'**
+  /// **'Fixed expenses'**
   String get recurring_section;
 
   /// No description provided for @recurring_title.
   ///
   /// In en, this message translates to:
-  /// **'Fixed commitments'**
+  /// **'Fixed expenses'**
   String get recurring_title;
 
   /// No description provided for @recurring_empty_title.
   ///
   /// In en, this message translates to:
-  /// **'No fixed commitments yet'**
+  /// **'No fixed expenses yet'**
   String get recurring_empty_title;
 
   /// No description provided for @recurring_empty_body.
   ///
   /// In en, this message translates to:
-  /// **'Add rent, installments or a salary to post them automatically.'**
+  /// **'Fixed expenses will appear here.'**
   String get recurring_empty_body;
 
   /// No description provided for @recurring_add.
   ///
   /// In en, this message translates to:
-  /// **'Add commitment'**
+  /// **'Add fixed expense'**
   String get recurring_add;
 
   /// No description provided for @recurring_edit.
   ///
   /// In en, this message translates to:
-  /// **'Edit commitment'**
+  /// **'Edit fixed expense'**
   String get recurring_edit;
 
   /// No description provided for @recurring_name.
@@ -1865,8 +1871,14 @@ abstract class AppLocalizations {
   /// No description provided for @nav_fixed.
   ///
   /// In en, this message translates to:
-  /// **'Fixed'**
+  /// **'Fixed expenses'**
   String get nav_fixed;
+
+  /// No description provided for @nav_fixed_short.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed'**
+  String get nav_fixed_short;
 
   /// No description provided for @nav_pets.
   ///
@@ -2075,7 +2087,7 @@ abstract class AppLocalizations {
   /// No description provided for @transaction_pin_fixed.
   ///
   /// In en, this message translates to:
-  /// **'Make monthly fixed'**
+  /// **'Make a monthly fixed expense'**
   String get transaction_pin_fixed;
 
   /// No description provided for @transaction_pin_fixed_confirm_title.
@@ -2117,7 +2129,7 @@ abstract class AppLocalizations {
   /// No description provided for @dashboard_fixed_header.
   ///
   /// In en, this message translates to:
-  /// **'Fixed this month'**
+  /// **'Fixed expenses this month'**
   String get dashboard_fixed_header;
 
   /// No description provided for @dashboard_fixed_posted.

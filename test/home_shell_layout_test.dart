@@ -171,4 +171,12 @@ void main() {
     expect(find.text('Pets'), findsOneWidget);
     expect(_drainExceptions(tester), isEmpty);
   });
+
+  testWidgets('bottom bar uses short fixed label at 360px width',
+      (tester) async {
+    await _pumpAt(tester, const Size(360, 640), MemberRole.adult);
+    expect(_drainExceptions(tester), isEmpty);
+    expect(find.text('Fixed'), findsOneWidget);
+  });
+
 }

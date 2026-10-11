@@ -424,7 +424,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get group_car => 'Car expenses';
 
   @override
-  String get group_fixed => 'Fixed commitments';
+  String get group_fixed => 'Fixed expenses';
 
   @override
   String get group_income => 'Income';
@@ -476,6 +476,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transaction_delete_confirm_body => 'This can\'t be undone.';
+
+  @override
+  String get transaction_delete_from_fixed =>
+      'This transaction came from a fixed expense. Deleting it will not cause regeneration.';
 
   @override
   String get transaction_deleted => 'Transaction deleted.';
@@ -830,23 +834,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get maintenance_saved => 'Reminder saved.';
 
   @override
-  String get recurring_section => 'Fixed commitments';
+  String get recurring_section => 'Fixed expenses';
 
   @override
-  String get recurring_title => 'Fixed commitments';
+  String get recurring_title => 'Fixed expenses';
 
   @override
-  String get recurring_empty_title => 'No fixed commitments yet';
+  String get recurring_empty_title => 'No fixed expenses yet';
 
   @override
-  String get recurring_empty_body =>
-      'Add rent, installments or a salary to post them automatically.';
+  String get recurring_empty_body => 'Fixed expenses will appear here.';
 
   @override
-  String get recurring_add => 'Add commitment';
+  String get recurring_add => 'Add fixed expense';
 
   @override
-  String get recurring_edit => 'Edit commitment';
+  String get recurring_edit => 'Edit fixed expense';
 
   @override
   String get recurring_name => 'Name (optional)';
@@ -949,7 +952,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get error_no_linked_person => 'Link this account to a person first.';
 
   @override
-  String get nav_fixed => 'Fixed';
+  String get nav_fixed => 'Fixed expenses';
+
+  @override
+  String get nav_fixed_short => 'Fixed';
 
   @override
   String get nav_pets => 'Pets';
@@ -1058,7 +1064,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transaction_pet => 'Pet';
 
   @override
-  String get transaction_pin_fixed => 'Make monthly fixed';
+  String get transaction_pin_fixed => 'Make a monthly fixed expense';
 
   @override
   String get transaction_pin_fixed_confirm_title =>
@@ -1081,7 +1087,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurring_link_pet => 'Pet (optional)';
 
   @override
-  String get dashboard_fixed_header => 'Fixed this month';
+  String get dashboard_fixed_header => 'Fixed expenses this month';
 
   @override
   String get dashboard_fixed_posted => 'Posted';

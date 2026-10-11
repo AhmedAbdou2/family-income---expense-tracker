@@ -208,7 +208,7 @@ class TransactionsScreen extends ConsumerWidget {
   }
 }
 
-class _TransactionTile extends StatelessWidget {
+class _TransactionTile extends ConsumerWidget {
   const _TransactionTile({
     required this.transaction,
     required this.categoryName,
@@ -226,31 +226,123 @@ class _TransactionTile extends StatelessWidget {
   final String amountLabel;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isExpense = transaction.type == TransactionType.expense;
     final color = colorFromHex(colorHex);
 
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: color.withValues(alpha: 0.18),
-        child: Icon(icon, color: color, size: 20),
+    return Dismissible(
+      key: Key(transaction.id),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) => _confirmDelete(context, ref),
+      background: Container(
+        color: Theme.of(context).colorScheme.errorContainer,
+        alignment: AlignmentDirectional.centerEnd,
+        padding: const EdgeInsetsDirectional.only(end: 16),
+        child: Icon(Icons.delete_outline_rounded,
+            color: Theme.of(context).colorScheme.onErrorContainer),
       ),
-      title: Text(categoryName),
-      subtitle: Text(
-        '$memberName'
-        '${transaction.note == null || transaction.note!.isEmpty ? '' : ' • ${transaction.note}'}',
-      ),
-      trailing: Text(
-        '${isExpense ? '-' : '+'} $amountLabel',
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          color: isExpense
-              ? Theme.of(context).colorScheme.error
-              : Theme.of(context).colorScheme.primary,
+      onDismissed: (_) async {
+        if (context.mounted) await _delete(context, ref);
+      },
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: color.withValues(alpha: 0.18),
+          child: Icon(icon, color: color, size: 20),
         ),
+        title: Text(categoryName),
+        subtitle: Text(
+          '$memberName'
+          '${transaction.note == null || transaction.note!.isEmpty ? '' : ' • ${transaction.note}'}',
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '${isExpense ? '-' : '+'} $amountLabel',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: isExpense
+                    ? Theme.of(context).colorScheme.error
+                    : Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            PopupMenuButton<String>(
+              onSelected: (value) async {
+                if (value == 'delete') {
+                  final confirmed = await _confirmDelete(context, ref);
+                  if (confirmed == true && context.mounted) {
+                    await _delete(context, ref);
+                  }
+                } else if (value == 'edit') {
+                  if (context.mounted) {
+                    context.push('/transactions/edit/${transaction.id}');
+                  }
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Text(context.l10n.transaction_edit_title),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Text(context.l10n.delete_action),
+                ),
+              ],
+            ),
+          ],
+        ),
+        onTap: () => context.push('/transactions/edit/${transaction.id}'),
       ),
-      onTap: () =>
-          context.push('/transactions/edit/${transaction.id}'),
     );
+  }
+
+  Future<bool?> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    String content = l10n.transaction_delete_confirm_body;
+    if (transaction.recurringRuleId != null) {
+      content = l10n.transaction_delete_from_fixed;
+    }
+    if (!context.mounted) return false;
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(dialogContext.l10n.transaction_delete_confirm_title),
+        content: Text(content),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(dialogContext.l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(dialogContext.l10n.delete_action),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _delete(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    try {
+      await ref
+          .read(transactionsRepositoryProvider)
+          .deleteTransaction(id: transaction.id);
+      ref
+        ..invalidate(monthTransactionsProvider)
+        ..invalidate(dashboardMonthTransactionsProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.transaction_deleted)),
+        );
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage(context, error))),
+        );
+      }
+    }
   }
 }

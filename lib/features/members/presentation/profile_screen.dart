@@ -316,7 +316,7 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-class _RecentTile extends StatelessWidget {
+class _RecentTile extends ConsumerWidget {
   const _RecentTile({
     required this.transaction,
     required this.label,
@@ -332,25 +332,102 @@ class _RecentTile extends StatelessWidget {
   final IconData icon;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final color = colorFromHex(colorHex);
     final isExpense = transaction.type == TransactionType.expense;
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: color.withValues(alpha: 0.18),
-        child: Icon(icon, color: color, size: 20),
+    return Dismissible(
+      key: Key('profile_${transaction.id}'),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) => _confirmDelete(context),
+      background: Container(
+        color: Theme.of(context).colorScheme.errorContainer,
+        alignment: AlignmentDirectional.centerEnd,
+        padding: const EdgeInsetsDirectional.only(end: 16),
+        child: Icon(Icons.delete_outline_rounded,
+            color: Theme.of(context).colorScheme.onErrorContainer),
       ),
-      title: Text(categoryName),
-      trailing: Text(
-        label,
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          color: isExpense
-              ? Theme.of(context).colorScheme.error
-              : Theme.of(context).colorScheme.primary,
+      onDismissed: (_) => _delete(context, ref),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: color.withValues(alpha: 0.18),
+          child: Icon(icon, color: color, size: 20),
         ),
+        title: Text(categoryName),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: isExpense
+                    ? Theme.of(context).colorScheme.error
+                    : Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            IconButton(
+              tooltip: context.l10n.delete_action,
+              icon: const Icon(Icons.delete_outline_rounded),
+              onPressed: () async {
+                final confirmed = await _confirmDelete(context);
+                if (confirmed == true && context.mounted) {
+                  await _delete(context, ref);
+                }
+              },
+            ),
+          ],
+        ),
+        onTap: () => context.push('/transactions/edit/${transaction.id}'),
       ),
-      onTap: () => context.push('/transactions/edit/${transaction.id}'),
     );
+  }
+
+  Future<bool?> _confirmDelete(BuildContext context) async {
+    final l10n = context.l10n;
+    String content = l10n.transaction_delete_confirm_body;
+    if (transaction.recurringRuleId != null) {
+      content = l10n.transaction_delete_from_fixed;
+    }
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(dialogContext.l10n.transaction_delete_confirm_title),
+        content: Text(content),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(dialogContext.l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(dialogContext.l10n.delete_action),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _delete(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    try {
+      await ref
+          .read(transactionsRepositoryProvider)
+          .deleteTransaction(id: transaction.id);
+      ref
+        ..invalidate(monthTransactionsProvider)
+        ..invalidate(dashboardMonthTransactionsProvider)
+        ..invalidate(memberMonthTransactionsProvider(transaction.memberId));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.transaction_deleted)),
+        );
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage(context, error))),
+        );
+      }
+    }
   }
 }

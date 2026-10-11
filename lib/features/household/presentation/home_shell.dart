@@ -46,12 +46,14 @@ class _Destination {
     required this.icon,
     required this.activeIcon,
     required this.label,
+    this.shortLabel,
     this.adultOnly = false,
   });
 
   final IconData icon;
   final IconData activeIcon;
   final String label;
+  final String? shortLabel;
   final bool adultOnly;
 }
 
@@ -118,6 +120,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         icon: Icons.event_repeat_outlined,
         activeIcon: Icons.event_repeat_rounded,
         label: l10n.nav_fixed,
+        shortLabel: l10n.nav_fixed_short,
         adultOnly: true,
       ),
       _Destination(
@@ -216,7 +219,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
                 NavigationDestination(
                   icon: Icon(all[index].icon),
                   selectedIcon: Icon(all[index].activeIcon),
-                  label: all[index].label,
+                  label: all[index].shortLabel ?? all[index].label,
+                  tooltip: all[index].label,
                 ),
             ],
           ),

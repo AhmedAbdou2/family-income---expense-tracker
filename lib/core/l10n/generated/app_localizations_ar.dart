@@ -426,7 +426,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get group_car => 'مصروفات السيارة';
 
   @override
-  String get group_fixed => 'التزامات ثابتة';
+  String get group_fixed => 'المصروفات الثابتة';
 
   @override
   String get group_income => 'الدخل';
@@ -479,6 +479,10 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get transaction_delete_confirm_body =>
       'لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get transaction_delete_from_fixed =>
+      'نشأت هذه المعاملة من مصروف ثابت. الحذف لن يؤدي إلى إعادة إنشائها.';
 
   @override
   String get transaction_deleted => 'تم حذف المعاملة.';
@@ -822,23 +826,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get maintenance_saved => 'تم حفظ التذكير.';
 
   @override
-  String get recurring_section => 'الالتزامات الثابتة';
+  String get recurring_section => 'المصروفات الثابتة';
 
   @override
-  String get recurring_title => 'الالتزامات الثابتة';
+  String get recurring_title => 'المصروفات الثابتة';
 
   @override
-  String get recurring_empty_title => 'لا توجد التزامات ثابتة بعد';
+  String get recurring_empty_title => 'لا توجد مصروفات ثابتة بعد';
 
   @override
-  String get recurring_empty_body =>
-      'أضف الإيجار أو الأقساط أو الراتب لترحيلها تلقائيًا.';
+  String get recurring_empty_body => 'ستظهر المصروفات الثابتة هنا.';
 
   @override
-  String get recurring_add => 'إضافة التزام';
+  String get recurring_add => 'إضافة مصروف ثابت';
 
   @override
-  String get recurring_edit => 'تعديل الالتزام';
+  String get recurring_edit => 'تعديل المصروف الثابت';
 
   @override
   String get recurring_name => 'الاسم (اختياري)';
@@ -939,7 +942,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get error_no_linked_person => 'اربط هذا الحساب بشخص أولًا.';
 
   @override
-  String get nav_fixed => 'الثابتة';
+  String get nav_fixed => 'المصروفات الثابتة';
+
+  @override
+  String get nav_fixed_short => 'الثابتة';
 
   @override
   String get nav_pets => 'الحيوانات';
@@ -1047,7 +1053,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transaction_pet => 'الحيوان';
 
   @override
-  String get transaction_pin_fixed => 'اجعله ثابتًا شهريًا';
+  String get transaction_pin_fixed => 'اجعله مصروفًا ثابتًا شهريًا';
 
   @override
   String get transaction_pin_fixed_confirm_title =>
@@ -1070,7 +1076,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recurring_link_pet => 'الحيوان (اختياري)';
 
   @override
-  String get dashboard_fixed_header => 'الثابتة هذا الشهر';
+  String get dashboard_fixed_header => 'المصروفات الثابتة هذا الشهر';
 
   @override
   String get dashboard_fixed_posted => 'المُرحَّل';
