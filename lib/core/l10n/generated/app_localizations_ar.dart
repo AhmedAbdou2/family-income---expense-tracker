@@ -900,7 +900,28 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recurring_delete_confirm_title => 'حذف هذا الالتزام؟';
 
   @override
-  String get recurring_delete_confirm_body => 'تبقى الحركات المرحّلة.';
+  String get recurring_delete_confirm_body =>
+      'اختر ما يجب فعله بالمعاملات التي أنشأها هذا الالتزام.';
+
+  @override
+  String get recurring_delete_option_keep =>
+      'الاحتفاظ بالمعاملات المنشورة بالفعل';
+
+  @override
+  String get recurring_delete_option_delete_month =>
+      'حذف المعاملات المنشورة من هذا الالتزام هذا الشهر أيضًا';
+
+  @override
+  String recurring_delete_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'سيتم حذف $count معاملات',
+      one: 'سيتم حذف معاملة واحدة',
+      zero: 'لن يتم حذف أي معاملات',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get recurring_deleted => 'تم حذف الالتزام.';

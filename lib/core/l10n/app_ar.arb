@@ -310,7 +310,17 @@
   "recurring_saved": "تم حفظ الالتزام.",
   "recurring_delete": "حذف الالتزام",
   "recurring_delete_confirm_title": "حذف هذا الالتزام؟",
-  "recurring_delete_confirm_body": "تبقى الحركات المرحّلة.",
+  "recurring_delete_confirm_body": "اختر ما يجب فعله بالمعاملات التي أنشأها هذا الالتزام.",
+  "recurring_delete_option_keep": "الاحتفاظ بالمعاملات المنشورة بالفعل",
+  "recurring_delete_option_delete_month": "حذف المعاملات المنشورة من هذا الالتزام هذا الشهر أيضًا",
+  "recurring_delete_count": "{count, plural, =0{لن يتم حذف أي معاملات} =1{سيتم حذف معاملة واحدة} other{سيتم حذف {count} معاملات}}",
+  "@recurring_delete_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "recurring_deleted": "تم حذف الالتزام.",
   "recurring_generated": "تم ترحيل {count} حركة دورية.",
   "recurring_type_income": "دخل",

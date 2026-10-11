@@ -909,7 +909,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recurring_delete_confirm_body =>
-      'Already-posted transactions stay.';
+      'Choose what to do with transactions posted from this rule.';
+
+  @override
+  String get recurring_delete_option_keep => 'Keep already posted transactions';
+
+  @override
+  String get recurring_delete_option_delete_month =>
+      'Also delete the transactions posted from this rule this month';
+
+  @override
+  String recurring_delete_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions will be deleted',
+      one: '1 transaction will be deleted',
+      zero: 'No transactions will be deleted',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get recurring_deleted => 'Commitment deleted.';

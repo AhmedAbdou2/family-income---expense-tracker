@@ -1793,8 +1793,26 @@ abstract class AppLocalizations {
   /// No description provided for @recurring_delete_confirm_body.
   ///
   /// In en, this message translates to:
-  /// **'Already-posted transactions stay.'**
+  /// **'Choose what to do with transactions posted from this rule.'**
   String get recurring_delete_confirm_body;
+
+  /// No description provided for @recurring_delete_option_keep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep already posted transactions'**
+  String get recurring_delete_option_keep;
+
+  /// No description provided for @recurring_delete_option_delete_month.
+  ///
+  /// In en, this message translates to:
+  /// **'Also delete the transactions posted from this rule this month'**
+  String get recurring_delete_option_delete_month;
+
+  /// No description provided for @recurring_delete_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No transactions will be deleted} =1{1 transaction will be deleted} other{{count} transactions will be deleted}}'**
+  String recurring_delete_count(int count);
 
   /// No description provided for @recurring_deleted.
   ///

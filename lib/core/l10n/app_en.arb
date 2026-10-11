@@ -338,7 +338,17 @@
   "recurring_saved": "Commitment saved.",
   "recurring_delete": "Delete commitment",
   "recurring_delete_confirm_title": "Delete this commitment?",
-  "recurring_delete_confirm_body": "Already-posted transactions stay.",
+  "recurring_delete_confirm_body": "Choose what to do with transactions posted from this rule.",
+  "recurring_delete_option_keep": "Keep already posted transactions",
+  "recurring_delete_option_delete_month": "Also delete the transactions posted from this rule this month",
+  "recurring_delete_count": "{count, plural, =0{No transactions will be deleted} =1{1 transaction will be deleted} other{{count} transactions will be deleted}}",
+  "@recurring_delete_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "recurring_deleted": "Commitment deleted.",
   "recurring_generated": "Posted {count} recurring transactions.",
   "@recurring_generated": {
