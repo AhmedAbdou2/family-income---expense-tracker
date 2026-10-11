@@ -54,7 +54,7 @@ GoRouter _buildRouter() => GoRouter(
       ],
     );
 
-Widget _app(GoRouter router, MemberRole role) => ProviderScope(
+Widget _app(GoRouter router, MemberRole role, {Locale? locale}) => ProviderScope(
       overrides: [
         membershipProvider.overrideWith(
           (ref) async => Membership(
@@ -77,6 +77,7 @@ Widget _app(GoRouter router, MemberRole role) => ProviderScope(
       ],
       child: MaterialApp.router(
         routerConfig: router,
+        locale: locale,
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: const [
           AppLocalizations.delegate,
@@ -100,15 +101,16 @@ List<Object> _drainExceptions(WidgetTester tester) {
 Future<void> _pumpAt(
   WidgetTester tester,
   Size size,
-  MemberRole role,
-) async {
+  MemberRole role, {
+  Locale? locale,
+}) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 
   final router = _buildRouter();
   addTearDown(router.dispose);
-  await tester.pumpWidget(_app(router, role));
+  await tester.pumpWidget(_app(router, role, locale: locale));
   await _pumpFrames(tester);
 }
 
@@ -177,6 +179,18 @@ void main() {
     await _pumpAt(tester, const Size(360, 640), MemberRole.adult);
     expect(_drainExceptions(tester), isEmpty);
     expect(find.text('Fixed'), findsOneWidget);
+  });
+
+  testWidgets('bottom bar short fixed label fits at 360px in Arabic too',
+      (tester) async {
+    await _pumpAt(
+      tester,
+      const Size(360, 640),
+      MemberRole.adult,
+      locale: const Locale('ar'),
+    );
+    expect(_drainExceptions(tester), isEmpty);
+    expect(find.text('الثابتة'), findsOneWidget);
   });
 
 }

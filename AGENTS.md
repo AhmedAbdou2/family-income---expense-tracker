@@ -32,7 +32,7 @@ Flutter (Riverpod 3, go_router 18, Supabase) + Postgres with RLS.
 ```sh
 flutter gen-l10n        # only if .arb files changed
 flutter analyze         # must be clean
-flutter test            # must pass (132 tests)
+flutter test            # must pass (133 tests)
 flutter build web --release   # compile check; ~3-4 min
 ```
 
@@ -331,7 +331,7 @@ owner can delete the leftover unlinked person from the Family tab.
   writes `is_active=false` via `setRuleActive` and drops it from "Still due"
   immediately; resuming advances `next_due` with the new pure
   `nextOccurrenceOnOrAfter` so the paused period is not backfilled (Docker:
-  0,1,1,0,1). No DB change. Tests 132
+  0,1,1,0,1). No DB change. Tests 133
   (`test/recurring_schedule_test.dart`, `test/fixed_summary_test.dart`,
   `test/dashboard_fixed_test.dart`, new
   `test/transaction_delete_dialog_test.dart`); deprecated `RadioListTile`
