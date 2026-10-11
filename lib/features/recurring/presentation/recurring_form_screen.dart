@@ -613,13 +613,17 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
                 value: 'keep',
                 groupValue: value,
                 title: Text(dialogContext.l10n.recurring_delete_option_keep),
-                onChanged: (v) => setState(() => value = v ?? 'keep'),
+                onChanged: (v) {
+                  if (v != null) setState(() => value = v);
+                },
               ),
               RadioListTile<String>(
                 value: 'delete_month',
                 groupValue: value,
                 title: Text(dialogContext.l10n.recurring_delete_option_delete_month),
-                onChanged: (v) => setState(() => value = v ?? 'keep'),
+                onChanged: (v) {
+                  if (v != null) setState(() => value = v);
+                },
               ),
               const SizedBox(height: 8),
               Text(dialogContext.l10n.recurring_delete_count(count)),
@@ -655,10 +659,9 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
       ..invalidate(monthTransactionsProvider)
       ..invalidate(dashboardMonthTransactionsProvider);
     if (!mounted) return;
-    if (!mounted) return;
     final l10n = context.l10n;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(l10n.recurring_deleted)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.recurring_deleted)));
+    if (!mounted) return;
     Navigator.of(context).pop();
   }
 }
