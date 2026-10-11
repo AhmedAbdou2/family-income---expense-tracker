@@ -135,6 +135,70 @@ void main() {
     expect(summary.dueMinor, 100000);
   });
 
+  group('pausing a fixed expense', () {
+    final active = _rule(
+      frequency: RecurrenceFrequency.monthly,
+      start: DateTime(2026, 10, 10),
+      amount: 50000,
+      dayOfMonth: 10,
+    );
+    final paused = _rule(
+      frequency: RecurrenceFrequency.monthly,
+      start: DateTime(2026, 10, 10),
+      amount: 50000,
+      dayOfMonth: 10,
+      isActive: false,
+    );
+
+    test('a) a paused rule stops future postings (due -> 0)', () {
+      final summary = fixedMonthSummary(
+        rules: [paused],
+        incomeCategoryIds: const <String>{},
+        month: month,
+        today: DateTime(2026, 10, 5),
+      );
+      expect(summary.dueMinor, 0);
+      expect(summary.postedMinor, 0);
+    });
+
+    test('b) pausing drops the rule out of still-due immediately', () {
+      final before = fixedMonthSummary(
+        rules: [active],
+        incomeCategoryIds: const <String>{},
+        month: month,
+        today: DateTime(2026, 10, 5),
+      );
+      final after = fixedMonthSummary(
+        rules: [paused],
+        incomeCategoryIds: const <String>{},
+        month: month,
+        today: DateTime(2026, 10, 5),
+      );
+      expect(before.dueMinor, 50000);
+      expect(after.dueMinor, 0);
+    });
+
+    test('c) pausing leaves posted transactions untouched', () {
+      // The dashboard reads "posted" from the real transactions, never from
+      // the paused rule; pausing adds nothing to posted either.
+      final pausedPostedDay = _rule(
+        frequency: RecurrenceFrequency.monthly,
+        start: DateTime(2026, 10, 10),
+        amount: 50000,
+        dayOfMonth: 1,
+        isActive: false,
+      );
+      final summary = fixedMonthSummary(
+        rules: [pausedPostedDay],
+        incomeCategoryIds: const <String>{},
+        month: month,
+        today: DateTime(2026, 10, 20),
+      );
+      expect(summary.postedMinor, 0);
+      expect(summary.dueMinor, 0);
+    });
+  });
+
   test('yearly rule only counts its own month', () {
     final rule = _rule(
       frequency: RecurrenceFrequency.yearly,

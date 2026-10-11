@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/settings/preferences.dart';
+import '../../../core/settings/settings_controller.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_view.dart';
@@ -19,10 +20,9 @@ import '../../pets/presentation/pet_visuals.dart';
 import '../../pets/presentation/providers.dart';
 import '../../recurring/domain/entities.dart';
 import '../../recurring/presentation/providers.dart';
-import '../../vehicles/domain/entities.dart';
-import '../../vehicles/presentation/providers.dart';
 import '../domain/entities.dart';
 import 'providers.dart';
+import 'transaction_delete.dart';
 
 /// Full add/edit form. Reached from quick-add's "More options" and by
 /// tapping a row in the list (`/transactions/edit/:id`).
@@ -511,56 +511,55 @@ class _TransactionFormScreenState
   }
 
   Future<void> _delete() async {
+    final transaction = _existing;
+    if (transaction == null) return;
     final l10n = context.l10n;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(dialogContext.l10n.transaction_delete_confirm_title),
-        content: Text(
-          _existing?.recurringRuleId != null
-              ? l10n.transaction_delete_from_fixed
-              : l10n.transaction_delete_confirm_body,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(dialogContext.l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(dialogContext.l10n.delete_action),
-          ),
-        ],
-      ),
+    final languageCode = Localizations.localeOf(context).languageCode;
+    final locale = Localizations.localeOf(context).toString();
+    final categories = ref.read(categoriesProvider).value ?? const <Category>[];
+    final members = ref.read(membersProvider).value ?? const <Member>[];
+
+    var categoryName = l10n.category;
+    for (final category in categories) {
+      if (category.id == transaction.categoryId) {
+        categoryName = category.localizedName(languageCode);
+        break;
+      }
+    }
+    var personName = l10n.person;
+    for (final member in members) {
+      if (member.id == transaction.memberId) {
+        personName = member.name;
+        break;
+      }
+    }
+
+    final amountLabel = Money.format(
+      minorUnits: transaction.amountMinorUnits,
+      arabicDigits: ref.read(settingsProvider).arabicDigits,
+      currencyCode: ref.read(membershipProvider).value?.household.currency,
     );
-    if (confirmed != true || !mounted) return;
+    final fuelLinked = await isFuelLinkedTransaction(ref, transaction.id);
+    if (!mounted) return;
+    final result = await showTransactionDeleteDialog(
+      context,
+      categoryName: categoryName,
+      personLabel: personName,
+      dateLabel: DateFormat.yMMMd(locale).format(transaction.date),
+      amountLabel:
+          '${transaction.type == TransactionType.expense ? '-' : '+'} $amountLabel',
+      isExpense: transaction.type == TransactionType.expense,
+      fromFixed: transaction.recurringRuleId != null,
+      fuelLinked: fuelLinked,
+      vehicleLinked: transaction.vehicleId != null,
+    );
+    if (result == null || !result.confirmed || !mounted) return;
     try {
-      // Check for fuel log linked to this transaction
-      final fuelRepo = ref.read(fuelRepositoryProvider);
-      final logs = await ref.read(fuelLogsProvider(null).future);
-      FuelLog? linkedLog;
-      for (final log in logs) {
-        if (log.transactionId == widget.transactionId) {
-          linkedLog = log;
-          break;
-        }
-      }
-      if (linkedLog != null) {
-        await fuelRepo.deleteFuelLog(logId: linkedLog.id);
-        ref
-          ..invalidate(fuelLogsProvider(null))
-          ..invalidate(fuelLogsProvider(linkedLog.vehicleId))
-          ..invalidate(vehiclesProvider)
-          ..invalidate(monthTransactionsProvider)
-          ..invalidate(dashboardMonthTransactionsProvider);
-      } else {
-        await ref
-            .read(transactionsRepositoryProvider)
-            .deleteTransaction(id: widget.transactionId!);
-        ref
-          ..invalidate(monthTransactionsProvider)
-          ..invalidate(dashboardMonthTransactionsProvider);
-      }
+      await deleteTransactionCascade(
+        ref: ref,
+        transaction: transaction,
+        pauseRule: result.pauseRule,
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.transaction_deleted)));

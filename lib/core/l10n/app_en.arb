@@ -178,6 +178,9 @@
   "transaction_delete_confirm_title": "Delete this transaction?",
   "transaction_delete_confirm_body": "This can't be undone.",
   "transaction_delete_from_fixed": "This transaction came from a fixed expense. Deleting it will not cause regeneration.",
+  "transaction_delete_fuel_note": "The linked fuel log will also be deleted.",
+  "transaction_delete_maintenance_note": "If this expense came from completing a maintenance reminder, deleting it won't make the reminder due again.",
+  "transaction_delete_pause_rule": "Also pause this fixed expense",
   "transaction_deleted": "Transaction deleted.",
   "month_no_data": "No transactions this month.",
   "month_prev": "Previous month",
@@ -357,6 +360,8 @@
   "recurring_type_income": "Income",
   "recurring_type_expense": "Expense",
   "recurring_inactive_hint": "Paused commitments don't post.",
+  "recurring_paused_message": "Paused. Transactions already posted this month stay; delete them separately if needed.",
+  "recurring_resumed_message": "Resumed. The next occurrence is the upcoming one; the paused period isn't backfilled.",
 
   "error_invalid_vehicle": "That vehicle doesn't belong to this household.",
   "error_invalid_item": "That maintenance reminder doesn't exist.",

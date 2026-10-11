@@ -482,6 +482,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'This transaction came from a fixed expense. Deleting it will not cause regeneration.';
 
   @override
+  String get transaction_delete_fuel_note =>
+      'The linked fuel log will also be deleted.';
+
+  @override
+  String get transaction_delete_maintenance_note =>
+      'If this expense came from completing a maintenance reminder, deleting it won\'t make the reminder due again.';
+
+  @override
+  String get transaction_delete_pause_rule => 'Also pause this fixed expense';
+
+  @override
   String get transaction_deleted => 'Transaction deleted.';
 
   @override
@@ -946,6 +957,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recurring_inactive_hint => 'Paused commitments don\'t post.';
+
+  @override
+  String get recurring_paused_message =>
+      'Paused. Transactions already posted this month stay; delete them separately if needed.';
+
+  @override
+  String get recurring_resumed_message =>
+      'Resumed. The next occurrence is the upcoming one; the paused period isn\'t backfilled.';
 
   @override
   String get error_invalid_vehicle =>

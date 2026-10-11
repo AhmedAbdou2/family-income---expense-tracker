@@ -17,7 +17,9 @@ import '../../household/presentation/home_shell.dart';
 import '../../household/presentation/providers.dart';
 import '../../members/domain/entities.dart';
 import '../../members/presentation/providers.dart';
+import '../../transactions/presentation/providers.dart';
 import '../domain/entities.dart';
+import '../domain/recurring_schedule.dart';
 import 'providers.dart';
 import 'recurring_visuals.dart';
 
@@ -171,21 +173,34 @@ class _RecurringTile extends ConsumerWidget {
   }
 
   Future<void> _toggleActive(WidgetRef ref, BuildContext context) async {
+    final l10n = context.l10n;
+    final resuming = !rule.isActive;
     try {
-      await ref.read(recurringRulesRepositoryProvider).updateRule(
-            id: rule.id,
-            categoryId: rule.categoryId,
-            memberId: rule.memberId,
-            amountMinorUnits: rule.amountMinorUnits,
-            frequency: rule.frequency,
-            nextDue: rule.nextDue,
-            isActive: !rule.isActive,
-            dayOfMonth: rule.dayOfMonth,
-            name: rule.name,
-            startDate: rule.startDate,
-            endDate: rule.endDate,
-          );
-      ref.invalidate(recurringRulesProvider);
+      final repo = ref.read(recurringRulesRepositoryProvider);
+      if (resuming) {
+        final next = nextOccurrenceOnOrAfter(
+          frequency: rule.frequency,
+          start: rule.startDate,
+          dayOfMonth: rule.dayOfMonth,
+          now: DateTime.now(),
+        );
+        await repo.setRuleActive(id: rule.id, isActive: true, nextDue: next);
+      } else {
+        await repo.setRuleActive(id: rule.id, isActive: false);
+      }
+      ref
+        ..invalidate(recurringRulesProvider)
+        ..invalidate(monthTransactionsProvider)
+        ..invalidate(dashboardMonthTransactionsProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              resuming ? l10n.recurring_resumed_message : l10n.recurring_paused_message,
+            ),
+          ),
+        );
+      }
     } catch (error) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)

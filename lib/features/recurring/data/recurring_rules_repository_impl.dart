@@ -175,6 +175,22 @@ class RecurringRulesRepositoryImpl implements RecurringRulesRepository {
   }
 
   @override
+  Future<void> setRuleActive({
+    required String id,
+    required bool isActive,
+    DateTime? nextDue,
+  }) async {
+    try {
+      await _client.from('recurring_rules').update({
+        'is_active': isActive,
+        if (nextDue != null) 'next_due': _dateKey(nextDue),
+      }).eq('id', id);
+    } catch (error) {
+      throw ExceptionMapper.map(error);
+    }
+  }
+
+  @override
   Future<int> generateDue() async {
     try {
       final result =

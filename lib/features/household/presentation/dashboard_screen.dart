@@ -18,6 +18,7 @@ import '../../recurring/domain/fixed_summary.dart';
 import '../../recurring/presentation/providers.dart';
 import '../../transactions/domain/entities.dart';
 import '../../transactions/presentation/providers.dart';
+import '../../transactions/presentation/transaction_delete.dart';
 import '../domain/entities.dart';
 import 'home_shell.dart';
 import 'providers.dart';
@@ -480,7 +481,10 @@ class _RecentTile extends ConsumerWidget {
     return Dismissible(
       key: Key('dashboard_${transaction.id}'),
       direction: DismissDirection.endToStart,
-      confirmDismiss: (direction) => _confirmDelete(context),
+      confirmDismiss: (direction) async {
+        await _confirmAndDelete(context, ref);
+        return false;
+      },
       background: Container(
         color: Theme.of(context).colorScheme.errorContainer,
         alignment: AlignmentDirectional.centerEnd,
@@ -488,7 +492,6 @@ class _RecentTile extends ConsumerWidget {
         child: Icon(Icons.delete_outline_rounded,
             color: Theme.of(context).colorScheme.onErrorContainer),
       ),
-      onDismissed: (_) => _delete(context, ref),
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: color.withValues(alpha: 0.18),
@@ -511,12 +514,7 @@ class _RecentTile extends ConsumerWidget {
             IconButton(
               tooltip: context.l10n.delete_action,
               icon: const Icon(Icons.delete_outline_rounded),
-              onPressed: () async {
-                final confirmed = await _confirmDelete(context);
-                if (confirmed == true && context.mounted) {
-                  await _delete(context, ref);
-                }
-              },
+              onPressed: () => _confirmAndDelete(context, ref),
             ),
           ],
         ),
@@ -525,40 +523,37 @@ class _RecentTile extends ConsumerWidget {
     );
   }
 
-  Future<bool?> _confirmDelete(BuildContext context) async {
-    final l10n = context.l10n;
-    String content = l10n.transaction_delete_confirm_body;
-    if (transaction.recurringRuleId != null) {
-      content = l10n.transaction_delete_from_fixed;
-    }
-    return showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(dialogContext.l10n.transaction_delete_confirm_title),
-        content: Text(content),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(dialogContext.l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(dialogContext.l10n.delete_action),
-          ),
-        ],
-      ),
+  Future<void> _confirmAndDelete(BuildContext context, WidgetRef ref) async {
+    final fuelLinked = await isFuelLinkedTransaction(ref, transaction.id);
+    if (!context.mounted) return;
+    final locale = Localizations.localeOf(context).toString();
+    final result = await showTransactionDeleteDialog(
+      context,
+      categoryName: categoryName,
+      personLabel: memberName,
+      dateLabel: DateFormat.yMMMd(locale).format(transaction.date),
+      amountLabel: label,
+      isExpense: transaction.type == TransactionType.expense,
+      fromFixed: transaction.recurringRuleId != null,
+      fuelLinked: fuelLinked,
+      vehicleLinked: transaction.vehicleId != null,
     );
+    if (result == null || !result.confirmed || !context.mounted) return;
+    await _delete(context, ref, pauseRule: result.pauseRule);
   }
 
-  Future<void> _delete(BuildContext context, WidgetRef ref) async {
+  Future<void> _delete(
+    BuildContext context,
+    WidgetRef ref, {
+    bool pauseRule = false,
+  }) async {
     final l10n = context.l10n;
     try {
-      await ref
-          .read(transactionsRepositoryProvider)
-          .deleteTransaction(id: transaction.id);
-      ref
-        ..invalidate(monthTransactionsProvider)
-        ..invalidate(dashboardMonthTransactionsProvider);
+      await deleteTransactionCascade(
+        ref: ref,
+        transaction: transaction,
+        pauseRule: pauseRule,
+      );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.transaction_deleted)),

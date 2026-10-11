@@ -485,6 +485,17 @@ class AppLocalizationsAr extends AppLocalizations {
       'نشأت هذه المعاملة من مصروف ثابت. الحذف لن يؤدي إلى إعادة إنشائها.';
 
   @override
+  String get transaction_delete_fuel_note =>
+      'سيتم حذف سجل التزود بالوقود المرتبط أيضًا.';
+
+  @override
+  String get transaction_delete_maintenance_note =>
+      'إذا نشأ هذا المصروف من إكمال تذكير صيانة، فحذفه لن يُعيد التذكير كمستحق.';
+
+  @override
+  String get transaction_delete_pause_rule => 'أوقف هذا المصروف الثابت أيضًا';
+
+  @override
   String get transaction_deleted => 'تم حذف المعاملة.';
 
   @override
@@ -939,6 +950,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get recurring_inactive_hint => 'الالتزامات الموقوفة لا تُرحَّل.';
+
+  @override
+  String get recurring_paused_message =>
+      'تم الإيقاف. تبقى المعاملات المُدرجة هذا الشهر؛ احذفها منفصلة عند الحاجة.';
+
+  @override
+  String get recurring_resumed_message =>
+      'تم التشغيل. ستكون الحركة القادمة هي التالية؛ لن يتم ترحيل فترة الإيقاف.';
 
   @override
   String get error_invalid_vehicle => 'هذه السيارة لا تنتمي إلى هذا المنزل.';

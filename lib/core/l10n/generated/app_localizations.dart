@@ -998,6 +998,24 @@ abstract class AppLocalizations {
   /// **'This transaction came from a fixed expense. Deleting it will not cause regeneration.'**
   String get transaction_delete_from_fixed;
 
+  /// No description provided for @transaction_delete_fuel_note.
+  ///
+  /// In en, this message translates to:
+  /// **'The linked fuel log will also be deleted.'**
+  String get transaction_delete_fuel_note;
+
+  /// No description provided for @transaction_delete_maintenance_note.
+  ///
+  /// In en, this message translates to:
+  /// **'If this expense came from completing a maintenance reminder, deleting it won\'t make the reminder due again.'**
+  String get transaction_delete_maintenance_note;
+
+  /// No description provided for @transaction_delete_pause_rule.
+  ///
+  /// In en, this message translates to:
+  /// **'Also pause this fixed expense'**
+  String get transaction_delete_pause_rule;
+
   /// No description provided for @transaction_deleted.
   ///
   /// In en, this message translates to:
@@ -1843,6 +1861,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Paused commitments don\'t post.'**
   String get recurring_inactive_hint;
+
+  /// No description provided for @recurring_paused_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused. Transactions already posted this month stay; delete them separately if needed.'**
+  String get recurring_paused_message;
+
+  /// No description provided for @recurring_resumed_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Resumed. The next occurrence is the upcoming one; the paused period isn\'t backfilled.'**
+  String get recurring_resumed_message;
 
   /// No description provided for @error_invalid_vehicle.
   ///

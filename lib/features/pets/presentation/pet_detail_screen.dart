@@ -12,8 +12,11 @@ import '../../../core/widgets/loading_view.dart';
 import '../../categories/presentation/category_visuals.dart';
 import '../../categories/presentation/providers.dart';
 import '../../household/presentation/providers.dart';
+import '../../members/domain/entities.dart';
+import '../../members/presentation/providers.dart';
 import '../../transactions/domain/entities.dart';
 import '../../transactions/presentation/providers.dart';
+import '../../transactions/presentation/transaction_delete.dart';
 import '../domain/entities.dart';
 import 'pet_visuals.dart';
 import 'providers.dart';
@@ -301,7 +304,7 @@ class _PetHeaderCard extends StatelessWidget {
   }
 }
 
-class _PetExpenseTile extends StatelessWidget {
+class _PetExpenseTile extends ConsumerWidget {
   const _PetExpenseTile({
     required this.transaction,
     required this.categoryName,
@@ -319,27 +322,97 @@ class _PetExpenseTile extends StatelessWidget {
   final String date;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isExpense = transaction.type == TransactionType.expense;
     final color = colorFromHex(colorHex);
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: color.withValues(alpha: 0.18),
-        child: Icon(icon, color: color, size: 20),
+    return Dismissible(
+      key: Key('pet_${transaction.id}'),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) async {
+        await _confirmAndDelete(context, ref);
+        return false;
+      },
+      background: Container(
+        color: Theme.of(context).colorScheme.errorContainer,
+        alignment: AlignmentDirectional.centerEnd,
+        padding: const EdgeInsetsDirectional.only(end: 16),
+        child: Icon(Icons.delete_outline_rounded,
+            color: Theme.of(context).colorScheme.onErrorContainer),
       ),
-      title: Text(categoryName),
-      subtitle: Text(date),
-      trailing: Text(
-        '${isExpense ? '-' : '+'} $amountLabel',
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          color: isExpense
-              ? Theme.of(context).colorScheme.error
-              : Theme.of(context).colorScheme.primary,
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: color.withValues(alpha: 0.18),
+          child: Icon(icon, color: color, size: 20),
         ),
+        title: Text(categoryName),
+        subtitle: Text(date),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '${isExpense ? '-' : '+'} $amountLabel',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: isExpense
+                    ? Theme.of(context).colorScheme.error
+                    : Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            IconButton(
+              tooltip: context.l10n.delete_action,
+              icon: const Icon(Icons.delete_outline_rounded),
+              onPressed: () => _confirmAndDelete(context, ref),
+            ),
+          ],
+        ),
+        onTap: () => context.push('/transactions/edit/${transaction.id}'),
       ),
-      onTap: () => context.push('/transactions/edit/${transaction.id}'),
     );
+  }
+
+  Future<void> _confirmAndDelete(BuildContext context, WidgetRef ref) async {
+    final members = ref.read(membersProvider).value ?? const <Member>[];
+    var personName = context.l10n.person;
+    for (final member in members) {
+      if (member.id == transaction.memberId) {
+        personName = member.name;
+        break;
+      }
+    }
+    final fuelLinked = await isFuelLinkedTransaction(ref, transaction.id);
+    if (!context.mounted) return;
+    final result = await showTransactionDeleteDialog(
+      context,
+      categoryName: categoryName,
+      personLabel: personName,
+      dateLabel: date,
+      amountLabel:
+          '${transaction.type == TransactionType.expense ? '-' : '+'} $amountLabel',
+      isExpense: transaction.type == TransactionType.expense,
+      fromFixed: transaction.recurringRuleId != null,
+      fuelLinked: fuelLinked,
+      vehicleLinked: transaction.vehicleId != null,
+    );
+    if (result == null || !result.confirmed || !context.mounted) return;
+    final l10n = context.l10n;
+    try {
+      await deleteTransactionCascade(
+        ref: ref,
+        transaction: transaction,
+        pauseRule: result.pauseRule,
+      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.transaction_deleted)),
+        );
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage(context, error))),
+        );
+      }
+    }
   }
 }
 

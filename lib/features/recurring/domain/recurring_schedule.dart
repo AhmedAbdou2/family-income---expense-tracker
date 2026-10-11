@@ -82,6 +82,56 @@ DateTime resolveNextDue({
   );
 }
 
+/// The FIRST occurrence on or after [now] for a rule being resumed.
+///
+/// Advancing the cursor this way means a paused rule never backfills the
+/// period it was paused: resuming continues from the next occurrence today
+/// or later.
+DateTime nextOccurrenceOnOrAfter({
+  required RecurrenceFrequency frequency,
+  DateTime? start,
+  int? dayOfMonth,
+  required DateTime now,
+}) {
+  final today = dateOnly(now);
+  switch (frequency) {
+    case RecurrenceFrequency.monthly:
+      final day = dayOfMonth ?? start?.day ?? today.day;
+      final thisMonth = DateTime(
+        today.year,
+        today.month,
+        day.clamp(1, daysInMonth(today.year, today.month)),
+      );
+      if (!thisMonth.isBefore(today)) return thisMonth;
+      final next = DateTime(today.year, today.month + 1);
+      return DateTime(
+        next.year,
+        next.month,
+        day.clamp(1, daysInMonth(next.year, next.month)),
+      );
+    case RecurrenceFrequency.weekly:
+      final anchor = dateOnly(start ?? today);
+      if (anchor.isAfter(today)) return anchor;
+      final steps = (today.difference(anchor).inDays / 7).ceil();
+      return anchor.add(Duration(days: steps * 7));
+    case RecurrenceFrequency.yearly:
+      final anchor = start ?? today;
+      var candidate = DateTime(
+        today.year,
+        anchor.month,
+        anchor.day.clamp(1, daysInMonth(today.year, anchor.month)),
+      );
+      if (candidate.isBefore(today)) {
+        candidate = DateTime(
+          today.year + 1,
+          anchor.month,
+          anchor.day.clamp(1, daysInMonth(today.year + 1, anchor.month)),
+        );
+      }
+      return candidate;
+  }
+}
+
 /// Occurrence dates of [rule] that fall inside [month].
 ///
 /// Monthly rules compare by MONTH (not by the exact day), so an occurrence

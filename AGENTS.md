@@ -32,7 +32,7 @@ Flutter (Riverpod 3, go_router 18, Supabase) + Postgres with RLS.
 ```sh
 flutter gen-l10n        # only if .arb files changed
 flutter analyze         # must be clean
-flutter test            # must pass (119 tests)
+flutter test            # must pass (132 tests)
 flutter build web --release   # compile check; ~3-4 min
 ```
 
@@ -316,4 +316,24 @@ owner can delete the leftover unlinked person from the Family tab.
   (`test/recurring_schedule_test.dart`, `test/dashboard_fixed_test.dart`,
   extended `test/fixed_summary_test.dart`); generator re-validated in Docker
   (3 posted incl. catch-up, no backfill, second call 0).
+- Fix (delete + pause of fixed expenses): "Fixed" renamed to "Fixed
+  expenses" (AR المصروفات الثابتة) with a short bottom-bar label
+  (`nav_fixed_short`) that fits 360px. Any transaction row (transactions
+  list, dashboard recent, person profile, pet detail, edit form) can now be
+  deleted via swipe or action, using one shared rich dialog
+  (`transaction_delete.dart`) that shows category/person/amount/date, notes
+  the fuel-log cascade, warns a maintenance reminder is not un-completed,
+  and — for fixed-expense postings — offers an optional "Also pause this
+  fixed expense" checkbox (default off). Deleting a recurring-generated
+  transaction never regenerates (proven in Docker: 1,1,0,0,0,0 with a rule
+  edit in between). Fuel-linked deletes go through `delete_fuel_log`;
+  provider invalidation refreshes every derived figure. Pausing a rule now
+  writes `is_active=false` via `setRuleActive` and drops it from "Still due"
+  immediately; resuming advances `next_due` with the new pure
+  `nextOccurrenceOnOrAfter` so the paused period is not backfilled (Docker:
+  0,1,1,0,1). No DB change. Tests 132
+  (`test/recurring_schedule_test.dart`, `test/fixed_summary_test.dart`,
+  `test/dashboard_fixed_test.dart`, new
+  `test/transaction_delete_dialog_test.dart`); deprecated `RadioListTile`
+  migrated to `RadioGroup`.
 - Phase 4: reports/charts/CSV export/polish.

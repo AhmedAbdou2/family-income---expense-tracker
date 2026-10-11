@@ -40,6 +40,14 @@ abstract interface class RecurringRulesRepository {
 
   Future<void> deleteRule({required String id});
 
+  /// Pauses or resumes a rule. When resuming, [nextDue] advances the cursor
+  /// so the paused period is not backfilled.
+  Future<void> setRuleActive({
+    required String id,
+    required bool isActive,
+    DateTime? nextDue,
+  });
+
   /// Generate every due occurrence for the caller's households. Returns
   /// how many transactions were created (0 when nothing was due). Safe to
   /// call on every app open - duplicates are impossible.

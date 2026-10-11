@@ -162,6 +162,9 @@
   "transaction_delete_confirm_title": "حذف هذه المعاملة؟",
   "transaction_delete_confirm_body": "لا يمكن التراجع عن هذا الإجراء.",
   "transaction_delete_from_fixed": "نشأت هذه المعاملة من مصروف ثابت. الحذف لن يؤدي إلى إعادة إنشائها.",
+  "transaction_delete_fuel_note": "سيتم حذف سجل التزود بالوقود المرتبط أيضًا.",
+  "transaction_delete_maintenance_note": "إذا نشأ هذا المصروف من إكمال تذكير صيانة، فحذفه لن يُعيد التذكير كمستحق.",
+  "transaction_delete_pause_rule": "أوقف هذا المصروف الثابت أيضًا",
   "transaction_deleted": "تم حذف المعاملة.",
   "month_no_data": "لا توجد معاملات في هذا الشهر.",
   "month_prev": "الشهر السابق",
@@ -326,6 +329,8 @@
   "recurring_type_income": "دخل",
   "recurring_type_expense": "مصروف",
   "recurring_inactive_hint": "الالتزامات الموقوفة لا تُرحَّل.",
+  "recurring_paused_message": "تم الإيقاف. تبقى المعاملات المُدرجة هذا الشهر؛ احذفها منفصلة عند الحاجة.",
+  "recurring_resumed_message": "تم التشغيل. ستكون الحركة القادمة هي التالية؛ لن يتم ترحيل فترة الإيقاف.",
 
   "error_invalid_vehicle": "هذه السيارة لا تنتمي إلى هذا المنزل.",
   "error_invalid_item": "تذكير الصيانة هذا غير موجود.",

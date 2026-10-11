@@ -160,6 +160,78 @@ void main() {
     });
   });
 
+  group('nextOccurrenceOnOrAfter (resume does not backfill the pause)', () {
+    test('monthly resumes on the next day-of-month on or after today', () {
+      expect(
+        nextOccurrenceOnOrAfter(
+          frequency: RecurrenceFrequency.monthly,
+          start: DateTime(2026, 8, 20),
+          dayOfMonth: 20,
+          now: now,
+        ),
+        DateTime(2026, 10, 20),
+      );
+    });
+
+    test('monthly with a day already passed resumes next month', () {
+      expect(
+        nextOccurrenceOnOrAfter(
+          frequency: RecurrenceFrequency.monthly,
+          start: DateTime(2026, 8, 3),
+          dayOfMonth: 3,
+          now: now,
+        ),
+        DateTime(2026, 11, 3),
+      );
+    });
+
+    test('monthly on exactly today keeps today', () {
+      expect(
+        nextOccurrenceOnOrAfter(
+          frequency: RecurrenceFrequency.monthly,
+          start: DateTime(2026, 8, 10),
+          dayOfMonth: 10,
+          now: now,
+        ),
+        DateTime(2026, 10, 10),
+      );
+    });
+
+    test('weekly resumes on the next 7-day step, not the paused anchor', () {
+      // Anchor Oct 1; paused through Oct 10 -> next step is Oct 15.
+      expect(
+        nextOccurrenceOnOrAfter(
+          frequency: RecurrenceFrequency.weekly,
+          start: DateTime(2026, 10, 1),
+          now: now,
+        ),
+        DateTime(2026, 10, 15),
+      );
+    });
+
+    test('yearly resumes this year when the date is still ahead', () {
+      expect(
+        nextOccurrenceOnOrAfter(
+          frequency: RecurrenceFrequency.yearly,
+          start: DateTime(2020, 12, 25),
+          now: now,
+        ),
+        DateTime(2026, 12, 25),
+      );
+    });
+
+    test('yearly resumes next year when this year has passed', () {
+      expect(
+        nextOccurrenceOnOrAfter(
+          frequency: RecurrenceFrequency.yearly,
+          start: DateTime(2020, 3, 15),
+          now: now,
+        ),
+        DateTime(2027, 3, 15),
+      );
+    });
+  });
+
   group('occurrencesInMonth', () {
     test('monthly compares by month, so a day before start still counts', () {
       final rule = _rule(

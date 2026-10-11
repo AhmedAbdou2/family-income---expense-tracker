@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart' show DateFormat;
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/settings/settings_controller.dart';
@@ -14,6 +15,7 @@ import '../../household/presentation/providers.dart';
 import '../../household/presentation/role_badge.dart';
 import '../../transactions/domain/entities.dart';
 import '../../transactions/presentation/providers.dart';
+import '../../transactions/presentation/transaction_delete.dart';
 import '../domain/entities.dart';
 import 'providers.dart';
 
@@ -229,6 +231,7 @@ class ProfileScreen extends ConsumerWidget {
                     for (final transaction in rows.take(10))
                       _RecentTile(
                         transaction: transaction,
+                        personName: person.name,
                         label: label(
                           transaction.amountMinorUnits,
                           sign: transaction.type == TransactionType.expense
@@ -319,6 +322,7 @@ class _StatCard extends StatelessWidget {
 class _RecentTile extends ConsumerWidget {
   const _RecentTile({
     required this.transaction,
+    required this.personName,
     required this.label,
     required this.categoryName,
     required this.colorHex,
@@ -326,6 +330,7 @@ class _RecentTile extends ConsumerWidget {
   });
 
   final Transaction transaction;
+  final String personName;
   final String label;
   final String categoryName;
   final String colorHex;
@@ -338,7 +343,10 @@ class _RecentTile extends ConsumerWidget {
     return Dismissible(
       key: Key('profile_${transaction.id}'),
       direction: DismissDirection.endToStart,
-      confirmDismiss: (direction) => _confirmDelete(context),
+      confirmDismiss: (direction) async {
+        await _confirmAndDelete(context, ref);
+        return false;
+      },
       background: Container(
         color: Theme.of(context).colorScheme.errorContainer,
         alignment: AlignmentDirectional.centerEnd,
@@ -346,7 +354,6 @@ class _RecentTile extends ConsumerWidget {
         child: Icon(Icons.delete_outline_rounded,
             color: Theme.of(context).colorScheme.onErrorContainer),
       ),
-      onDismissed: (_) => _delete(context, ref),
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: color.withValues(alpha: 0.18),
@@ -368,12 +375,7 @@ class _RecentTile extends ConsumerWidget {
             IconButton(
               tooltip: context.l10n.delete_action,
               icon: const Icon(Icons.delete_outline_rounded),
-              onPressed: () async {
-                final confirmed = await _confirmDelete(context);
-                if (confirmed == true && context.mounted) {
-                  await _delete(context, ref);
-                }
-              },
+              onPressed: () => _confirmAndDelete(context, ref),
             ),
           ],
         ),
@@ -382,41 +384,37 @@ class _RecentTile extends ConsumerWidget {
     );
   }
 
-  Future<bool?> _confirmDelete(BuildContext context) async {
-    final l10n = context.l10n;
-    String content = l10n.transaction_delete_confirm_body;
-    if (transaction.recurringRuleId != null) {
-      content = l10n.transaction_delete_from_fixed;
-    }
-    return showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(dialogContext.l10n.transaction_delete_confirm_title),
-        content: Text(content),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(dialogContext.l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(dialogContext.l10n.delete_action),
-          ),
-        ],
-      ),
+  Future<void> _confirmAndDelete(BuildContext context, WidgetRef ref) async {
+    final fuelLinked = await isFuelLinkedTransaction(ref, transaction.id);
+    if (!context.mounted) return;
+    final locale = Localizations.localeOf(context).toString();
+    final result = await showTransactionDeleteDialog(
+      context,
+      categoryName: categoryName,
+      personLabel: personName,
+      dateLabel: DateFormat.yMMMd(locale).format(transaction.date),
+      amountLabel: label,
+      isExpense: transaction.type == TransactionType.expense,
+      fromFixed: transaction.recurringRuleId != null,
+      fuelLinked: fuelLinked,
+      vehicleLinked: transaction.vehicleId != null,
     );
+    if (result == null || !result.confirmed || !context.mounted) return;
+    await _delete(context, ref, pauseRule: result.pauseRule);
   }
 
-  Future<void> _delete(BuildContext context, WidgetRef ref) async {
+  Future<void> _delete(
+    BuildContext context,
+    WidgetRef ref, {
+    bool pauseRule = false,
+  }) async {
     final l10n = context.l10n;
     try {
-      await ref
-          .read(transactionsRepositoryProvider)
-          .deleteTransaction(id: transaction.id);
-      ref
-        ..invalidate(monthTransactionsProvider)
-        ..invalidate(dashboardMonthTransactionsProvider)
-        ..invalidate(memberMonthTransactionsProvider(transaction.memberId));
+      await deleteTransactionCascade(
+        ref: ref,
+        transaction: transaction,
+        pauseRule: pauseRule,
+      );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.transaction_deleted)),

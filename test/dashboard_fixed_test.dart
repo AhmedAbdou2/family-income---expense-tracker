@@ -175,4 +175,130 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets(
+      'deleting the posted fixed transaction recomputes expenses and remaining '
+      'without touching the still-due figure', (tester) async {
+    final now = DateTime.now();
+    final monthStart = DateTime(now.year, now.month, 1);
+
+    final rule = RecurringRule(
+      id: 'r1',
+      householdId: 'h1',
+      categoryId: 'cat-exp',
+      memberId: 'm1',
+      amountMinorUnits: 20000,
+      frequency: RecurrenceFrequency.monthly,
+      nextDue: monthStart,
+      isActive: true,
+      dayOfMonth: 1,
+      startDate: monthStart,
+    );
+    // The posted fixed row (t2) has been deleted, so only income + a manual
+    // expense remain.
+    final transactions = <Transaction>[
+      Transaction(
+        id: 't1',
+        householdId: 'h1',
+        type: TransactionType.income,
+        amountMinorUnits: 100000,
+        categoryId: 'cat-inc',
+        memberId: 'm1',
+        date: monthStart,
+      ),
+      Transaction(
+        id: 't3',
+        householdId: 'h1',
+        type: TransactionType.expense,
+        amountMinorUnits: 1000,
+        categoryId: 'cat-exp',
+        memberId: 'm1',
+        date: monthStart,
+      ),
+    ];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          settingsProvider.overrideWith(_TestSettings.new),
+          membershipProvider.overrideWith(
+            (ref) async => const Membership(
+              household: Household(id: 'h1', name: 'Home', currency: 'EGP'),
+              role: MemberRole.owner,
+            ),
+          ),
+          recurringRulesRepositoryProvider
+              .overrideWithValue(_FakeRecurringRepo()),
+          recurringRulesProvider.overrideWith((ref) async => [rule]),
+          categoriesProvider.overrideWith(
+            (ref) async => const [
+              Category(
+                id: 'cat-inc',
+                householdId: 'h1',
+                group: CategoryGroup.income,
+                nameEn: 'Salary',
+                nameAr: 'راتب',
+              ),
+              Category(
+                id: 'cat-exp',
+                householdId: 'h1',
+                group: CategoryGroup.general,
+                nameEn: 'Food',
+                nameAr: 'طعام',
+              ),
+            ],
+          ),
+          membersProvider.overrideWith(
+            (ref) async => const [
+              Member(
+                id: 'm1',
+                householdId: 'h1',
+                name: 'Alex',
+                isActive: true,
+                userId: 'u1',
+              ),
+            ],
+          ),
+          dashboardMonthTransactionsProvider
+              .overrideWith((ref) async => transactions),
+        ],
+        child: const MaterialApp(
+          locale: Locale('en'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          home: DashboardScreen(),
+        ),
+      ),
+    );
+
+    for (var i = 0; i < 12; i++) {
+      await tester.pump(const Duration(milliseconds: 40));
+    }
+
+    // 1000.00 income, no posted fixed left, nothing still due -> remaining
+    // 1000.00 and expenses only the 10.00 manual row. (The 1000.00 appears
+    // twice: the income stat and the "left after fixed" stat.)
+    expect(
+      find.text(Money.format(minorUnits: 100000, currencyCode: 'EGP')),
+      findsNWidgets(2),
+    );
+    expect(
+      find.text(Money.format(minorUnits: 1000, currencyCode: 'EGP')),
+      findsOneWidget,
+    );
+    // The 150.00/160.00 figures from the other scenario must be gone.
+    expect(
+      find.text(Money.format(minorUnits: 85000, currencyCode: 'EGP')),
+      findsNothing,
+    );
+    expect(
+      find.text(Money.format(minorUnits: 16000, currencyCode: 'EGP')),
+      findsNothing,
+    );
+  });
 }

@@ -597,7 +597,7 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
       }
     }
     String value = 'keep';
-    if (!mounted) return;
+    if (!context.mounted) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
@@ -609,21 +609,26 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
             children: [
               Text(dialogContext.l10n.recurring_delete_confirm_body),
               const SizedBox(height: 12),
-              RadioListTile<String>(
-                value: 'keep',
+              RadioGroup<String>(
                 groupValue: value,
-                title: Text(dialogContext.l10n.recurring_delete_option_keep),
                 onChanged: (v) {
                   if (v != null) setState(() => value = v);
                 },
-              ),
-              RadioListTile<String>(
-                value: 'delete_month',
-                groupValue: value,
-                title: Text(dialogContext.l10n.recurring_delete_option_delete_month),
-                onChanged: (v) {
-                  if (v != null) setState(() => value = v);
-                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    RadioListTile<String>(
+                      value: 'keep',
+                      title:
+                          Text(dialogContext.l10n.recurring_delete_option_keep),
+                    ),
+                    RadioListTile<String>(
+                      value: 'delete_month',
+                      title: Text(dialogContext
+                          .l10n.recurring_delete_option_delete_month),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 8),
               Text(dialogContext.l10n.recurring_delete_count(count)),
@@ -642,7 +647,7 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
         ),
       ),
     );
-    if (confirmed != true || !mounted) return;
+    if (confirmed != true || !context.mounted) return;
     // If delete_month, delete this month's posted transactions from this rule
     if (value == 'delete_month') {
       for (final tx in transactions) {
@@ -658,10 +663,10 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
       ..invalidate(recurringRulesProvider)
       ..invalidate(monthTransactionsProvider)
       ..invalidate(dashboardMonthTransactionsProvider);
-    if (!mounted) return;
+    if (!context.mounted) return;
     final l10n = context.l10n;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.recurring_deleted)));
-    if (!mounted) return;
+    if (!context.mounted) return;
     Navigator.of(context).pop();
   }
 }
