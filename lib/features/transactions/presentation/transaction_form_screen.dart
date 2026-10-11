@@ -19,6 +19,8 @@ import '../../pets/presentation/pet_visuals.dart';
 import '../../pets/presentation/providers.dart';
 import '../../recurring/domain/entities.dart';
 import '../../recurring/presentation/providers.dart';
+import '../../vehicles/domain/entities.dart';
+import '../../vehicles/presentation/providers.dart';
 import '../domain/entities.dart';
 import 'providers.dart';
 
@@ -514,7 +516,11 @@ class _TransactionFormScreenState
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(dialogContext.l10n.transaction_delete_confirm_title),
-        content: Text(dialogContext.l10n.transaction_delete_confirm_body),
+        content: Text(
+          _existing?.recurringRuleId != null
+              ? l10n.transaction_delete_from_fixed
+              : l10n.transaction_delete_confirm_body,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -529,12 +535,32 @@ class _TransactionFormScreenState
     );
     if (confirmed != true || !mounted) return;
     try {
-      await ref
-          .read(transactionsRepositoryProvider)
-          .deleteTransaction(id: widget.transactionId!);
-      ref
-        ..invalidate(monthTransactionsProvider)
-        ..invalidate(dashboardMonthTransactionsProvider);
+      // Check for fuel log linked to this transaction
+      final fuelRepo = ref.read(fuelRepositoryProvider);
+      final logs = await ref.read(fuelLogsProvider(null).future);
+      FuelLog? linkedLog;
+      for (final log in logs) {
+        if (log.transactionId == widget.transactionId) {
+          linkedLog = log;
+          break;
+        }
+      }
+      if (linkedLog != null) {
+        await fuelRepo.deleteFuelLog(logId: linkedLog.id);
+        ref
+          ..invalidate(fuelLogsProvider(null))
+          ..invalidate(fuelLogsProvider(linkedLog.vehicleId))
+          ..invalidate(vehiclesProvider)
+          ..invalidate(monthTransactionsProvider)
+          ..invalidate(dashboardMonthTransactionsProvider);
+      } else {
+        await ref
+            .read(transactionsRepositoryProvider)
+            .deleteTransaction(id: widget.transactionId!);
+        ref
+          ..invalidate(monthTransactionsProvider)
+          ..invalidate(dashboardMonthTransactionsProvider);
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.transaction_deleted)));
