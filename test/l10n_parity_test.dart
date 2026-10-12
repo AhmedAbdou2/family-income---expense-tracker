@@ -42,14 +42,75 @@ void main() {
     expect(loadArb('lib/core/l10n/app_ar.arb')['@@locale'], 'ar');
   });
 
-  /// Every `{placeholder}` in a message (works for plain `{currency}` and for
-  /// `{count, plural, ...}` alike).
+  /// Every argument a message actually references. Works for plain
+  /// `{currency}`, `{count, plural, ...}` and `{code, select, ...}`: the
+  /// literal text inside a `plural`/`select` branch (`EUR{Euro}` is the word
+  /// "Euro", not a placeholder) is skipped, while arguments nested in a branch
+  /// body (`other{{count}}`) are still collected.
   Set<String> placeholders(Object? value) {
     if (value is! String) return const {};
-    return RegExp(r'\{([a-zA-Z_][a-zA-Z0-9_]*)\s*[,}]')
-        .allMatches(value)
-        .map((match) => match.group(1)!)
-        .toSet();
+    final found = <String>{};
+    final head = RegExp(r'\{([a-zA-Z_][a-zA-Z0-9_]*)\s*([,}])');
+
+    // Reads the argument or literal token starting at `start` (which points at
+    // a `{`), and returns the index just past it.
+    int read(String s, int start) {
+      final match = head.matchAsPrefix(s, start);
+      if (match == null) return start + 1;
+      found.add(match.group(1)!);
+      if (match.group(2) == '}') return match.end;
+
+      final typed = RegExp(r'\s*([a-zA-Z]+)\s*,').matchAsPrefix(s, match.end)!;
+      final type = typed.group(1)!;
+      var i = typed.end;
+      if (type == 'select' || type == 'plural' || type == 'selectordinal') {
+        // Branches look like `key{body}` repeated until the construct closes.
+        while (i < s.length && s[i] != '}') {
+          while (i < s.length && s[i] != '{') {
+            i++;
+          }
+          if (i >= s.length) break;
+          i++; // into the branch body
+          var closed = false;
+          while (i < s.length) {
+            if (s[i] == '{') {
+              i = read(s, i);
+              continue;
+            }
+            if (s[i] == '}') {
+              i++;
+              closed = true;
+              break;
+            }
+            i++;
+          }
+          if (!closed) break;
+        }
+        if (i < s.length && s[i] == '}') i++;
+        return i;
+      }
+      // Any other typed argument ({n, number}, ...) has no branch bodies.
+      var depth = 1;
+      while (i < s.length && depth > 0) {
+        if (s[i] == '{') {
+          depth++;
+        } else if (s[i] == '}') {
+          depth--;
+        }
+        i++;
+      }
+      return i;
+    }
+
+    var i = 0;
+    while (i < value.length) {
+      if (value[i] == '{') {
+        i = read(value, i);
+        continue;
+      }
+      i++;
+    }
+    return found;
   }
 
   test('placeholders match between the two languages', () {

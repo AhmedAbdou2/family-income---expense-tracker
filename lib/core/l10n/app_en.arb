@@ -30,6 +30,10 @@
   "household_name": "Household name",
   "household_name_hint": "e.g. Al-Ahmed family",
   "currency": "Currency",
+  "currency_name": "{code, select, SAR{Saudi Riyal} AED{UAE Dirham} EGP{Egyptian Pound} KWD{Kuwaiti Dinar} QAR{Qatari Riyal} OMR{Omani Rial} BHD{Bahraini Dinar} JOD{Jordanian Dinar} IQD{Iraqi Dinar} YER{Yemeni Rial} SDG{Sudanese Pound} MAD{Moroccan Dirham} TND{Tunisian Dinar} DZD{Algerian Dinar} LBP{Lebanese Pound} SYP{Syrian Pound} TRY{Turkish Lira} USD{US Dollar} EUR{Euro} GBP{British Pound} other{{code}}}",
+  "@currency_name": {
+    "placeholders": { "code": { "type": "String" } }
+  },
   "invite_code": "Invite code",
   "invite_code_hint": "e.g. A1B2C3",
   "invalid_invite_code": "Enter the 6-character invite code",
@@ -193,6 +197,7 @@
   "quick_add_title": "Quick add",
   "quick_add_more": "More options",
 
+  "dashboard_income": "Income",
   "dashboard_expenses": "Expenses",
   "dashboard_balance": "Balance",
   "dashboard_recent": "Recent",
@@ -423,7 +428,7 @@
   "dashboard_after_fixed": "Left after fixed",
   "dashboard_expenses_help": "All expenses this month, including posted fixed ones.",
   "dashboard_fixed_posted_help": "Fixed commitments already posted this month.",
-  "dashboard_fixed_due_help": "Fixed commitments still to post later this month.",
+  "dashboard_fixed_due_help": "Fixed commitments still due later this month.",
   "dashboard_after_fixed_help": "Income minus posted and still-due fixed commitments.",
   "error_invalid_pet": "That pet doesn't belong to this household.",
   "error_invalid_rule": "That fixed expense doesn't exist.",

@@ -260,6 +260,12 @@ abstract class AppLocalizations {
   /// **'Currency'**
   String get currency;
 
+  /// No description provided for @currency_name.
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, SAR{Saudi Riyal} AED{UAE Dirham} EGP{Egyptian Pound} KWD{Kuwaiti Dinar} QAR{Qatari Riyal} OMR{Omani Rial} BHD{Bahraini Dinar} JOD{Jordanian Dinar} IQD{Iraqi Dinar} YER{Yemeni Rial} SDG{Sudanese Pound} MAD{Moroccan Dirham} TND{Tunisian Dinar} DZD{Algerian Dinar} LBP{Lebanese Pound} SYP{Syrian Pound} TRY{Turkish Lira} USD{US Dollar} EUR{Euro} GBP{British Pound} other{{code}}}'**
+  String currency_name(String code);
+
   /// No description provided for @invite_code.
   ///
   /// In en, this message translates to:
@@ -1075,6 +1081,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More options'**
   String get quick_add_more;
+
+  /// No description provided for @dashboard_income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get dashboard_income;
 
   /// No description provided for @dashboard_expenses.
   ///
@@ -2213,7 +2225,7 @@ abstract class AppLocalizations {
   /// No description provided for @dashboard_fixed_due_help.
   ///
   /// In en, this message translates to:
-  /// **'Fixed commitments still to post later this month.'**
+  /// **'Fixed commitments still due later this month.'**
   String get dashboard_fixed_due_help;
 
   /// No description provided for @dashboard_after_fixed_help.

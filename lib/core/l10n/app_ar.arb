@@ -28,6 +28,10 @@
   "household_name": "اسم الأسرة",
   "household_name_hint": "مثال: آل أحمد",
   "currency": "العملة",
+  "currency_name": "{code, select, SAR{ريال سعودي} AED{درهم إماراتي} EGP{جنيه مصري} KWD{دينار كويتي} QAR{ريال قطري} OMR{ريال عماني} BHD{دينار بحريني} JOD{دينار أردني} IQD{دينار عراقي} YER{ريال يمني} SDG{جنيه سوداني} MAD{درهم مغربي} TND{دينار تونسي} DZD{دينار جزائري} LBP{ليرة لبنانية} SYP{ليرة سورية} TRY{ليرة تركية} USD{دولار أمريكي} EUR{يورو} GBP{جنيه إسترليني} other{{code}}}",
+  "@currency_name": {
+    "placeholders": { "code": { "type": "String" } }
+  },
   "invite_code": "رمز الدعوة",
   "invite_code_hint": "مثال: A1B2C3",
   "invalid_invite_code": "أدخل رمز الدعوة المكوّن من 6 خانات",
@@ -160,8 +164,8 @@
   "group_fixed": "المصروفات الثابتة",
   "group_income": "الإيرادات",
 
-  "type_expense": "المصروفات",
-  "type_income": "الإيرادات",
+  "type_expense": "مصروف",
+  "type_income": "إيراد",
   "amount": "المبلغ",
   "amount_invalid": "أدخل مبلغًا صحيحًا.",
   "amount_zero": "يجب أن يكون المبلغ أكبر من صفر.",
@@ -191,6 +195,7 @@
   "quick_add_title": "إضافة سريعة",
   "quick_add_more": "خيارات إضافية",
 
+  "dashboard_income": "الإيرادات",
   "dashboard_expenses": "المصروفات",
   "dashboard_balance": "الرصيد",
   "dashboard_recent": "الأحدث",
@@ -355,8 +360,8 @@
   "@recurring_generated": {
     "placeholders": { "count": { "type": "int" } }
   },
-  "recurring_type_income": "الإيرادات",
-  "recurring_type_expense": "المصروفات",
+  "recurring_type_income": "إيراد",
+  "recurring_type_expense": "مصروف",
   "recurring_inactive_hint": "المصروفات الثابتة الموقوفة لا تُسجَّل.",
   "recurring_paused_message": "تم الإيقاف مؤقتًا. تبقى المعاملات المسجّلة هذا الشهر، ويمكنك حذفها على حدة.",
   "recurring_resumed_message": "تم الاستئناف. سيُسجَّل الموعد القادم فقط، ولن تُسجَّل الفترة الموقوفة.",
@@ -416,13 +421,13 @@
   "recurring_link_vehicle": "ربط بسيارة (اختياري)",
   "recurring_link_pet": "ربط بحيوان أليف (اختياري)",
   "dashboard_fixed_header": "المصروفات الثابتة هذا الشهر",
-  "dashboard_fixed_posted": "المسجَّل هذا الشهر",
-  "dashboard_fixed_due": "المتبقي تسجيله هذا الشهر",
+  "dashboard_fixed_posted": "المسجَّل",
+  "dashboard_fixed_due": "مستحق لاحقًا",
   "dashboard_after_fixed": "المتبقي بعد المصروفات الثابتة",
   "dashboard_expenses_help": "كل مصروفات الشهر، بما فيها المصروفات الثابتة المسجّلة.",
   "dashboard_fixed_posted_help": "المصروفات الثابتة المسجّلة هذا الشهر.",
-  "dashboard_fixed_due_help": "المصروفات الثابتة التي ستُسجَّل لاحقًا هذا الشهر.",
-  "dashboard_after_fixed_help": "الإيرادات ناقص المصروفات الثابتة المسجّلة والمتبقية.",
+  "dashboard_fixed_due_help": "المصروفات الثابتة المستحقة لاحقًا هذا الشهر.",
+  "dashboard_after_fixed_help": "الإيرادات ناقص المصروفات الثابتة المسجّلة والمستحقة لاحقًا.",
   "error_invalid_pet": "هذا الحيوان ليس من حيوانات هذه الأسرة.",
   "error_invalid_rule": "هذا المصروف الثابت غير موجود.",
   "error_already_archived": "تمت إزالة هذا المصروف الثابت بالفعل."

@@ -85,6 +85,7 @@ class _CreateHouseholdScreenState extends ConsumerState<CreateHouseholdScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).toString();
     return Scaffold(
       appBar: AppBar(title: Text(l10n.create_household_action)),
       body: Center(
@@ -142,11 +143,8 @@ class _CreateHouseholdScreenState extends ConsumerState<CreateHouseholdScreen> {
                             DropdownMenuItem(
                               value: code,
                               child: Text(
-                                Currency.label(
-                                  code,
-                                  locale: Localizations.localeOf(context)
-                                      .toString(),
-                                ),
+                                '${l10n.currency_name(code)} '
+                                '(${Currency.label(code, locale: locale)})',
                               ),
                             ),
                         ],

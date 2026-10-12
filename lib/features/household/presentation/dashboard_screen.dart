@@ -186,7 +186,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           children: [
                             Expanded(
                               child: _StatCard(
-                                title: l10n.type_income,
+                                title: l10n.dashboard_income,
                                 value: label(income),
                                 color: Theme.of(context).colorScheme.primary,
                               ),

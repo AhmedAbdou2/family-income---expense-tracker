@@ -184,7 +184,7 @@ class ProfileScreen extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: _StatCard(
-                            title: l10n.type_income,
+                            title: l10n.dashboard_income,
                             value: label(income),
                             color: scheme.primary,
                           ),

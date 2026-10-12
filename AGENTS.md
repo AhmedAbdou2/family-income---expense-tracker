@@ -361,7 +361,7 @@ owner can delete the leftover unlinked person from the Family tab.
 - Copy & translation pass (text only, no DB/behaviour change): full EN/AR
   audit against one glossary (Income=الإيرادات, Expenses=المصروفات,
   Balance=الرصيد, Fixed expenses=المصروفات الثابتة, Posted=المسجَّل,
-  Still due=المتبقي تسجيله, Left after fixed=المتبقي بعد المصروفات الثابتة,
+  Still due=مستحق لاحقًا, Left after fixed=المتبقي بعد المصروفات الثابتة,
   Family=العائلة, Owner/Adult/Child=مالك/بالغ/طفل, Vehicles=السيارات,
   Pets=الحيوانات الأليفة, Odometer=عدّاد الكيلومترات, Pause/Resume=
   إيقاف مؤقت/استئناف, Make monthly fixed=تثبيت كمصروف شهري, Category=التصنيف,
@@ -377,4 +377,16 @@ owner can delete the leftover unlinked person from the Family tab.
   (`test/currency_test.dart`, `test/arabic_dialogs_layout_test.dart`,
   extended parity checks for placeholders + plural categories); analyze
   clean, web release build OK.
+- Copy-pass follow-up (text only, decisions from review): the expense/income
+  segmented toggle now reads singular مصروف/إيراد while the dashboard cards
+  keep the plural الإيرادات (new `dashboard_income`) / المصروفات; the
+  fixed-expenses card labels are المسجَّل (posted), مستحق لاحقًا (still
+  due) and المتبقي بعد المصروفات الثابتة, and the three help lines were
+  reworded to match; the household currency dropdown shows name + symbol in
+  Arabic and name + ISO code in English via the new `currency_name` ICU
+  `select` (all 20 supported codes named in both languages); the
+  expired-invite label (Expired/منتهي, never Active) is pinned by
+  `test/invite_status_test.dart`; `test/l10n_parity_test.dart` now parses
+  `select`/`plural` branch bodies so a branch literal like `{Euro}` is not
+  mistaken for a placeholder. Tests 156; analyze clean, web release build OK.
 - Phase 4: reports/charts/CSV export/polish.

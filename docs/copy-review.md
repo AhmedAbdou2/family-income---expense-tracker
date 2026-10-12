@@ -2,7 +2,7 @@
 
 Text-only pass over `lib/core/l10n/app_en.arb` and `lib/core/l10n/app_ar.arb`. No behaviour, database or migration changes. Only changed/new strings are listed, grouped by screen; the English column shows the current (new) English.
 
-**Glossary:** الإيرادات (income) · المصروفات (expenses) · الرصيد (balance) · المصروفات الثابتة (fixed expenses) · المسجَّل (posted) · المتبقي تسجيله (still due) · المتبقي بعد المصروفات الثابتة (left after fixed) · العائلة (family) · مالك/بالغ/طفل (owner/adult/child) · السيارات (vehicles) · الحيوانات الأليفة (pets) · وقود (fuel) · عدّاد الكيلومترات (odometer) · الصيانة (maintenance) · إيقاف مؤقت/استئناف (pause/resume) · تثبيت كمصروف شهري (make monthly fixed) · دعوة (invite) · الأسرة (household) · التصنيف (category) · الشخص (person).
+**Glossary:** الإيرادات (income total) · مصروف/إيراد (expense/income type) · المصروفات (expenses) · الرصيد (balance) · المصروفات الثابتة (fixed expenses) · المسجَّل (posted) · مستحق لاحقًا (still due) · المتبقي بعد المصروفات الثابتة (left after fixed) · العائلة (family) · مالك/بالغ/طفل (owner/adult/child) · السيارات (vehicles) · الحيوانات الأليفة (pets) · وقود (fuel) · عدّاد الكيلومترات (odometer) · الصيانة (maintenance) · إيقاف مؤقت/استئناف (pause/resume) · تثبيت كمصروف شهري (make monthly fixed) · دعوة (invite) · الأسرة (household) · التصنيف (category) · الشخص (person).
 
 ## Auth
 
@@ -17,6 +17,7 @@ Text-only pass over `lib/core/l10n/app_en.arb` and `lib/core/l10n/app_ar.arb`. N
 
 | key | English | old Arabic | new Arabic |
 | --- | --- | --- | --- |
+| `currency_name` | {code, select, SAR{Saudi Riyal} AED{UAE Dirham} EGP{Egyptian Pound} KWD{Kuwaiti Dinar} QAR{Qatari Riyal} OMR{Omani Rial} BHD{Bahraini Dinar} JOD{Jordanian Dinar} IQD{Iraqi Dinar} YER{Yemeni Rial} SDG{Sudanese Pound} MAD{Moroccan Dirham} TND{Tunisian Dinar} DZD{Algerian Dinar} LBP{Lebanese Pound} SYP{Syrian Pound} TRY{Turkish Lira} USD{US Dollar} EUR{Euro} GBP{British Pound} other{{code}}} | *(new)* | {code, select, SAR{ريال سعودي} AED{درهم إماراتي} EGP{جنيه مصري} KWD{دينار كويتي} QAR{ريال قطري} OMR{ريال عماني} BHD{دينار بحريني} JOD{دينار أردني} IQD{دينار عراقي} YER{ريال يمني} SDG{جنيه سوداني} MAD{درهم مغربي} TND{دينار تونسي} DZD{دينار جزائري} LBP{ليرة لبنانية} SYP{ليرة سورية} TRY{ليرة تركية} USD{دولار أمريكي} EUR{يورو} GBP{جنيه إسترليني} other{{code}}} |
 | `invalid_invite_code` | Enter the 6-character invite code | أدخل رمز الدعوة المكوّن من ٦ خانات | أدخل رمز الدعوة المكوّن من 6 خانات |
 | `invite_code_hint_share` | Share this code so someone can join your household. | شارك هذا الرمز ليتمكن أحد الانضمام إلى أسرتك. | شارك هذا الرمز مع من تريد دعوته إلى أسرتك. |
 | `setup_subtitle` | Create a new household, or join one with an invite code. | أنشئ أسرة جديدة، أو انضم إلى أسرة موجودة برمز دعوة. | أنشئ أسرة جديدة أو انضم إلى أسرة موجودة برمز دعوة. |
@@ -111,12 +112,13 @@ Text-only pass over `lib/core/l10n/app_en.arb` and `lib/core/l10n/app_ar.arb`. N
 | --- | --- | --- | --- |
 | `amount_invalid` | Enter a valid amount. | أدخل مبلغاً صحيحاً. | أدخل مبلغًا صحيحًا. |
 | `dashboard_after_fixed` | Left after fixed | المتبقي بعد الثابتة | المتبقي بعد المصروفات الثابتة |
-| `dashboard_after_fixed_help` | Income minus posted and still-due fixed commitments. | الدخل ناقص الالتزامات الثابتة المُرحَّلة والمتبقية. | الإيرادات ناقص المصروفات الثابتة المسجّلة والمتبقية. |
+| `dashboard_after_fixed_help` | Income minus posted and still-due fixed commitments. | الدخل ناقص الالتزامات الثابتة المُرحَّلة والمتبقية. | الإيرادات ناقص المصروفات الثابتة المسجّلة والمستحقة لاحقًا. |
 | `dashboard_expenses_help` | All expenses this month, including posted fixed ones. | كل مصروفات الشهر، بما فيها الثابتة المُرحَّلة. | كل مصروفات الشهر، بما فيها المصروفات الثابتة المسجّلة. |
-| `dashboard_fixed_due` | Still due | المتبقي | المتبقي تسجيله هذا الشهر |
-| `dashboard_fixed_due_help` | Fixed commitments still to post later this month. | الالتزامات الثابتة التي ستُرحَّل لاحقًا هذا الشهر. | المصروفات الثابتة التي ستُسجَّل لاحقًا هذا الشهر. |
-| `dashboard_fixed_posted` | Posted | المُرحَّل | المسجَّل هذا الشهر |
+| `dashboard_fixed_due` | Still due | المتبقي | مستحق لاحقًا |
+| `dashboard_fixed_due_help` | Fixed commitments still due later this month. | الالتزامات الثابتة التي ستُرحَّل لاحقًا هذا الشهر. | المصروفات الثابتة المستحقة لاحقًا هذا الشهر. |
+| `dashboard_fixed_posted` | Posted | المُرحَّل | المسجَّل |
 | `dashboard_fixed_posted_help` | Fixed commitments already posted this month. | الالتزامات الثابتة التي رُحِّلت هذا الشهر. | المصروفات الثابتة المسجّلة هذا الشهر. |
+| `dashboard_income` | Income | *(new)* | الإيرادات |
 | `select_category` | Select a category | اختر تصنيفاً | اختر تصنيفًا |
 | `select_person` | Select a person | اختر شخصاً | اختر شخصًا |
 | `transaction_delete_from_fixed` | This came from a fixed expense. Deleting it won't make it post again. | نشأت هذه المعاملة من مصروف ثابت. الحذف لن يؤدي إلى إعادة إنشائها. | نشأت هذه المعاملة من مصروف ثابت. حذفها لن يجعلها تُسجَّل مرة أخرى. |
@@ -128,8 +130,7 @@ Text-only pass over `lib/core/l10n/app_en.arb` and `lib/core/l10n/app_ar.arb`. N
 | `transaction_pin_fixed_confirm_body` | A monthly commitment will be created and posted automatically. | سيتم إنشاء التزام شهري وترحيله تلقائيًا. | سيُنشأ مصروف ثابت شهري يُسجَّل تلقائيًا. |
 | `transaction_pin_fixed_confirm_title` | Make this a monthly fixed expense? | تحويل هذا إلى مصروف ثابت شهري؟ | تثبيت هذه المعاملة كمصروف شهري؟ |
 | `transaction_pinned_fixed` | Added to fixed commitments. | أُضيف إلى الالتزامات الثابتة. | تمت الإضافة إلى المصروفات الثابتة. |
-| `type_expense` | Expense | مصروف | المصروفات |
-| `type_income` | Income | دخل | الإيرادات |
+| `type_income` | Income | دخل | إيراد |
 
 ## Vehicles, fuel & maintenance
 
@@ -173,8 +174,7 @@ Text-only pass over `lib/core/l10n/app_en.arb` and `lib/core/l10n/app_ar.arb`. N
 | `recurring_resume` | Resume | تشغيل | استئناف |
 | `recurring_resumed_message` | Resumed. It continues from the next due date; the missed period isn't posted. | تم التشغيل. ستكون الحركة القادمة هي التالية؛ لن يتم ترحيل فترة الإيقاف. | تم الاستئناف. سيُسجَّل الموعد القادم فقط، ولن تُسجَّل الفترة الموقوفة. |
 | `recurring_saved` | Commitment saved. | تم حفظ الالتزام. | تم حفظ المصروف الثابت. |
-| `recurring_type_expense` | Expense | مصروف | المصروفات |
-| `recurring_type_income` | Income | دخل | الإيرادات |
+| `recurring_type_income` | Income | دخل | إيراد |
 
 ## Pets & profile
 

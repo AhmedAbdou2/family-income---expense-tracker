@@ -20,6 +20,14 @@ String _roleLabel(BuildContext context, MemberRole role) => switch (role) {
       MemberRole.child => context.l10n.role_child,
     };
 
+/// The status badge label for an invite: Used, Expired or Active, checked in
+/// that order so a used invite never reads as Expired.
+String inviteStatusLabel(AppLocalizations l10n, Invite invite) {
+  if (invite.isUsed) return l10n.invite_status_used;
+  if (invite.isExpired) return l10n.invite_status_expired;
+  return l10n.invite_status_active;
+}
+
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -601,16 +609,13 @@ class _InviteTile extends StatelessWidget {
     final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
 
-    final String statusText;
+    final statusText = inviteStatusLabel(l10n, invite);
     final Color statusColor;
     if (invite.isUsed) {
-      statusText = l10n.invite_status_used;
       statusColor = scheme.surfaceContainerHighest;
     } else if (invite.isExpired) {
-      statusText = l10n.invite_status_expired;
       statusColor = scheme.errorContainer;
     } else {
-      statusText = l10n.invite_status_active;
       statusColor = scheme.primaryContainer;
     }
 

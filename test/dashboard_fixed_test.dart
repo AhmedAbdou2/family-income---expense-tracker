@@ -167,7 +167,7 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.text('Fixed commitments still to post later this month.'),
+      find.text('Fixed commitments still due later this month.'),
       findsOneWidget,
     );
     expect(
@@ -299,6 +299,132 @@ void main() {
     expect(
       find.text(Money.format(minorUnits: 16000, currencyCode: 'EGP')),
       findsNothing,
+    );
+  });
+
+  testWidgets('Arabic fixed labels read consistently and fit at 360px',
+      (tester) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    final now = DateTime.now();
+    final monthStart = DateTime(now.year, now.month, 1);
+
+    final rule = RecurringRule(
+      id: 'r1',
+      householdId: 'h1',
+      categoryId: 'cat-exp',
+      memberId: 'm1',
+      amountMinorUnits: 20000,
+      frequency: RecurrenceFrequency.monthly,
+      nextDue: monthStart,
+      isActive: true,
+      dayOfMonth: 1,
+      startDate: monthStart,
+    );
+    final transactions = <Transaction>[
+      Transaction(
+        id: 't1',
+        householdId: 'h1',
+        type: TransactionType.income,
+        amountMinorUnits: 100000,
+        categoryId: 'cat-inc',
+        memberId: 'm1',
+        date: monthStart,
+      ),
+      Transaction(
+        id: 't2',
+        householdId: 'h1',
+        type: TransactionType.expense,
+        amountMinorUnits: 15000,
+        categoryId: 'cat-exp',
+        memberId: 'm1',
+        date: monthStart,
+        recurringRuleId: 'r1',
+      ),
+    ];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          settingsProvider.overrideWith(_TestSettings.new),
+          membershipProvider.overrideWith(
+            (ref) async => const Membership(
+              household: Household(id: 'h1', name: 'Home', currency: 'EGP'),
+              role: MemberRole.owner,
+            ),
+          ),
+          recurringRulesRepositoryProvider
+              .overrideWithValue(_FakeRecurringRepo()),
+          recurringRulesProvider.overrideWith((ref) async => [rule]),
+          categoriesProvider.overrideWith(
+            (ref) async => const [
+              Category(
+                id: 'cat-inc',
+                householdId: 'h1',
+                group: CategoryGroup.income,
+                nameEn: 'Salary',
+                nameAr: 'راتب',
+              ),
+              Category(
+                id: 'cat-exp',
+                householdId: 'h1',
+                group: CategoryGroup.general,
+                nameEn: 'Food',
+                nameAr: 'طعام',
+              ),
+            ],
+          ),
+          membersProvider.overrideWith(
+            (ref) async => const [
+              Member(
+                id: 'm1',
+                householdId: 'h1',
+                name: 'Alex',
+                isActive: true,
+                userId: 'u1',
+              ),
+            ],
+          ),
+          dashboardMonthTransactionsProvider
+              .overrideWith((ref) async => transactions),
+        ],
+        child: const MaterialApp(
+          locale: Locale('ar'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          home: DashboardScreen(),
+        ),
+      ),
+    );
+
+    for (var i = 0; i < 12; i++) {
+      await tester.pump(const Duration(milliseconds: 40));
+    }
+
+    // The three fixed labels and the two help lines must all be present and,
+    // with the longer Arabic wording, lay out at a 360px phone width.
+    expect(tester.takeException(), isNull);
+    expect(find.text('المسجَّل'), findsOneWidget);
+    expect(find.text('مستحق لاحقًا'), findsOneWidget);
+    expect(find.text('المتبقي بعد المصروفات الثابتة'), findsOneWidget);
+    expect(
+      find.text('المصروفات الثابتة المسجّلة هذا الشهر.'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('المصروفات الثابتة المستحقة لاحقًا هذا الشهر.'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('الإيرادات ناقص المصروفات الثابتة المسجّلة والمستحقة لاحقًا.'),
+      findsOneWidget,
     );
   });
 }

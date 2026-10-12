@@ -95,6 +95,34 @@ class AppLocalizationsAr extends AppLocalizations {
   String get currency => 'العملة';
 
   @override
+  String currency_name(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'SAR': 'ريال سعودي',
+      'AED': 'درهم إماراتي',
+      'EGP': 'جنيه مصري',
+      'KWD': 'دينار كويتي',
+      'QAR': 'ريال قطري',
+      'OMR': 'ريال عماني',
+      'BHD': 'دينار بحريني',
+      'JOD': 'دينار أردني',
+      'IQD': 'دينار عراقي',
+      'YER': 'ريال يمني',
+      'SDG': 'جنيه سوداني',
+      'MAD': 'درهم مغربي',
+      'TND': 'دينار تونسي',
+      'DZD': 'دينار جزائري',
+      'LBP': 'ليرة لبنانية',
+      'SYP': 'ليرة سورية',
+      'TRY': 'ليرة تركية',
+      'USD': 'دولار أمريكي',
+      'EUR': 'يورو',
+      'GBP': 'جنيه إسترليني',
+      'other': '$code',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get invite_code => 'رمز الدعوة';
 
   @override
@@ -434,10 +462,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get group_income => 'الإيرادات';
 
   @override
-  String get type_expense => 'المصروفات';
+  String get type_expense => 'مصروف';
 
   @override
-  String get type_income => 'الإيرادات';
+  String get type_income => 'إيراد';
 
   @override
   String get amount => 'المبلغ';
@@ -524,6 +552,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get quick_add_more => 'خيارات إضافية';
+
+  @override
+  String get dashboard_income => 'الإيرادات';
 
   @override
   String get dashboard_expenses => 'المصروفات';
@@ -956,10 +987,10 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get recurring_type_income => 'الإيرادات';
+  String get recurring_type_income => 'إيراد';
 
   @override
-  String get recurring_type_expense => 'المصروفات';
+  String get recurring_type_expense => 'مصروف';
 
   @override
   String get recurring_inactive_hint =>
@@ -1132,10 +1163,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dashboard_fixed_header => 'المصروفات الثابتة هذا الشهر';
 
   @override
-  String get dashboard_fixed_posted => 'المسجَّل هذا الشهر';
+  String get dashboard_fixed_posted => 'المسجَّل';
 
   @override
-  String get dashboard_fixed_due => 'المتبقي تسجيله هذا الشهر';
+  String get dashboard_fixed_due => 'مستحق لاحقًا';
 
   @override
   String get dashboard_after_fixed => 'المتبقي بعد المصروفات الثابتة';
@@ -1150,11 +1181,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get dashboard_fixed_due_help =>
-      'المصروفات الثابتة التي ستُسجَّل لاحقًا هذا الشهر.';
+      'المصروفات الثابتة المستحقة لاحقًا هذا الشهر.';
 
   @override
   String get dashboard_after_fixed_help =>
-      'الإيرادات ناقص المصروفات الثابتة المسجّلة والمتبقية.';
+      'الإيرادات ناقص المصروفات الثابتة المسجّلة والمستحقة لاحقًا.';
 
   @override
   String get error_invalid_pet => 'هذا الحيوان ليس من حيوانات هذه الأسرة.';

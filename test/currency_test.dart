@@ -1,3 +1,5 @@
+import 'package:family_income_expense_tracker/core/l10n/generated/app_localizations_ar.dart';
+import 'package:family_income_expense_tracker/core/l10n/generated/app_localizations_en.dart';
 import 'package:family_income_expense_tracker/core/utils/currency.dart';
 import 'package:family_income_expense_tracker/features/household/presentation/create_household_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,6 +34,18 @@ void main() {
       expect(Currency.arabicSymbols.containsKey(code), isTrue, reason: code);
       expect(Currency.label(code, locale: 'ar'), isNotEmpty, reason: code);
       expect(Currency.label(code, locale: 'en'), code, reason: code);
+    }
+  });
+
+  test('every supported currency has a readable name in both languages', () {
+    final en = AppLocalizationsEn();
+    final ar = AppLocalizationsAr();
+    for (final code in kSupportedCurrencies) {
+      expect(en.currency_name(code), isNotEmpty, reason: code);
+      expect(ar.currency_name(code), isNotEmpty, reason: code);
+      // A known code must resolve to a name, not fall through to the code.
+      expect(en.currency_name(code), isNot(code), reason: 'en $code');
+      expect(ar.currency_name(code), isNot(code), reason: 'ar $code');
     }
   });
 }

@@ -94,6 +94,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currency => 'Currency';
 
   @override
+  String currency_name(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'SAR': 'Saudi Riyal',
+      'AED': 'UAE Dirham',
+      'EGP': 'Egyptian Pound',
+      'KWD': 'Kuwaiti Dinar',
+      'QAR': 'Qatari Riyal',
+      'OMR': 'Omani Rial',
+      'BHD': 'Bahraini Dinar',
+      'JOD': 'Jordanian Dinar',
+      'IQD': 'Iraqi Dinar',
+      'YER': 'Yemeni Rial',
+      'SDG': 'Sudanese Pound',
+      'MAD': 'Moroccan Dirham',
+      'TND': 'Tunisian Dinar',
+      'DZD': 'Algerian Dinar',
+      'LBP': 'Lebanese Pound',
+      'SYP': 'Syrian Pound',
+      'TRY': 'Turkish Lira',
+      'USD': 'US Dollar',
+      'EUR': 'Euro',
+      'GBP': 'British Pound',
+      'other': '$code',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get invite_code => 'Invite code';
 
   @override
@@ -522,6 +550,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get quick_add_more => 'More options';
+
+  @override
+  String get dashboard_income => 'Income';
 
   @override
   String get dashboard_expenses => 'Expenses';
@@ -1153,7 +1184,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashboard_fixed_due_help =>
-      'Fixed commitments still to post later this month.';
+      'Fixed commitments still due later this month.';
 
   @override
   String get dashboard_after_fixed_help =>
