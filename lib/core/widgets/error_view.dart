@@ -44,6 +44,8 @@ String errorMessage(BuildContext context, Object error) {
     AppErrorCode.noCarCategory => l10n.error_no_car_category,
     AppErrorCode.noLinkedPerson => l10n.error_no_linked_person,
     AppErrorCode.invalidPet => l10n.error_invalid_pet,
+    AppErrorCode.invalidRule => l10n.error_invalid_rule,
+    AppErrorCode.alreadyArchived => l10n.error_already_archived,
     AppErrorCode.unknown => l10n.error_unknown,
   };
 }

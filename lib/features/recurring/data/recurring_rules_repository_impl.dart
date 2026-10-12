@@ -9,7 +9,7 @@ import '../domain/recurring_schedule.dart';
 const _columns =
     'id, household_id, category_id, member_id, amount::text, frequency, '
     'day_of_month, next_due, is_active, name, start_date, end_date, '
-    'vehicle_id, pet_id';
+    'vehicle_id, pet_id, archived_at';
 
 class RecurringRulesRepositoryImpl implements RecurringRulesRepository {
   RecurringRulesRepositoryImpl(this._client);
@@ -41,6 +41,7 @@ class RecurringRulesRepositoryImpl implements RecurringRulesRepository {
         endDate: _parse(row['end_date']),
         vehicleId: row['vehicle_id'] as String?,
         petId: row['pet_id'] as String?,
+        archivedAt: _parse(row['archived_at']),
       );
 
   @override
@@ -50,6 +51,7 @@ class RecurringRulesRepositoryImpl implements RecurringRulesRepository {
           .from('recurring_rules')
           .select(_columns)
           .eq('household_id', householdId)
+          .isFilter('archived_at', null)
           .order('next_due', ascending: true);
       return rows.map(_map).toList();
     } catch (error) {
@@ -166,9 +168,19 @@ class RecurringRulesRepositoryImpl implements RecurringRulesRepository {
   }
 
   @override
-  Future<void> deleteRule({required String id}) async {
+  Future<int> archiveRule({
+    required String id,
+    bool deleteMonthTransactions = false,
+  }) async {
     try {
-      await _client.from('recurring_rules').delete().eq('id', id);
+      final result = await _client.rpc(
+        'archive_recurring_rule',
+        params: {
+          'p_rule_id': id,
+          'p_delete_month_transactions': deleteMonthTransactions,
+        },
+      );
+      return (result as num).toInt();
     } catch (error) {
       throw ExceptionMapper.map(error);
     }

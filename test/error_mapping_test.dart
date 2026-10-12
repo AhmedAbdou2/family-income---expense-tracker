@@ -31,6 +31,9 @@ void main() {
         'odometer_backwards': AppErrorCode.odometerBackwards,
         'no_car_category': AppErrorCode.noCarCategory,
         'no_linked_person': AppErrorCode.noLinkedPerson,
+        'invalid_pet': AppErrorCode.invalidPet,
+        'invalid_rule': AppErrorCode.invalidRule,
+        'already_archived': AppErrorCode.alreadyArchived,
       };
 
       cases.forEach((message, expected) {

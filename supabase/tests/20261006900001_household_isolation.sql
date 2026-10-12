@@ -61,6 +61,16 @@
 --   * recurring rules carry vehicle_id + pet_id onto the transactions
 --     they post.
 --
+-- Phase 3.6 additions (section 10):
+--   * archiving a fixed commitment keeps the posted transaction's
+--     recurring_rule_id (the link survives), leaves the rule inactive +
+--     archived, and the generator ignores it from then on;
+--   * delete-this-month purges only that rule's current-month rows in the
+--     same atomic call that archives;
+--   * double archive -> already_archived, unknown -> invalid_rule;
+--   * direct DELETE on recurring_rules is revoked; a child and an
+--     outsider get forbidden.
+--
 -- Logins used: A + B (isolation), C + D + E (phase 2), F + G + H
 -- (phase 2.5 joiners/legacy), J + K + L (role / leave / remove cast).
 --
@@ -69,7 +79,7 @@
 -- leaves no data behind. Success = green notice below; any failure =
 -- red error starting with "FAIL:" or "TEST SETUP FAILED:".
 --
--- Prerequisite: migrations 1..14 have been run in that order.
+-- Prerequisite: migrations 1..15 have been run in that order.
 -- ===================================================================
 
 begin;
@@ -1965,6 +1975,154 @@ declare n int;
 begin
   select count(*) into n from public.pets;
   if n <> 1 then raise exception 'FAIL: owner sees % pets (expected 1)', n; end if;
+end $$;
+
+-- --------------------------------------------------------------------
+-- 10. PHASE 3.6: archiving a fixed commitment (migration 15)
+--   * archive keeps the posted transaction's recurring_rule_id (the link
+--     survives - that is the whole bug fix);
+--   * the archived rule is inactive + hidden and the generator skips it;
+--   * delete-this-month purges only the rule's current-month rows, in the
+--     same atomic call that archives;
+--   * double archive -> already_archived, unknown -> invalid_rule;
+--   * direct DELETE is revoked; a child and an outsider get forbidden.
+-- --------------------------------------------------------------------
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
+set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
+
+-- 10.0 Owner A creates a rule that posts this month, then archives it
+--      with "Keep".
+do $$
+declare v_rule uuid; v_tx uuid; n int;
+begin
+  insert into public.recurring_rules
+    (household_id, category_id, member_id, amount, frequency, day_of_month,
+     next_due, start_date, is_active, name)
+  values (current_setting('test.hh_a')::uuid, current_setting('test.category_a')::uuid,
+          current_setting('test.member_a')::uuid, 2000.00, 'monthly',
+          extract(day from current_date)::int, current_date, current_date, true,
+          'Archive Me')
+  returning id into v_rule;
+
+  perform public.generate_recurring_transactions();
+
+  select count(*) into n from public.transactions where recurring_rule_id = v_rule;
+  if n <> 1 then raise exception 'FAIL: archive rule posted % rows (expected 1)', n; end if;
+  select id into v_tx from public.transactions where recurring_rule_id = v_rule;
+  perform set_config('test.archive_rule', v_rule::text, false);
+  perform set_config('test.archive_tx', v_tx::text, false);
+end $$;
+
+do $$
+declare v_rule uuid := current_setting('test.archive_rule')::uuid; n int;
+begin
+  if public.archive_recurring_rule(v_rule, false) <> 0 then
+    raise exception 'FAIL: keep-archive reported a deleted row';
+  end if;
+
+  select count(*) into n from public.recurring_rules
+   where id = v_rule and archived_at is not null and is_active = false;
+  if n <> 1 then raise exception 'FAIL: rule not archived + inactive'; end if;
+
+  -- The bug: the posted row must KEEP its link.
+  select count(*) into n from public.transactions
+   where id = current_setting('test.archive_tx')::uuid and recurring_rule_id = v_rule;
+  if n <> 1 then raise exception 'FAIL: keep-archive broke the posted link'; end if;
+
+  -- Re-running the generator adds nothing for the archived rule.
+  perform public.generate_recurring_transactions();
+  select count(*) into n from public.transactions where recurring_rule_id = v_rule;
+  if n <> 1 then raise exception 'FAIL: archived rule generated new rows (%)', n; end if;
+
+  -- Archived rows stay SELECTable by the household (the app hides them).
+  select count(*) into n from public.recurring_rules where id = v_rule;
+  if n <> 1 then raise exception 'FAIL: owner cannot select the archived rule'; end if;
+end $$;
+
+-- 10.1 delete-this-month purges only the rule''s current-month rows and
+--      archives, all in one call.
+do $$
+declare v_rule uuid; n int;
+begin
+  insert into public.recurring_rules
+    (household_id, category_id, member_id, amount, frequency, day_of_month,
+     next_due, start_date, is_active, name)
+  values (current_setting('test.hh_a')::uuid, current_setting('test.category_a')::uuid,
+          current_setting('test.member_a')::uuid, 300.00, 'monthly',
+          extract(day from current_date)::int, current_date, current_date, true,
+          'Purge Me')
+  returning id into v_rule;
+
+  perform public.generate_recurring_transactions();
+  select count(*) into n from public.transactions where recurring_rule_id = v_rule;
+  if n <> 1 then raise exception 'FAIL: purge rule posted % rows (expected 1)', n; end if;
+
+  if public.archive_recurring_rule(v_rule, true) <> 1 then
+    raise exception 'FAIL: delete-month did not report 1 deleted row';
+  end if;
+
+  select count(*) into n from public.transactions where recurring_rule_id = v_rule;
+  if n <> 0 then raise exception 'FAIL: delete-month left % linked rows', n; end if;
+  select count(*) into n from public.recurring_rules
+   where id = v_rule and archived_at is not null and is_active = false;
+  if n <> 1 then raise exception 'FAIL: purge rule not archived'; end if;
+end $$;
+
+-- 10.2 Error cases: double archive + unknown rule.
+do $$
+begin
+  begin
+    perform public.archive_recurring_rule(current_setting('test.archive_rule')::uuid, false);
+    raise exception 'FAIL: double archive was allowed';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'already_archived' then raise; end if;
+  end;
+
+  begin
+    perform public.archive_recurring_rule('00000000-0000-0000-0000-000000000000', false);
+    raise exception 'FAIL: archiving an unknown rule succeeded';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_rule' then raise; end if;
+  end;
+end $$;
+
+-- 10.3 Direct DELETE on recurring_rules is gone for the owner.
+do $$
+declare n int;
+begin
+  delete from public.recurring_rules where id = current_setting('test.archive_rule')::uuid;
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'FAIL: owner deleted % rules directly', n; end if;
+exception when insufficient_privilege then null;
+end $$;
+
+-- 10.4 Child B cannot archive A''s rule.
+set local request.jwt.claims to '{"sub":"22222222-2222-4222-8222-222222222222","role":"authenticated"}';
+set local request.jwt.claim.sub to '22222222-2222-4222-8222-222222222222';
+
+do $$
+begin
+  perform public.archive_recurring_rule(current_setting('test.archive_rule')::uuid, false);
+  raise exception 'FAIL: child archived a rule';
+exception when others then
+  if sqlerrm like 'FAIL:%' then raise; end if;
+  if sqlerrm <> 'forbidden' then raise; end if;
+end $$;
+
+-- 10.5 Outsider H cannot archive A''s rule.
+set local request.jwt.claims to '{"sub":"88888888-8888-4888-8888-888888888888","role":"authenticated"}';
+set local request.jwt.claim.sub to '88888888-8888-4888-8888-888888888888';
+
+do $$
+begin
+  perform public.archive_recurring_rule(current_setting('test.archive_rule')::uuid, false);
+  raise exception 'FAIL: outsider archived a rule';
+exception when others then
+  if sqlerrm like 'FAIL:%' then raise; end if;
+  if sqlerrm <> 'forbidden' then raise; end if;
 end $$;
 
 -- --------------------------------------------------------------------

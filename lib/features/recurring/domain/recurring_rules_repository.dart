@@ -38,7 +38,19 @@ abstract interface class RecurringRulesRepository {
     String? petId,
   });
 
-  Future<void> deleteRule({required String id});
+  /// Archives a rule instead of deleting it (migration 15). The rule becomes
+  /// inactive and hidden, but the transactions it already posted keep their
+  /// link, so past/current-month dashboard figures do not change.
+  ///
+  /// When [deleteMonthTransactions] is true, this rule's already-posted rows
+  /// of the current calendar month are deleted in the SAME server-side call
+  /// (atomic - if anything fails, nothing is deleted and the rule stays
+  /// live). Returns how many transactions were deleted (0 for a plain
+  /// archive).
+  Future<int> archiveRule({
+    required String id,
+    bool deleteMonthTransactions = false,
+  });
 
   /// Pauses or resumes a rule. When resuming, [nextDue] advances the cursor
   /// so the paused period is not backfilled.

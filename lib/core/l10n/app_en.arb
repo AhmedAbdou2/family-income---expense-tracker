@@ -339,20 +339,19 @@
   "recurring_pause": "Pause",
   "recurring_resume": "Resume",
   "recurring_saved": "Commitment saved.",
-  "recurring_delete": "Delete commitment",
-  "recurring_delete_confirm_title": "Delete this commitment?",
-  "recurring_delete_confirm_body": "Choose what to do with transactions posted from this rule.",
-  "recurring_delete_option_keep": "Keep already posted transactions",
-  "recurring_delete_option_delete_month": "Also delete the transactions posted from this rule this month",
-  "recurring_delete_count": "{count, plural, =0{No transactions will be deleted} =1{1 transaction will be deleted} other{{count} transactions will be deleted}}",
-  "@recurring_delete_count": {
+  "recurring_delete": "Delete fixed expense",
+  "recurring_delete_confirm_title": "Delete this fixed expense?",
+  "recurring_delete_confirm_body": "It will stop posting and disappear from the list. Choose what happens to the transactions it already posted.",
+  "recurring_delete_option_keep": "Posted transactions stay and keep counting as fixed expenses",
+  "recurring_delete_option_delete_month": "{count, plural, =0{No posted transactions this month to delete} =1{This month's 1 posted transaction is deleted too} other{This month's {count} posted transactions are deleted too}}",
+  "@recurring_delete_option_delete_month": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
-  "recurring_deleted": "Commitment deleted.",
+  "recurring_deleted": "Fixed expense deleted.",
   "recurring_generated": "Posted {count} recurring transactions.",
   "@recurring_generated": {
     "placeholders": { "count": { "type": "int" } }
@@ -425,5 +424,7 @@
   "dashboard_fixed_posted_help": "Fixed commitments already posted this month.",
   "dashboard_fixed_due_help": "Fixed commitments still to post later this month.",
   "dashboard_after_fixed_help": "Income minus posted and still-due fixed commitments.",
-  "error_invalid_pet": "That pet doesn't belong to this household."
+  "error_invalid_pet": "That pet doesn't belong to this household.",
+  "error_invalid_rule": "That fixed expense doesn't exist.",
+  "error_already_archived": "That fixed expense was already removed."
 }

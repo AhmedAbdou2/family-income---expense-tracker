@@ -32,6 +32,7 @@ class RecurringRule {
     this.endDate,
     this.vehicleId,
     this.petId,
+    this.archivedAt,
   });
 
   final String id;
@@ -52,4 +53,12 @@ class RecurringRule {
   /// Optional links copied onto each generated transaction.
   final String? vehicleId;
   final String? petId;
+
+  /// Set when the rule was archived (migration 15). An archived rule is
+  /// inactive, hidden from the list, never generated again, but the
+  /// transactions it already posted keep their `recurringRuleId` link - so
+  /// past/current-month figures do not move.
+  final DateTime? archivedAt;
+
+  bool get isArchived => archivedAt != null;
 }

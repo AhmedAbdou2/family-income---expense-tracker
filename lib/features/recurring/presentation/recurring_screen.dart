@@ -21,6 +21,7 @@ import '../../transactions/presentation/providers.dart';
 import '../domain/entities.dart';
 import '../domain/recurring_schedule.dart';
 import 'providers.dart';
+import 'recurring_delete.dart';
 import 'recurring_visuals.dart';
 
 /// Fixed commitments (rent, installments, subscriptions, salaries). Adults
@@ -211,27 +212,26 @@ class _RecurringTile extends ConsumerWidget {
 
   Future<void> _delete(WidgetRef ref, BuildContext context) async {
     final l10n = context.l10n;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(dialogContext.l10n.recurring_delete_confirm_title),
-        content: Text(dialogContext.l10n.recurring_delete_confirm_body),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(dialogContext.l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(dialogContext.l10n.delete_action),
-          ),
-        ],
-      ),
+    final month = DateTime(DateTime.now().year, DateTime.now().month);
+    final transactions =
+        await ref.read(dashboardMonthTransactionsProvider.future);
+    final count = postedThisMonthCount(transactions, rule.id, month);
+    if (!context.mounted) return;
+    final choice = await showRecurringDeleteDialog(
+      context,
+      postedThisMonthCount: count,
     );
-    if (confirmed != true || !context.mounted) return;
+    if (choice == null || !context.mounted) return;
     try {
-      await ref.read(recurringRulesRepositoryProvider).deleteRule(id: rule.id);
-      ref.invalidate(recurringRulesProvider);
+      await ref.read(recurringRulesRepositoryProvider).archiveRule(
+            id: rule.id,
+            deleteMonthTransactions:
+                choice == RecurringDeleteChoice.deleteMonth,
+          );
+      ref
+        ..invalidate(recurringRulesProvider)
+        ..invalidate(monthTransactionsProvider)
+        ..invalidate(dashboardMonthTransactionsProvider);
       if (context.mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(l10n.recurring_deleted)));

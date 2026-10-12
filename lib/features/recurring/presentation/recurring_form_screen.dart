@@ -22,6 +22,7 @@ import '../../vehicles/domain/entities.dart';
 import '../../vehicles/presentation/providers.dart';
 import '../domain/entities.dart';
 import 'providers.dart';
+import 'recurring_delete.dart';
 import 'recurring_visuals.dart';
 
 /// Add/edit a recurring fixed commitment. `type` is derived from the
@@ -588,85 +589,36 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
 
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
     if (_existing == null || widget.ruleId == null) return;
+    final ruleId = widget.ruleId!;
     final month = DateTime(DateTime.now().year, DateTime.now().month);
-    final transactions = await ref.read(dashboardMonthTransactionsProvider.future);
-    int count = 0;
-    for (final tx in transactions) {
-      if (tx.recurringRuleId == widget.ruleId && tx.date.year == month.year && tx.date.month == month.month) {
-        count++;
-      }
-    }
-    String value = 'keep';
+    final transactions =
+        await ref.read(dashboardMonthTransactionsProvider.future);
+    final count = postedThisMonthCount(transactions, ruleId, month);
     if (!context.mounted) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(dialogContext.l10n.recurring_delete_confirm_title),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(dialogContext.l10n.recurring_delete_confirm_body),
-              const SizedBox(height: 12),
-              RadioGroup<String>(
-                groupValue: value,
-                onChanged: (v) {
-                  if (v != null) setState(() => value = v);
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    RadioListTile<String>(
-                      value: 'keep',
-                      title:
-                          Text(dialogContext.l10n.recurring_delete_option_keep),
-                    ),
-                    RadioListTile<String>(
-                      value: 'delete_month',
-                      title: Text(dialogContext
-                          .l10n.recurring_delete_option_delete_month),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(dialogContext.l10n.recurring_delete_count(count)),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text(dialogContext.l10n.cancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(dialogContext.l10n.delete_action),
-            ),
-          ],
-        ),
-      ),
+    final choice = await showRecurringDeleteDialog(
+      context,
+      postedThisMonthCount: count,
     );
-    if (confirmed != true || !context.mounted) return;
-    // If delete_month, delete this month's posted transactions from this rule
-    if (value == 'delete_month') {
-      for (final tx in transactions) {
-        if (tx.recurringRuleId == widget.ruleId && tx.date.year == month.year && tx.date.month == month.month) {
-          try {
-            await ref.read(transactionsRepositoryProvider).deleteTransaction(id: tx.id);
-          } catch (_) {}
-        }
-      }
+    if (choice == null || !context.mounted) return;
+    try {
+      await ref.read(recurringRulesRepositoryProvider).archiveRule(
+            id: ruleId,
+            deleteMonthTransactions:
+                choice == RecurringDeleteChoice.deleteMonth,
+          );
+      ref
+        ..invalidate(recurringRulesProvider)
+        ..invalidate(monthTransactionsProvider)
+        ..invalidate(dashboardMonthTransactionsProvider);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.recurring_deleted)),
+      );
+      Navigator.of(context).pop();
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(errorMessage(context, error))));
     }
-    await ref.read(recurringRulesRepositoryProvider).deleteRule(id: widget.ruleId!);
-    ref
-      ..invalidate(recurringRulesProvider)
-      ..invalidate(monthTransactionsProvider)
-      ..invalidate(dashboardMonthTransactionsProvider);
-    if (!context.mounted) return;
-    final l10n = context.l10n;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.recurring_deleted)));
-    if (!context.mounted) return;
-    Navigator.of(context).pop();
   }
 }

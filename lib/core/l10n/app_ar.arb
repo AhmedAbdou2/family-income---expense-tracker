@@ -311,20 +311,19 @@
   "recurring_pause": "إيقاف",
   "recurring_resume": "تشغيل",
   "recurring_saved": "تم حفظ الالتزام.",
-  "recurring_delete": "حذف الالتزام",
-  "recurring_delete_confirm_title": "حذف هذا الالتزام؟",
-  "recurring_delete_confirm_body": "اختر ما يجب فعله بالمعاملات التي أنشأها هذا الالتزام.",
-  "recurring_delete_option_keep": "الاحتفاظ بالمعاملات المنشورة بالفعل",
-  "recurring_delete_option_delete_month": "حذف المعاملات المنشورة من هذا الالتزام هذا الشهر أيضًا",
-  "recurring_delete_count": "{count, plural, =0{لن يتم حذف أي معاملات} =1{سيتم حذف معاملة واحدة} other{سيتم حذف {count} معاملات}}",
-  "@recurring_delete_count": {
+  "recurring_delete": "حذف المصروف الثابت",
+  "recurring_delete_confirm_title": "حذف هذا المصروف الثابت؟",
+  "recurring_delete_confirm_body": "سيتوقف عن الترحيل ويختفي من القائمة. اختر ما سيحدث للمعاملات التي رحّلها بالفعل.",
+  "recurring_delete_option_keep": "تبقى المعاملات المرحّلة وتستمر في احتسابها كمصروفات ثابتة",
+  "recurring_delete_option_delete_month": "{count, plural, =0{لا توجد معاملات مرحّلة هذا الشهر لحذفها} =1{تُحذف أيضًا معاملة هذا الشهر المرحّلة} other{تُحذف أيضًا {count} معاملات مرحّلة هذا الشهر}}",
+  "@recurring_delete_option_delete_month": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
-  "recurring_deleted": "تم حذف الالتزام.",
+  "recurring_deleted": "تم حذف المصروف الثابت.",
   "recurring_generated": "تم ترحيل {count} حركة دورية.",
   "recurring_type_income": "دخل",
   "recurring_type_expense": "مصروف",
@@ -391,5 +390,7 @@
   "dashboard_fixed_posted_help": "الالتزامات الثابتة التي رُحِّلت هذا الشهر.",
   "dashboard_fixed_due_help": "الالتزامات الثابتة التي ستُرحَّل لاحقًا هذا الشهر.",
   "dashboard_after_fixed_help": "الدخل ناقص الالتزامات الثابتة المُرحَّلة والمتبقية.",
-  "error_invalid_pet": "هذا الحيوان لا ينتمي إلى هذا المنزل."
+  "error_invalid_pet": "هذا الحيوان لا ينتمي إلى هذا المنزل.",
+  "error_invalid_rule": "هذا المصروف الثابت غير موجود.",
+  "error_already_archived": "تمت إزالة هذا المصروف الثابت بالفعل."
 }

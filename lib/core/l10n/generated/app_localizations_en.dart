@@ -913,36 +913,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurring_saved => 'Commitment saved.';
 
   @override
-  String get recurring_delete => 'Delete commitment';
+  String get recurring_delete => 'Delete fixed expense';
 
   @override
-  String get recurring_delete_confirm_title => 'Delete this commitment?';
+  String get recurring_delete_confirm_title => 'Delete this fixed expense?';
 
   @override
   String get recurring_delete_confirm_body =>
-      'Choose what to do with transactions posted from this rule.';
+      'It will stop posting and disappear from the list. Choose what happens to the transactions it already posted.';
 
   @override
-  String get recurring_delete_option_keep => 'Keep already posted transactions';
+  String get recurring_delete_option_keep =>
+      'Posted transactions stay and keep counting as fixed expenses';
 
   @override
-  String get recurring_delete_option_delete_month =>
-      'Also delete the transactions posted from this rule this month';
-
-  @override
-  String recurring_delete_count(int count) {
+  String recurring_delete_option_delete_month(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count transactions will be deleted',
-      one: '1 transaction will be deleted',
-      zero: 'No transactions will be deleted',
+      other: 'This month\'s $count posted transactions are deleted too',
+      one: 'This month\'s 1 posted transaction is deleted too',
+      zero: 'No posted transactions this month to delete',
     );
     return '$_temp0';
   }
 
   @override
-  String get recurring_deleted => 'Commitment deleted.';
+  String get recurring_deleted => 'Fixed expense deleted.';
 
   @override
   String recurring_generated(int count) {
@@ -1154,4 +1151,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get error_invalid_pet => 'That pet doesn\'t belong to this household.';
+
+  @override
+  String get error_invalid_rule => 'That fixed expense doesn\'t exist.';
+
+  @override
+  String get error_already_archived =>
+      'That fixed expense was already removed.';
 }

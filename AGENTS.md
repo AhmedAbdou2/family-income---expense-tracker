@@ -336,4 +336,26 @@ owner can delete the leftover unlinked person from the Family tab.
   `test/dashboard_fixed_test.dart`, new
   `test/transaction_delete_dialog_test.dart`); deprecated `RadioListTile`
   migrated to `RadioGroup`.
+- Fix (delete fixed expense corrupted the dashboard): the "Keep posted
+  transactions" path hard-deleted the rule, and
+  `transactions.recurring_rule_id` is `on delete set null`, so spent rows
+  lost their link and "Posted" dropped / "Left after fixed" rose (Docker
+  repro: Posted 2,000→0, Left 7,500→9,500, FK `confdeltype='n'`). Now rules
+  are archived: migration 15
+  (`20261012000015_archive_fixed_expenses.sql`) adds
+  `recurring_rules.archived_at`, rebuilds
+  `generate_recurring_transactions()` to skip archived rules, adds the
+  atomic `archive_recurring_rule(rule, delete_month_transactions)` RPC
+  (optionally purges this month's posted rows, then archives; nothing
+  deleted on failure), and revokes direct DELETE on `recurring_rules` from
+  `authenticated`/`anon`. Archived rules are inactive, hidden from the list,
+  never generated, and keep every link. App: `deleteRule` → `archiveRule`,
+  `listRules` hides archived, `fixedMonthSummary` skips archived, shared
+  delete dialog (`recurring_delete.dart`) states each option with the
+  month's count, pure `dashboardSummary()` extracted, new
+  `invalidRule`/`alreadyArchived` error codes. Docker-green (all 15 files on
+  a fresh DB + extended isolation test section 10 + privilege matrix);
+  analyze clean, 140 tests (`test/recurring_archive_test.dart` pins the exact
+  figures: Keep ⇒ Posted 2,000 / due 0 / expenses unchanged; delete-month ⇒
+  Posted 0 / expenses −2,000), web release build OK.
 - Phase 4: reports/charts/CSV export/polish.

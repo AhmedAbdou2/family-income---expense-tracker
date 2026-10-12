@@ -14,11 +14,11 @@ import '../../categories/presentation/category_visuals.dart';
 import '../../categories/presentation/providers.dart';
 import '../../members/presentation/providers.dart';
 import '../../recurring/domain/entities.dart';
-import '../../recurring/domain/fixed_summary.dart';
 import '../../recurring/presentation/providers.dart';
 import '../../transactions/domain/entities.dart';
 import '../../transactions/presentation/providers.dart';
 import '../../transactions/presentation/transaction_delete.dart';
+import '../domain/dashboard_summary.dart';
 import '../domain/entities.dart';
 import 'home_shell.dart';
 import 'providers.dart';
@@ -145,31 +145,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       ref.invalidate(dashboardMonthTransactionsProvider),
                 ),
                 data: (list) {
-                  var income = 0;
-                  var expense = 0;
-                  for (final transaction in list) {
-                    if (transaction.type == TransactionType.income) {
-                      income += transaction.amountMinorUnits;
-                    } else {
-                      expense += transaction.amountMinorUnits;
-                    }
-                  }
-                  final balance = income - expense;
-                  final fixed = fixedMonthSummary(
+                  final summary = dashboardSummary(
+                    transactions: list,
                     rules: rules,
                     incomeCategoryIds: incomeCategoryIds,
                     month: month,
                   );
-                  var postedFixed = 0;
-                  for (final transaction in list) {
-                    if (transaction.type == TransactionType.expense &&
-                        transaction.recurringRuleId != null) {
-                      postedFixed += transaction.amountMinorUnits;
-                    }
-                  }
-                  final remaining = income - postedFixed - fixed.dueMinor;
+                  final income = summary.incomeMinor;
+                  final expense = summary.expensesMinor;
+                  final balance = summary.balanceMinor;
+                  final postedFixed = summary.postedFixedMinor;
+                  final remaining = summary.leftAfterFixedMinor;
 
-                  if (list.isEmpty && fixed.totalMinor == 0) {
+                  if (list.isEmpty && summary.fixedProjectedMinor == 0) {
                     return EmptyState(
                       icon: Icons.pie_chart_outline_rounded,
                       title: l10n.month_no_data,
@@ -257,7 +245,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             Expanded(
                               child: _StatCard(
                                 title: l10n.dashboard_fixed_due,
-                                value: label(fixed.dueMinor),
+                                value: label(summary.stillDueMinor),
                                 color: Theme.of(context).colorScheme.tertiary,
                                 help: l10n.dashboard_fixed_due_help,
                               ),

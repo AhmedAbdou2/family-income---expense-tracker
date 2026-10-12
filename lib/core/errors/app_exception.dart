@@ -41,6 +41,8 @@ enum AppErrorCode {
   noCarCategory,
   noLinkedPerson,
   invalidPet,
+  invalidRule,
+  alreadyArchived,
   unknown,
 }
 
@@ -173,6 +175,10 @@ abstract final class ExceptionMapper {
         return const AppException(AppErrorCode.noLinkedPerson);
       case 'invalid_pet':
         return const AppException(AppErrorCode.invalidPet);
+      case 'invalid_rule':
+        return const AppException(AppErrorCode.invalidRule);
+      case 'already_archived':
+        return const AppException(AppErrorCode.alreadyArchived);
     }
 
     final message = error.message.toLowerCase();

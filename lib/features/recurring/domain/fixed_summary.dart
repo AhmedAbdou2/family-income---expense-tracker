@@ -35,6 +35,7 @@ FixedMonthSummary fixedMonthSummary({
   var due = 0;
   for (final rule in rules) {
     if (!rule.isActive) continue;
+    if (rule.isArchived) continue;
     if (incomeCategoryIds.contains(rule.categoryId)) continue;
     for (final occurs in occurrencesInMonth(rule, month)) {
       if (!occurs.isAfter(reference)) {

@@ -1799,43 +1799,37 @@ abstract class AppLocalizations {
   /// No description provided for @recurring_delete.
   ///
   /// In en, this message translates to:
-  /// **'Delete commitment'**
+  /// **'Delete fixed expense'**
   String get recurring_delete;
 
   /// No description provided for @recurring_delete_confirm_title.
   ///
   /// In en, this message translates to:
-  /// **'Delete this commitment?'**
+  /// **'Delete this fixed expense?'**
   String get recurring_delete_confirm_title;
 
   /// No description provided for @recurring_delete_confirm_body.
   ///
   /// In en, this message translates to:
-  /// **'Choose what to do with transactions posted from this rule.'**
+  /// **'It will stop posting and disappear from the list. Choose what happens to the transactions it already posted.'**
   String get recurring_delete_confirm_body;
 
   /// No description provided for @recurring_delete_option_keep.
   ///
   /// In en, this message translates to:
-  /// **'Keep already posted transactions'**
+  /// **'Posted transactions stay and keep counting as fixed expenses'**
   String get recurring_delete_option_keep;
 
   /// No description provided for @recurring_delete_option_delete_month.
   ///
   /// In en, this message translates to:
-  /// **'Also delete the transactions posted from this rule this month'**
-  String get recurring_delete_option_delete_month;
-
-  /// No description provided for @recurring_delete_count.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =0{No transactions will be deleted} =1{1 transaction will be deleted} other{{count} transactions will be deleted}}'**
-  String recurring_delete_count(int count);
+  /// **'{count, plural, =0{No posted transactions this month to delete} =1{This month\'s 1 posted transaction is deleted too} other{This month\'s {count} posted transactions are deleted too}}'**
+  String recurring_delete_option_delete_month(int count);
 
   /// No description provided for @recurring_deleted.
   ///
   /// In en, this message translates to:
-  /// **'Commitment deleted.'**
+  /// **'Fixed expense deleted.'**
   String get recurring_deleted;
 
   /// No description provided for @recurring_generated.
@@ -2227,6 +2221,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'That pet doesn\'t belong to this household.'**
   String get error_invalid_pet;
+
+  /// No description provided for @error_invalid_rule.
+  ///
+  /// In en, this message translates to:
+  /// **'That fixed expense doesn\'t exist.'**
+  String get error_invalid_rule;
+
+  /// No description provided for @error_already_archived.
+  ///
+  /// In en, this message translates to:
+  /// **'That fixed expense was already removed.'**
+  String get error_already_archived;
 }
 
 class _AppLocalizationsDelegate
