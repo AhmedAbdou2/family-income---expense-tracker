@@ -420,14 +420,11 @@ select set_config('test.member_kid', (
     and m.name = 'Linked Kid'
   limit 1)::text, false);
 
-insert into public.budgets (household_id, category_id, amount, period)
-values (current_setting('test.hh_a')::uuid,
-        current_setting('test.category_a')::uuid, 500.00, 'monthly');
-
-select set_config('test.budget_a', (
-  select b.id from public.budgets b
-  where b.household_id = current_setting('test.hh_a')::uuid
-  limit 1)::text, false);
+-- Migration 16: budgets are write-through-RPC only (direct INSERT is
+-- revoked from authenticated).
+select set_config('test.budget_a', public.set_category_budget(
+  current_setting('test.hh_a')::uuid,
+  current_setting('test.category_a')::uuid, 500.00)::text, false);
 
 select set_config('test.invite_link', public.create_invite(
   current_setting('test.hh_a')::uuid, 'child', 7,
@@ -538,24 +535,54 @@ begin
   get diagnostics n = row_count;
   if n <> 0 then raise exception 'FAIL: child deleted % member rows', n; end if;
 
-  -- 5.5 Child cannot EDIT budgets (may read them, never write).
-  update public.budgets
-     set amount = 1
-   where id = current_setting('test.budget_a')::uuid;
-  get diagnostics n = row_count;
-  if n <> 0 then raise exception 'FAIL: child edited a budget (% rows)', n; end if;
-
-  delete from public.budgets
-   where id = current_setting('test.budget_a')::uuid;
-  get diagnostics n = row_count;
-  if n <> 0 then raise exception 'FAIL: child deleted a budget (% rows)', n; end if;
+  -- 5.5 Migration 16: budgets are owner/adult-only. A child sees ZERO
+  --     budget rows, and every budget RPC raises 'forbidden'.
+  select count(*) into n from public.budgets;
+  if n <> 0 then raise exception 'FAIL: child sees % budget rows (expected 0)', n; end if;
 
   begin
-    insert into public.budgets (household_id, category_id, amount, period)
-    values (current_setting('test.hh_a')::uuid,
-            current_setting('test.category_a')::uuid, 1.00, 'monthly');
-    raise exception 'FAIL: child inserted a budget';
-  exception when insufficient_privilege then null;
+    perform public.set_budget_active(current_setting('test.budget_a')::uuid, false);
+    raise exception 'FAIL: child paused a budget via RPC';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    perform public.delete_budget(current_setting('test.budget_a')::uuid);
+    raise exception 'FAIL: child deleted a budget via RPC';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    perform public.set_category_budget(
+      current_setting('test.hh_a')::uuid,
+      current_setting('test.category_a')::uuid, 1.00);
+    raise exception 'FAIL: child set a category budget via RPC';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    perform public.set_overall_budget(current_setting('test.hh_a')::uuid, 1.00);
+    raise exception 'FAIL: child set the overall budget via RPC';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    perform public.monthly_totals(
+      current_setting('test.hh_a')::uuid,
+      date_trunc('month', current_date)::date,
+      (date_trunc('month', current_date) + interval '1 month')::date);
+    raise exception 'FAIL: child called monthly_totals';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
   end;
 end $$;
 
@@ -2123,6 +2150,257 @@ begin
 exception when others then
   if sqlerrm like 'FAIL:%' then raise; end if;
   if sqlerrm <> 'forbidden' then raise; end if;
+end $$;
+
+-- --------------------------------------------------------------------
+-- 11. PHASE 4: budgets (migration 16) + monthly_totals aggregation
+-- --------------------------------------------------------------------
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
+set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
+
+-- 11.0 One limit per category: setting the same category again UPDATES
+--      the same row (budget_a was created in 5.0 with 500.00).
+select set_config('test.budget_a2', public.set_category_budget(
+  current_setting('test.hh_a')::uuid,
+  current_setting('test.category_a')::uuid, 750.00)::text, false);
+
+do $$
+declare n int; v_amt numeric;
+begin
+  if current_setting('test.budget_a2') is distinct from current_setting('test.budget_a') then
+    raise exception 'FAIL: re-setting a category budget created a second row';
+  end if;
+  select count(*) into n from public.budgets
+   where household_id = current_setting('test.hh_a')::uuid
+     and category_id = current_setting('test.category_a')::uuid;
+  if n <> 1 then raise exception 'FAIL: % budget rows for one category (expected 1)', n; end if;
+  select amount into v_amt from public.budgets where id = current_setting('test.budget_a')::uuid;
+  if v_amt <> 750.00 then raise exception 'FAIL: category budget amount not updated (%)', v_amt; end if;
+end $$;
+
+-- 11.1 Overall limit: exactly one row, category_id null.
+select set_config('test.budget_overall', public.set_overall_budget(
+  current_setting('test.hh_a')::uuid, 2000.00)::text, false);
+
+do $$
+declare n int;
+begin
+  select count(*) into n from public.budgets
+   where household_id = current_setting('test.hh_a')::uuid and category_id is null;
+  if n <> 1 then raise exception 'FAIL: overall budget rows = % (expected 1)', n; end if;
+end $$;
+
+-- 11.2 Pause keeps the row; resume flips it back; delete removes it.
+do $$
+declare n int;
+begin
+  perform public.set_budget_active(current_setting('test.budget_overall')::uuid, false);
+  select count(*) into n from public.budgets
+   where id = current_setting('test.budget_overall')::uuid and is_active = false;
+  if n <> 1 then raise exception 'FAIL: pause did not keep the row inactive (%)', n; end if;
+
+  perform public.set_budget_active(current_setting('test.budget_overall')::uuid, true);
+  select count(*) into n from public.budgets
+   where id = current_setting('test.budget_overall')::uuid and is_active = true;
+  if n <> 1 then raise exception 'FAIL: resume failed (%)', n; end if;
+end $$;
+
+do $$
+begin
+  perform public.delete_budget(current_setting('test.budget_overall')::uuid);
+  if (select count(*) from public.budgets where id = current_setting('test.budget_overall')::uuid) <> 0 then
+    raise exception 'FAIL: delete_budget left the row behind';
+  end if;
+  begin
+    perform public.delete_budget(current_setting('test.budget_overall')::uuid);
+    raise exception 'FAIL: deleting an unknown budget succeeded';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_budget' then raise; end if;
+  end;
+end $$;
+
+-- 11.3 Amount validation: zero, negative, too many decimals -> invalid_value.
+do $$
+begin
+  begin
+    perform public.set_overall_budget(current_setting('test.hh_a')::uuid, 0);
+    raise exception 'FAIL: zero overall budget accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_value' then raise; end if;
+  end;
+
+  begin
+    perform public.set_overall_budget(current_setting('test.hh_a')::uuid, -5);
+    raise exception 'FAIL: negative overall budget accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_value' then raise; end if;
+  end;
+
+  begin
+    perform public.set_category_budget(current_setting('test.hh_a')::uuid,
+                                       current_setting('test.category_a')::uuid, 10.555);
+    raise exception 'FAIL: 3-decimal amount accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_value' then raise; end if;
+  end;
+
+  begin
+    perform public.set_category_budget(current_setting('test.hh_a')::uuid,
+                                       '00000000-0000-0000-0000-000000000000', 10.00);
+    raise exception 'FAIL: unknown category accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_category' then raise; end if;
+  end;
+end $$;
+
+-- 11.4 Cross-household category rejected: grab one of hh_j's categories
+--      (as J), then try to attach it to hh_a (as A).
+set local request.jwt.claims to '{"sub":"99999999-9999-4999-8999-999999999999","role":"authenticated"}';
+set local request.jwt.claim.sub to '99999999-9999-4999-8999-999999999999';
+select set_config('test.category_j', (
+  select c.id from public.categories c
+   where c.household_id = current_setting('test.hh_j')::uuid
+   limit 1)::text, false);
+
+set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
+set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
+
+do $$
+begin
+  begin
+    perform public.set_category_budget(current_setting('test.hh_a')::uuid,
+                                       current_setting('test.category_j')::uuid, 100.00);
+    raise exception 'FAIL: set a budget for another household''s category';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_category' then raise; end if;
+  end;
+end $$;
+
+-- 11.5 Deleting an unused category cascades its budget row away.
+do $$
+declare v_cat uuid; v_budget uuid;
+begin
+  insert into public.categories (household_id, "group", name_en, name_ar)
+  values (current_setting('test.hh_a')::uuid, 'general', 'Budget Temp', 'Budget Temp')
+  returning id into v_cat;
+
+  v_budget := public.set_category_budget(current_setting('test.hh_a')::uuid, v_cat, 300.00);
+  if (select count(*) from public.budgets where id = v_budget) <> 1 then
+    raise exception 'FAIL: cascade setup budget missing';
+  end if;
+
+  delete from public.categories where id = v_cat;
+  if (select count(*) from public.budgets where id = v_budget) <> 0 then
+    raise exception 'FAIL: deleting the category left its budget behind';
+  end if;
+end $$;
+
+-- 11.6 monthly_totals: aggregated in the DB, exact even past 1000 rows.
+do $$
+declare
+  v_hh uuid := current_setting('test.hh_a')::uuid;
+  v_mem uuid := current_setting('test.member_a')::uuid;
+  v_cat uuid := current_setting('test.category_a')::uuid;
+  v_old date := (date_trunc('month', current_date) - interval '24 months')::date;
+  v_old_end date := (date_trunc('month', current_date) - interval '23 months')::date;
+  v_curr date := date_trunc('month', current_date)::date;
+  v_curr_end date := (date_trunc('month', current_date) + interval '1 month')::date;
+  v_n int;
+  v_months int;
+  v_income bigint; v_expense bigint;
+  v_rpc_income bigint; v_rpc_expense bigint;
+begin
+  -- 1001 expenses of 1.11 in an otherwise-empty month 24 months back.
+  insert into public.transactions (household_id, type, amount, category_id, member_id, date)
+  select v_hh, 'expense', 1.11, v_cat, v_mem, v_old + (g % 28)::int
+    from generate_series(1, 1001) g;
+
+  select count(*) into v_n from public.transactions
+   where household_id = v_hh and date >= v_old and date < v_old_end;
+  if v_n <> 1001 then raise exception 'FAIL: seeded % rows (expected 1001)', v_n; end if;
+
+  select income_minor, expense_minor into v_rpc_income, v_rpc_expense
+    from public.monthly_totals(v_hh, v_old, v_old_end)
+   where month_start = v_old;
+
+  if v_rpc_expense is distinct from 111111 then
+    raise exception 'FAIL: >1000-row month expense = % (expected 111111)', v_rpc_expense;
+  end if;
+  if v_rpc_income is distinct from 0 then
+    raise exception 'FAIL: >1000-row month income = % (expected 0)', v_rpc_income;
+  end if;
+
+  -- Same definitions as the dashboard: RPC == direct sum for the month.
+  select (coalesce(sum(amount) filter (where type = 'income'), 0) * 100)::bigint,
+         (coalesce(sum(amount) filter (where type = 'expense'), 0) * 100)::bigint
+    into v_income, v_expense
+    from public.transactions
+   where household_id = v_hh and date >= v_curr and date < v_curr_end;
+
+  select income_minor, expense_minor into v_rpc_income, v_rpc_expense
+    from public.monthly_totals(v_hh, v_curr, v_curr_end)
+   where month_start = v_curr;
+
+  if v_rpc_income is distinct from v_income then
+    raise exception 'FAIL: RPC income % <> direct %', v_rpc_income, v_income;
+  end if;
+  if v_rpc_expense is distinct from v_expense then
+    raise exception 'FAIL: RPC expense % <> direct %', v_rpc_expense, v_expense;
+  end if;
+
+  -- Empty months are omitted: the row count equals the number of months
+  -- that actually carry transactions (not every month in the window).
+  select count(*) into v_n from public.monthly_totals(v_hh, v_old, v_curr_end);
+  select count(distinct date_trunc('month', t.date)::date) into v_months
+    from public.transactions t
+   where t.household_id = v_hh and t.date >= v_old and t.date < v_curr_end;
+  if v_n <> v_months then
+    raise exception 'FAIL: monthly_totals returned % rows, distinct months = %', v_n, v_months;
+  end if;
+
+  -- Bad ranges are rejected.
+  begin
+    perform public.monthly_totals(v_hh, v_curr_end, v_curr);
+    raise exception 'FAIL: inverted range accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_value' then raise; end if;
+  end;
+
+  raise notice 'MONTHLY_TOTALS PASSED (1001 rows exact, dashboard-identical)';
+end $$;
+
+-- 11.7 Outsider H stays locked out of every budget RPC.
+set local request.jwt.claims to '{"sub":"88888888-8888-4888-8888-888888888888","role":"authenticated"}';
+set local request.jwt.claim.sub to '88888888-8888-4888-8888-888888888888';
+
+do $$
+begin
+  begin
+    perform public.set_category_budget(current_setting('test.hh_a')::uuid,
+                                       current_setting('test.category_a')::uuid, 1.00);
+    raise exception 'FAIL: outsider set a category budget';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    perform public.monthly_totals(current_setting('test.hh_a')::uuid,
+                                  date_trunc('month', current_date)::date,
+                                  (date_trunc('month', current_date) + interval '1 month')::date);
+    raise exception 'FAIL: outsider called monthly_totals';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
 end $$;
 
 -- --------------------------------------------------------------------
