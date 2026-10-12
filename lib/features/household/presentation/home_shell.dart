@@ -60,9 +60,9 @@ class _Destination {
 /// Adaptive navigation shared by phones, tablets and web/desktop.
 ///
 /// Branch order (fixed - see `app_router.dart`): 0 dashboard, 1
-/// transactions, 2 people, 3 fixed, 4 settings, 5 vehicles, 6 pets.
-/// The bottom bar shows only the first four (adult) / three (child);
-/// every other destination lives in the drawer / rail.
+/// transactions, 2 people, 3 fixed, 4 settings, 5 vehicles, 6 pets,
+/// 7 budgets, 8 reports. The bottom bar shows only the first four (adult) /
+/// three (child); every other destination lives in the drawer / rail.
 class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key, required this.shell});
 
@@ -138,6 +138,18 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         icon: Icons.pets_outlined,
         activeIcon: Icons.pets_rounded,
         label: l10n.nav_pets,
+        adultOnly: true,
+      ),
+      _Destination(
+        icon: Icons.savings_outlined,
+        activeIcon: Icons.savings_rounded,
+        label: l10n.nav_budgets,
+        adultOnly: true,
+      ),
+      _Destination(
+        icon: Icons.bar_chart_outlined,
+        activeIcon: Icons.bar_chart_rounded,
+        label: l10n.nav_reports,
         adultOnly: true,
       ),
     ];

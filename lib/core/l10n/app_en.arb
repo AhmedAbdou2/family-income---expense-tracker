@@ -432,5 +432,83 @@
   "dashboard_after_fixed_help": "Income minus posted and still-due fixed commitments.",
   "error_invalid_pet": "That pet doesn't belong to this household.",
   "error_invalid_rule": "That fixed expense doesn't exist.",
-  "error_already_archived": "That fixed expense was already removed."
+  "error_already_archived": "That fixed expense was already removed.",
+  "error_invalid_category": "That category doesn't belong to this household.",
+  "error_invalid_budget": "That limit doesn't exist.",
+
+  "nav_budgets": "Budgets",
+  "nav_reports": "Reports",
+  "budgets_title": "Budgets",
+  "budget_overall_title": "Overall monthly limit",
+  "budget_overall_hint": "Covers ALL expenses this month, including categories without a limit and posted fixed expenses.",
+  "budget_projected_note": "Projected to exceed the limit",
+  "budget_help_spent": "Includes posted fixed expenses.",
+  "budget_status_ok": "Within limit",
+  "budget_status_near": "Near limit",
+  "budget_status_over": "Over budget",
+  "budget_percent": "{percent}% used",
+  "@budget_percent": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "budget_add": "Set a limit",
+  "budget_add_overall": "Set overall limit",
+  "budget_edit": "Edit limit",
+  "budget_pause": "Pause",
+  "budget_resume": "Resume",
+  "budget_delete": "Delete limit",
+  "budget_paused": "Paused",
+  "budget_paused_hint": "Paused — not counted in alerts.",
+  "budget_amount_label": "Monthly limit",
+  "budget_amount_hint": "e.g. 1000",
+  "budget_saved": "Limit saved.",
+  "budget_deleted": "Limit deleted.",
+  "budget_delete_confirm_title": "Delete this limit?",
+  "budget_delete_confirm_body": "The spending stays; only the limit is removed.",
+  "budget_empty_title": "No limits yet",
+  "budget_empty_body": "Set a monthly limit for a category, or one overall limit for the whole household.",
+  "budget_spent_of": "{spent} of {limit}",
+  "@budget_spent_of": {
+    "placeholders": {
+      "spent": { "type": "String" },
+      "limit": { "type": "String" }
+    }
+  },
+  "budget_remaining_value": "Remaining: {amount}",
+  "@budget_remaining_value": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "budget_projected_value": "Projected: {amount}",
+  "@budget_projected_value": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "budget_alert_title": "Budgets",
+  "budget_alert_all_ok": "No category is near or over its limit.",
+  "budget_alert_count": "{count, plural, =1{1 category near or over its limit} other{{count} categories near or over their limits}}",
+  "@budget_alert_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "budget_alert_overall": "Overall limit: {amount}",
+  "@budget_alert_overall": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+
+  "reports_title": "Reports",
+  "report_by_category": "Expenses by category",
+  "report_income_vs_expenses": "Income vs expenses",
+  "report_by_person": "Spending by person",
+  "report_last_six_months": "Last 6 months",
+  "report_total": "Total",
+  "report_expenses_total": "Total expenses: {amount}",
+  "@report_expenses_total": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "report_share": "{percent}%",
+  "@report_share": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "report_legend_income": "Income",
+  "report_empty_title": "No data yet",
+  "report_empty_body": "Add some transactions and the charts will appear here.",
+  "report_by_category_empty": "No expenses this month to chart.",
+  "report_by_person_empty": "No spending this month to chart."
 }

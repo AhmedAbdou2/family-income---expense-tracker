@@ -320,6 +320,8 @@ void main() {
         '/pets',
         '/pets/new',
         '/pets/p1',
+        '/budgets',
+        '/reports',
       ]) {
         expect(
           appRedirect(
@@ -342,6 +344,8 @@ void main() {
         '/vehicles/v1',
         '/recurring',
         '/pets',
+        '/budgets',
+        '/reports',
       ]) {
         expect(
           appRedirect(

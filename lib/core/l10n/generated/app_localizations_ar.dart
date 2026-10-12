@@ -1195,4 +1195,180 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get error_already_archived => 'تمت إزالة هذا المصروف الثابت بالفعل.';
+
+  @override
+  String get error_invalid_category => 'هذا التصنيف ليس من تصنيفات هذه الأسرة.';
+
+  @override
+  String get error_invalid_budget => 'هذا الحد غير موجود.';
+
+  @override
+  String get nav_budgets => 'الميزانيات';
+
+  @override
+  String get nav_reports => 'التقارير';
+
+  @override
+  String get budgets_title => 'الميزانيات';
+
+  @override
+  String get budget_overall_title => 'الحد الشهري الإجمالي';
+
+  @override
+  String get budget_overall_hint =>
+      'يشمل كل مصروفات الشهر، بما فيها التصنيفات بلا حد والمصروفات الثابتة المسجّلة.';
+
+  @override
+  String get budget_projected_note => 'متوقع تجاوز الحد';
+
+  @override
+  String get budget_help_spent => 'يشمل المصروفات الثابتة المسجّلة.';
+
+  @override
+  String get budget_status_ok => 'ضمن الحد';
+
+  @override
+  String get budget_status_near => 'قريب من الحد';
+
+  @override
+  String get budget_status_over => 'تجاوز الميزانية';
+
+  @override
+  String budget_percent(int percent) {
+    return 'استُخدم $percent%';
+  }
+
+  @override
+  String get budget_add => 'تحديد حد';
+
+  @override
+  String get budget_add_overall => 'تحديد الحد الإجمالي';
+
+  @override
+  String get budget_edit => 'تعديل الحد';
+
+  @override
+  String get budget_pause => 'إيقاف مؤقت';
+
+  @override
+  String get budget_resume => 'استئناف';
+
+  @override
+  String get budget_delete => 'حذف الحد';
+
+  @override
+  String get budget_paused => 'موقوف مؤقتًا';
+
+  @override
+  String get budget_paused_hint => 'موقوف مؤقتًا — لا يُحتسب في التنبيهات.';
+
+  @override
+  String get budget_amount_label => 'الحد الشهري';
+
+  @override
+  String get budget_amount_hint => 'مثال: 1000';
+
+  @override
+  String get budget_saved => 'تم حفظ الحد.';
+
+  @override
+  String get budget_deleted => 'تم حذف الحد.';
+
+  @override
+  String get budget_delete_confirm_title => 'حذف هذا الحد؟';
+
+  @override
+  String get budget_delete_confirm_body =>
+      'تبقى المصروفات كما هي، ويُحذف الحد فقط.';
+
+  @override
+  String get budget_empty_title => 'لا توجد حدود بعد';
+
+  @override
+  String get budget_empty_body =>
+      'حدّد حدًا شهريًا لتصنيف، أو حدًا إجماليًا واحدًا للأسرة.';
+
+  @override
+  String budget_spent_of(String spent, String limit) {
+    return '$spent من $limit';
+  }
+
+  @override
+  String budget_remaining_value(String amount) {
+    return 'المتبقي: $amount';
+  }
+
+  @override
+  String budget_projected_value(String amount) {
+    return 'المتوقع: $amount';
+  }
+
+  @override
+  String get budget_alert_title => 'الميزانيات';
+
+  @override
+  String get budget_alert_all_ok => 'لا يوجد تصنيف قريب من حده أو متجاوز له.';
+
+  @override
+  String budget_alert_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count تصنيف قريب من الحد أو متجاوز',
+      many: '$count تصنيفًا قريبًا من الحد أو متجاوزًا',
+      few: '$count تصنيفات قريبة من الحد أو متجاوزة',
+      two: 'تصنيفان قريبان من الحد أو متجاوزان',
+      one: 'تصنيف واحد قريب من الحد أو متجاوز',
+      zero: 'لا توجد تصنيفات قريبة من الحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String budget_alert_overall(String amount) {
+    return 'الحد الإجمالي: $amount';
+  }
+
+  @override
+  String get reports_title => 'التقارير';
+
+  @override
+  String get report_by_category => 'المصروفات حسب التصنيف';
+
+  @override
+  String get report_income_vs_expenses => 'الإيرادات مقابل المصروفات';
+
+  @override
+  String get report_by_person => 'الإنفاق حسب الشخص';
+
+  @override
+  String get report_last_six_months => 'آخر 6 أشهر';
+
+  @override
+  String get report_total => 'الإجمالي';
+
+  @override
+  String report_expenses_total(String amount) {
+    return 'إجمالي المصروفات: $amount';
+  }
+
+  @override
+  String report_share(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String get report_legend_income => 'الإيرادات';
+
+  @override
+  String get report_empty_title => 'لا توجد بيانات بعد';
+
+  @override
+  String get report_empty_body => 'أضف بعض المعاملات وستظهر الرسوم هنا.';
+
+  @override
+  String get report_by_category_empty => 'لا توجد مصروفات هذا الشهر لعرضها.';
+
+  @override
+  String get report_by_person_empty => 'لا يوجد إنفاق هذا الشهر لعرضه.';
 }

@@ -186,4 +186,5 @@ supabase/
 | 2.5 | Self-service membership: joiner picks their own name, claim screen for legacy logins, owner-only Household-members screen, role/removal/leave RPCs | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
 | 3 | Vehicles + fuel log (L/100km, cost/km), maintenance reminders, recurring fixed commitments (idempotent generator) | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
 | 3.5 | Profile screen + drawer/rail navigation, Pets, fixed commitments linked to vehicle/pet/person, dashboard fixed posted/due/remaining, "Make monthly fixed" | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
-| 4 | Reports, charts, CSV export, polish | pending |
+| 4a | Budgets (per-category + overall monthly limits, spent-based alerts, pause/resume), Reports (category donut, 6-month income vs expenses, spending per person), dashboard alert card — all reconciling exactly with the dashboard | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
+| 4b | Receipts/attachments, CSV/PDF export, offline cache, pet reminders, polish | pending |

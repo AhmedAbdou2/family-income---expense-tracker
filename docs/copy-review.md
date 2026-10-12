@@ -188,3 +188,72 @@ Text-only pass over `lib/core/l10n/app_en.arb` and `lib/core/l10n/app_ar.arb`. N
 | `pets_empty_title` | No pets yet | لا توجد حيوانات بعد | لا توجد حيوانات أليفة بعد |
 | `pets_section` | Pets | الحيوانات | الحيوانات الأليفة |
 | `pets_title` | Pets | الحيوانات | الحيوانات الأليفة |
+
+## Phase 4a: Budgets & Reports (new strings)
+
+New screens, so every string below is new (there is no "old Arabic" column).
+Glossary additions: **الميزانيات** (budgets), **الحد الشهري** (monthly limit),
+**الحد الإجمالي** (overall limit), **التقارير** (reports — **never** الرؤى),
+**المسجَّل** (posted, unchanged from the fixed-expenses cards).
+
+Decisions worth noting:
+
+- The dashboard alert card counts **categories** only, so its "nothing to
+  worry about" line reads `No category is near or over its limit.` rather than
+  "all budgets are on track" (the overall limit is surfaced on its own line,
+  with a status word beside it when it is near/over).
+- Amounts keep the copy-pass rules: `ج.م` in Arabic / `EGP` in English via
+  `Currency.label`, Western digits 0-9 in the strings (the Arabic-Indic toggle
+  still converts displayed numbers), and ICU plural categories in Arabic.
+
+| key | English | old Arabic | new Arabic |
+| --- | --- | --- | --- |
+| `error_invalid_category` | That category doesn't belong to this household. | *(new)* | هذا التصنيف ليس من تصنيفات هذه الأسرة. |
+| `error_invalid_budget` | That limit doesn't exist. | *(new)* | هذا الحد غير موجود. |
+| `nav_budgets` | Budgets | *(new)* | الميزانيات |
+| `nav_reports` | Reports | *(new)* | التقارير |
+| `budgets_title` | Budgets | *(new)* | الميزانيات |
+| `budget_overall_title` | Overall monthly limit | *(new)* | الحد الشهري الإجمالي |
+| `budget_overall_hint` | Covers ALL expenses this month, including categories without a limit and posted fixed expenses. | *(new)* | يشمل كل مصروفات الشهر، بما فيها التصنيفات بلا حد والمصروفات الثابتة المسجّلة. |
+| `budget_projected_note` | Projected to exceed the limit | *(new)* | متوقع تجاوز الحد |
+| `budget_help_spent` | Includes posted fixed expenses. | *(new)* | يشمل المصروفات الثابتة المسجّلة. |
+| `budget_status_ok` | Within limit | *(new)* | ضمن الحد |
+| `budget_status_near` | Near limit | *(new)* | قريب من الحد |
+| `budget_status_over` | Over budget | *(new)* | تجاوز الميزانية |
+| `budget_percent` | {percent}% used | *(new)* | استُخدم {percent}% |
+| `budget_add` | Set a limit | *(new)* | تحديد حد |
+| `budget_add_overall` | Set overall limit | *(new)* | تحديد الحد الإجمالي |
+| `budget_edit` | Edit limit | *(new)* | تعديل الحد |
+| `budget_pause` | Pause | *(new)* | إيقاف مؤقت |
+| `budget_resume` | Resume | *(new)* | استئناف |
+| `budget_delete` | Delete limit | *(new)* | حذف الحد |
+| `budget_paused` | Paused | *(new)* | موقوف مؤقتًا |
+| `budget_paused_hint` | Paused — not counted in alerts. | *(new)* | موقوف مؤقتًا — لا يُحتسب في التنبيهات. |
+| `budget_amount_label` | Monthly limit | *(new)* | الحد الشهري |
+| `budget_amount_hint` | e.g. 1000 | *(new)* | مثال: 1000 |
+| `budget_saved` | Limit saved. | *(new)* | تم حفظ الحد. |
+| `budget_deleted` | Limit deleted. | *(new)* | تم حذف الحد. |
+| `budget_delete_confirm_title` | Delete this limit? | *(new)* | حذف هذا الحد؟ |
+| `budget_delete_confirm_body` | The spending stays; only the limit is removed. | *(new)* | تبقى المصروفات كما هي، ويُحذف الحد فقط. |
+| `budget_empty_title` | No limits yet | *(new)* | لا توجد حدود بعد |
+| `budget_empty_body` | Set a monthly limit for a category, or one overall limit for the whole household. | *(new)* | حدّد حدًا شهريًا لتصنيف، أو حدًا إجماليًا واحدًا للأسرة. |
+| `budget_spent_of` | {spent} of {limit} | *(new)* | {spent} من {limit} |
+| `budget_remaining_value` | Remaining: {amount} | *(new)* | المتبقي: {amount} |
+| `budget_projected_value` | Projected: {amount} | *(new)* | المتوقع: {amount} |
+| `budget_alert_title` | Budgets | *(new)* | الميزانيات |
+| `budget_alert_all_ok` | No category is near or over its limit. | *(new)* | لا يوجد تصنيف قريب من حده أو متجاوز له. |
+| `budget_alert_count` | {count, plural, =1{1 category near or over its limit} other{{count} categories near or over their limits}} | *(new)* | {count, plural, zero{لا توجد تصنيفات قريبة من الحد} one{تصنيف واحد قريب من الحد أو متجاوز} two{تصنيفان قريبان من الحد أو متجاوزان} few{{count} تصنيفات قريبة من الحد أو متجاوزة} many{{count} تصنيفًا قريبًا من الحد أو متجاوزًا} other{{count} تصنيف قريب من الحد أو متجاوز}} |
+| `budget_alert_overall` | Overall limit: {amount} | *(new)* | الحد الإجمالي: {amount} |
+| `reports_title` | Reports | *(new)* | التقارير |
+| `report_by_category` | Expenses by category | *(new)* | المصروفات حسب التصنيف |
+| `report_income_vs_expenses` | Income vs expenses | *(new)* | الإيرادات مقابل المصروفات |
+| `report_by_person` | Spending by person | *(new)* | الإنفاق حسب الشخص |
+| `report_last_six_months` | Last 6 months | *(new)* | آخر 6 أشهر |
+| `report_total` | Total | *(new)* | الإجمالي |
+| `report_expenses_total` | Total expenses: {amount} | *(new)* | إجمالي المصروفات: {amount} |
+| `report_share` | {percent}% | *(new)* | {percent}% |
+| `report_legend_income` | Income | *(new)* | الإيرادات |
+| `report_empty_title` | No data yet | *(new)* | لا توجد بيانات بعد |
+| `report_empty_body` | Add some transactions and the charts will appear here. | *(new)* | أضف بعض المعاملات وستظهر الرسوم هنا. |
+| `report_by_category_empty` | No expenses this month to chart. | *(new)* | لا توجد مصروفات هذا الشهر لعرضها. |
+| `report_by_person_empty` | No spending this month to chart. | *(new)* | لا يوجد إنفاق هذا الشهر لعرضه. |

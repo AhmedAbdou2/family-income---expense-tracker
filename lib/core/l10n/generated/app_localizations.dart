@@ -2251,6 +2251,300 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'That fixed expense was already removed.'**
   String get error_already_archived;
+
+  /// No description provided for @error_invalid_category.
+  ///
+  /// In en, this message translates to:
+  /// **'That category doesn\'t belong to this household.'**
+  String get error_invalid_category;
+
+  /// No description provided for @error_invalid_budget.
+  ///
+  /// In en, this message translates to:
+  /// **'That limit doesn\'t exist.'**
+  String get error_invalid_budget;
+
+  /// No description provided for @nav_budgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets'**
+  String get nav_budgets;
+
+  /// No description provided for @nav_reports.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get nav_reports;
+
+  /// No description provided for @budgets_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets'**
+  String get budgets_title;
+
+  /// No description provided for @budget_overall_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall monthly limit'**
+  String get budget_overall_title;
+
+  /// No description provided for @budget_overall_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Covers ALL expenses this month, including categories without a limit and posted fixed expenses.'**
+  String get budget_overall_hint;
+
+  /// No description provided for @budget_projected_note.
+  ///
+  /// In en, this message translates to:
+  /// **'Projected to exceed the limit'**
+  String get budget_projected_note;
+
+  /// No description provided for @budget_help_spent.
+  ///
+  /// In en, this message translates to:
+  /// **'Includes posted fixed expenses.'**
+  String get budget_help_spent;
+
+  /// No description provided for @budget_status_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'Within limit'**
+  String get budget_status_ok;
+
+  /// No description provided for @budget_status_near.
+  ///
+  /// In en, this message translates to:
+  /// **'Near limit'**
+  String get budget_status_near;
+
+  /// No description provided for @budget_status_over.
+  ///
+  /// In en, this message translates to:
+  /// **'Over budget'**
+  String get budget_status_over;
+
+  /// No description provided for @budget_percent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% used'**
+  String budget_percent(int percent);
+
+  /// No description provided for @budget_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a limit'**
+  String get budget_add;
+
+  /// No description provided for @budget_add_overall.
+  ///
+  /// In en, this message translates to:
+  /// **'Set overall limit'**
+  String get budget_add_overall;
+
+  /// No description provided for @budget_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit limit'**
+  String get budget_edit;
+
+  /// No description provided for @budget_pause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get budget_pause;
+
+  /// No description provided for @budget_resume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get budget_resume;
+
+  /// No description provided for @budget_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete limit'**
+  String get budget_delete;
+
+  /// No description provided for @budget_paused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get budget_paused;
+
+  /// No description provided for @budget_paused_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused — not counted in alerts.'**
+  String get budget_paused_hint;
+
+  /// No description provided for @budget_amount_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly limit'**
+  String get budget_amount_label;
+
+  /// No description provided for @budget_amount_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 1000'**
+  String get budget_amount_hint;
+
+  /// No description provided for @budget_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit saved.'**
+  String get budget_saved;
+
+  /// No description provided for @budget_deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit deleted.'**
+  String get budget_deleted;
+
+  /// No description provided for @budget_delete_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this limit?'**
+  String get budget_delete_confirm_title;
+
+  /// No description provided for @budget_delete_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'The spending stays; only the limit is removed.'**
+  String get budget_delete_confirm_body;
+
+  /// No description provided for @budget_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No limits yet'**
+  String get budget_empty_title;
+
+  /// No description provided for @budget_empty_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a monthly limit for a category, or one overall limit for the whole household.'**
+  String get budget_empty_body;
+
+  /// No description provided for @budget_spent_of.
+  ///
+  /// In en, this message translates to:
+  /// **'{spent} of {limit}'**
+  String budget_spent_of(String spent, String limit);
+
+  /// No description provided for @budget_remaining_value.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining: {amount}'**
+  String budget_remaining_value(String amount);
+
+  /// No description provided for @budget_projected_value.
+  ///
+  /// In en, this message translates to:
+  /// **'Projected: {amount}'**
+  String budget_projected_value(String amount);
+
+  /// No description provided for @budget_alert_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets'**
+  String get budget_alert_title;
+
+  /// No description provided for @budget_alert_all_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'No category is near or over its limit.'**
+  String get budget_alert_all_ok;
+
+  /// No description provided for @budget_alert_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 category near or over its limit} other{{count} categories near or over their limits}}'**
+  String budget_alert_count(int count);
+
+  /// No description provided for @budget_alert_overall.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall limit: {amount}'**
+  String budget_alert_overall(String amount);
+
+  /// No description provided for @reports_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get reports_title;
+
+  /// No description provided for @report_by_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses by category'**
+  String get report_by_category;
+
+  /// No description provided for @report_income_vs_expenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Income vs expenses'**
+  String get report_income_vs_expenses;
+
+  /// No description provided for @report_by_person.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending by person'**
+  String get report_by_person;
+
+  /// No description provided for @report_last_six_months.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 6 months'**
+  String get report_last_six_months;
+
+  /// No description provided for @report_total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get report_total;
+
+  /// No description provided for @report_expenses_total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total expenses: {amount}'**
+  String report_expenses_total(String amount);
+
+  /// No description provided for @report_share.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String report_share(int percent);
+
+  /// No description provided for @report_legend_income.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get report_legend_income;
+
+  /// No description provided for @report_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No data yet'**
+  String get report_empty_title;
+
+  /// No description provided for @report_empty_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Add some transactions and the charts will appear here.'**
+  String get report_empty_body;
+
+  /// No description provided for @report_by_category_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No expenses this month to chart.'**
+  String get report_by_category_empty;
+
+  /// No description provided for @report_by_person_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No spending this month to chart.'**
+  String get report_by_person_empty;
 }
 
 class _AppLocalizationsDelegate

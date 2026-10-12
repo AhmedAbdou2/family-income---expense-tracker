@@ -6,6 +6,7 @@ import '../../features/auth/presentation/forgot_password_screen.dart';
 import '../../features/auth/presentation/providers.dart';
 import '../../features/auth/presentation/sign_in_screen.dart';
 import '../../features/auth/presentation/sign_up_screen.dart';
+import '../../features/budgets/presentation/budgets_screen.dart';
 import '../../features/categories/presentation/categories_screen.dart';
 import '../../features/household/domain/entities.dart';
 import '../../features/household/presentation/claim_screen.dart';
@@ -24,6 +25,7 @@ import '../../features/pets/presentation/pet_form_screen.dart';
 import '../../features/pets/presentation/pets_screen.dart';
 import '../../features/recurring/presentation/recurring_form_screen.dart';
 import '../../features/recurring/presentation/recurring_screen.dart';
+import '../../features/reports/presentation/reports_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/transactions/presentation/transaction_form_screen.dart';
 import '../../features/transactions/presentation/transactions_screen.dart';
@@ -246,6 +248,20 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(
               path: '/pets',
               builder: (context, state) => const PetsScreen(),
+            ),
+          ]),
+          // Phase 4: budgets and reports, also adult-only, also last so the
+          // child's destination indexes stay aligned.
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/budgets',
+              builder: (context, state) => const BudgetsScreen(),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/reports',
+              builder: (context, state) => const ReportsScreen(),
             ),
           ]),
         ],

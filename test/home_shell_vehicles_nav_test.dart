@@ -40,6 +40,8 @@ GoRouter _buildRouter() => GoRouter(
             _branch('/settings', 'settings-branch'),
             _branch('/vehicles', 'vehicles-branch'),
             _branch('/pets', 'pets-branch'),
+            _branch('/budgets', 'budgets-branch'),
+            _branch('/reports', 'reports-branch'),
           ],
         ),
       ],

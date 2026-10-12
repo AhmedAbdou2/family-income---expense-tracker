@@ -13,6 +13,8 @@ import '../../../core/widgets/loading_view.dart';
 import '../../categories/domain/entities.dart';
 import '../../categories/presentation/category_visuals.dart';
 import '../../categories/presentation/providers.dart';
+import '../../budgets/domain/budget_progress.dart';
+import '../../budgets/presentation/providers.dart';
 import '../../members/presentation/providers.dart';
 import '../../recurring/domain/entities.dart';
 import '../../recurring/presentation/providers.dart';
@@ -306,6 +308,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ),
                         ),
                       ),
+                      const _BudgetAlertCard(),
                       Padding(
                         padding: const EdgeInsetsDirectional.only(
                           start: 20, end: 20, top: 20, bottom: 4,
@@ -441,6 +444,131 @@ class _StatCard extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// Compact "how are the budgets doing" card. Adult-only, and only rendered
+/// when the household has at least one limit. Tapping opens the Budgets tab.
+/// Never colour alone: an icon and a text line carry the meaning.
+class _BudgetAlertCard extends ConsumerWidget {
+  const _BudgetAlertCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final membership = ref.watch(membershipProvider).value;
+    if (membership == null || membership.role == MemberRole.child) {
+      return const SizedBox.shrink();
+    }
+    final overview = ref.watch(budgetOverviewProvider).value;
+    if (overview == null || !overview.hasBudgets) return const SizedBox.shrink();
+
+    final scheme = Theme.of(context).colorScheme;
+    final arabicDigits = ref.watch(settingsProvider).arabicDigits;
+    final locale = Localizations.localeOf(context).toString();
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    final alertCount = overview.alertCount;
+    final accent = alertCount > 0 ? scheme.error : scheme.primary;
+    final overall = overview.overall;
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 14, 16, 0),
+      child: Material(
+        color: scheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => context.go('/budgets'),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundColor: accent.withValues(alpha: 0.18),
+                  child: Icon(
+                    alertCount > 0
+                        ? Icons.notifications_active_rounded
+                        : Icons.savings_outlined,
+                    size: 18,
+                    color: accent,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.budget_alert_title,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        alertCount > 0
+                            ? l10n.budget_alert_count(alertCount)
+                            : l10n.budget_alert_all_ok,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: alertCount > 0
+                              ? scheme.error
+                              : scheme.onSurfaceVariant,
+                        ),
+                      ),
+                      if (overall != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.budget_alert_overall(
+                            Money.format(
+                              minorUnits: overall.limitMinor,
+                              arabicDigits: arabicDigits,
+                              currencyCode: Currency.label(
+                                membership.household.currency,
+                                locale: locale,
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                        if (overall.isActive &&
+                            overall.status != BudgetStatus.ok) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            overall.status == BudgetStatus.over
+                                ? l10n.budget_status_over
+                                : l10n.budget_status_near,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: scheme.error,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ],
+                  ),
+                ),
+                Icon(
+                  rtl
+                      ? Icons.chevron_left_rounded
+                      : Icons.chevron_right_rounded,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

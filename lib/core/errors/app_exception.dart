@@ -43,6 +43,8 @@ enum AppErrorCode {
   invalidPet,
   invalidRule,
   alreadyArchived,
+  invalidCategory,
+  invalidBudget,
   unknown,
 }
 
@@ -179,6 +181,10 @@ abstract final class ExceptionMapper {
         return const AppException(AppErrorCode.invalidRule);
       case 'already_archived':
         return const AppException(AppErrorCode.alreadyArchived);
+      case 'invalid_category':
+        return const AppException(AppErrorCode.invalidCategory);
+      case 'invalid_budget':
+        return const AppException(AppErrorCode.invalidBudget);
     }
 
     final message = error.message.toLowerCase();

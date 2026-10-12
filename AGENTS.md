@@ -32,7 +32,7 @@ Flutter (Riverpod 3, go_router 18, Supabase) + Postgres with RLS.
 ```sh
 flutter gen-l10n        # only if .arb files changed
 flutter analyze         # must be clean
-flutter test            # must pass (133 tests)
+flutter test            # must pass (221 tests)
 flutter build web --release   # compile check; ~3-4 min
 ```
 
@@ -90,7 +90,30 @@ lib/features  auth/  domain (AuthRepository, SignUpOutcome), data
               settings/  settings screen (language/theme/digits, invites with
                    optional person link, manage categories, vehicles + pets +
                    fixed commitments entries, sign out)
+              budgets/  domain (Budget, BudgetsRepository, pure
+                   budget_progress.dart: budgetOverview() + BudgetProgress +
+                   BudgetStatus from SPENT, 80% near / 100% over, projected =
+                   spent + still-due fixed, paused limits excluded from
+                   alerts), data (RPC-only writes + `amount::text` reads),
+                   presentation (budgetsProvider, budgetOverviewProvider over
+                   the SHARED dashboard month, budgets screen with overall +
+                   per-category cards, amount editor sheet, status chip);
+                   adult-only)
+              reports/  domain (MonthlyTotal, ReportsRepository, pure
+                   report_data.dart: expensesByCategory/expensesByPerson +
+                   fillMonthTrend 6 zero-filled months ending at the selected
+                   month + sharePercent), data (`monthly_totals` RPC), charts
+                   (fl_chart donut + grouped 6-month bars, custom RTL-safe
+                   person bars), presentation (monthlyTotalsProvider,
+                   reportDataProvider over the SAME month rows the dashboard
+                   sums); adult-only)
 ```
+
+- Budgets and Reports reconcile by construction: both read
+  `dashboardMonthTransactionsProvider` (+ categories/members/recurring), so
+  the figures match the dashboard's month summary exactly. Only the 6-month
+  trend goes through SQL (`monthly_totals`), because PostgREST would silently
+  truncate a >1000-row response.
 
 - Providers: Riverpod 3 `NotifierProvider`/`StreamProvider`/`FutureProvider`.
   Router listens via `ref.listen` in a `@Riverpod`-style provider
@@ -106,9 +129,10 @@ lib/features  auth/  domain (AuthRepository, SignUpOutcome), data
   `/vehicles/:id/fuel/new`, `/vehicles/:id/maintenance/new`,
   `/vehicles/:id/maintenance/edit/:itemId`, `/recurring` (shell branch),
   `/recurring/new`, `/recurring/edit/:id`, `/pets` (shell branch),
-  `/pets/new`, `/pets/edit/:id`, `/pets/:id`, `/profile/:id` (`me` resolves
+  `/pets/new`, `/pets/edit/:id`, `/pets/:id`, `/budgets` (shell branch),
+  `/reports` (shell branch), `/profile/:id` (`me` resolves
   to the caller's own person), `/settings`. Adult-only: `/vehicles`,
-  `/recurring`, `/pets`. Detail routes are
+  `/recurring`, `/pets`, `/budgets`, `/reports`. Detail routes are
   declared before the shell (and `/vehicles/new` before `/vehicles/:id`,
   `/pets/new` before `/pets/:id`). A
   household login with no linked person is held on `/claim` until it picks a
@@ -148,7 +172,19 @@ Supabase SQL Editor (user does this manually):
    trigger, `transactions.pet_id`, `recurring_rules.vehicle_id`/`pet_id`,
    `pet_in_household` helper, updated `seed_default_categories` (37
    defaults) and `generate_recurring_transactions`, RLS: pets are
-   adult-only, child may still reference a same-household `pet_id`).
+   adult-only, child may still reference a same-household `pet_id`) →
+   15. archived fixed expenses (`recurring_rules.archived_at`, generator
+   skips archived rules, atomic `archive_recurring_rule(rule,
+   delete_month_transactions)` RPC, direct DELETE on `recurring_rules`
+   revoked — so deleting a posted fixed expense never orphans its
+   transactions) → 16. budgets + reports (guards that no legacy
+   `budgets.category_id is null` row survives, drops the unused
+   `member_id`/period columns, adds `budgets.is_active` + two partial
+   unique indexes (one limit per category, one overall), moves every write
+   behind `set_category_budget` / `set_overall_budget` / `set_budget_active`
+   / `delete_budget`, narrows `budgets` SELECT to **adults only**, and adds
+   the SECURITY DEFINER `monthly_totals(household, start, end)` aggregate
+   that the Reports trend uses instead of fetching >1000 transactions).
 
 Migration 11 is **frozen** (run green on the cloud DB together with the
 isolation test). Migration 12 is **frozen** too. Migration 13 is validated
@@ -156,8 +192,13 @@ in Docker (all 13 files + extended isolation test green, privilege matrix
 clean) — the user runs it on the cloud next; after that it is frozen.
 Migration 14 is validated in Docker (all 14 files + the extended isolation
 test green, privilege matrix clean) — the user runs it on the cloud next;
-after that it is frozen. Any further DB change must be a NEW migration
-file.
+after that it is frozen. Migration 15 is validated in Docker (all 15 files
++ extended isolation test section 10 + privilege matrix clean) — the user
+runs it on the cloud next; after that it is frozen. Migration 16 is
+validated in Docker (all 16 files + extended isolation test section 11 +
+privilege matrix clean, plus both legacy-guard cases `category_id is null`
+aborts / category row kept) — the user runs it on the cloud next; after
+that it is frozen. Any further DB change must be a NEW migration file.
 
 Indexes: `household_id` on every table; `(household_id, date)` on
 transactions.
@@ -175,12 +216,15 @@ RLS design (full plain-language comments in migration 10):
 - SELECT: members see their household's rows. Children additionally see
   only their own `members` row and that person's transactions; they can
   read categories (needed to record spending). Vehicles, fuel logs,
-  maintenance reminders, recurring rules and pets are **adult-only — a child
-  gets zero SELECT access** to them.
+  maintenance reminders, recurring rules, pets and budgets are **adult-only —
+  a child gets zero SELECT access** to them.
 - INSERT/UPDATE/DELETE on `members`, `categories`, `vehicles`,
-  `maintenance_items`, `recurring_rules`, `budgets`: owner/adult only.
+  `maintenance_items`, `recurring_rules`: owner/adult only.
   `fuel_logs` has a SELECT policy only — writes go through
-  `add_fuel_log`/`delete_fuel_log` (RPC-only).
+  `add_fuel_log`/`delete_fuel_log` (RPC-only). `budgets` (migration 16) is
+  SELECT-only for adults; every write goes through
+  `set_category_budget` / `set_overall_budget` / `set_budget_active` /
+  `delete_budget`, and the `monthly_totals` aggregate is a definer RPC.
 - `transactions` insert/update also require member/category/vehicle/recurring
   rows to belong to the same household.
 - `households` update/delete: owner only; no insert policy.
@@ -389,4 +433,34 @@ owner can delete the leftover unlinked person from the Family tab.
   `test/invite_status_test.dart`; `test/l10n_parity_test.dart` now parses
   `select`/`plural` branch bodies so a branch literal like `{Euro}` is not
   mistaken for a placeholder. Tests 156; analyze clean, web release build OK.
-- Phase 4: reports/charts/CSV export/polish.
+- Phase 4a (done, awaiting approval): migration 16 + extended isolation test
+  (section 11: budget upsert one-per-category, overall row, pause/resume/
+  delete, amount validation, cross-household category rejected, category
+  delete cascade, `monthly_totals` 1001-row exactness + dashboard-identical +
+  empty-month omission + inverted range, child 0 budgets and every budget RPC
+  `forbidden`, outsider lockout; plus the legacy guard proven BOTH ways — a
+  `category_id is null` row aborts the migration before any DDL, a category
+  row is kept and gets `is_active`). Docker-green (all 16 files on a fresh DB
+  + extended isolation test + privilege matrix). Budgets feature: one monthly
+  limit per category + one optional overall limit, alerts from SPENT
+  (80% near / 100% over, icon + text, never colour alone), projected = spent
+  + still-due fixed of the same scope, pause keeps the slot and drops it from
+  alerts, owner/adult only, RPC-only writes. Reports feature: this-month
+  expenses by category (fl_chart donut + legend with amount and share),
+  income vs expenses for the last 6 months (grouped bars via the
+  `monthly_totals` RPC — never truncated at PostgREST's 1000-row cap), and
+  this-month spending per person (RTL-safe proportional bars). Budgets and
+  Reports both read the SHARED dashboard month and the same month rows, so
+  every figure reconciles exactly with the dashboard. Dashboard gains a
+  compact alert card (category near/over count + overall limit, tap →
+  Budgets). New shell branches 7 `/budgets` and 8 `/reports` (adult-only,
+  drawer/rail only, bottom bar unchanged). Tests 221
+  (`test/budget_progress_test.dart` exact figures incl. 80%/100% boundaries
+  and paused exclusion, `test/report_data_test.dart` grouping + 6-month
+  fill, `test/budget_report_reconcile_test.dart` 23,845.67 agreement across
+  dashboard/budgets/reports + tap-to-open, `test/budget_editor_test.dart`
+  0 / >2-decimals rejected and exact minor units stored,
+  `test/budgets_reports_layout_test.dart` 360/800/1854 × AR/EN × all roles,
+  `test/budgets_reports_nav_test.dart`); analyze clean, web release build OK.
+- Phase 4b: receipts/attachments, CSV/PDF export, offline, pet reminders,
+  polish.

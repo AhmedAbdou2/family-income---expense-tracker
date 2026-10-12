@@ -430,5 +430,82 @@
   "dashboard_after_fixed_help": "الإيرادات ناقص المصروفات الثابتة المسجّلة والمستحقة لاحقًا.",
   "error_invalid_pet": "هذا الحيوان ليس من حيوانات هذه الأسرة.",
   "error_invalid_rule": "هذا المصروف الثابت غير موجود.",
-  "error_already_archived": "تمت إزالة هذا المصروف الثابت بالفعل."
+  "error_already_archived": "تمت إزالة هذا المصروف الثابت بالفعل.",
+  "error_invalid_category": "هذا التصنيف ليس من تصنيفات هذه الأسرة.",
+  "error_invalid_budget": "هذا الحد غير موجود.",
+
+  "nav_budgets": "الميزانيات",
+  "nav_reports": "التقارير",
+  "budgets_title": "الميزانيات",
+  "budget_overall_title": "الحد الشهري الإجمالي",
+  "budget_overall_hint": "يشمل كل مصروفات الشهر، بما فيها التصنيفات بلا حد والمصروفات الثابتة المسجّلة.",
+  "budget_projected_note": "متوقع تجاوز الحد",
+  "budget_help_spent": "يشمل المصروفات الثابتة المسجّلة.",
+  "budget_status_ok": "ضمن الحد",
+  "budget_status_near": "قريب من الحد",
+  "budget_status_over": "تجاوز الميزانية",
+  "budget_percent": "استُخدم {percent}%",
+  "@budget_percent": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "budget_add": "تحديد حد",
+  "budget_add_overall": "تحديد الحد الإجمالي",
+  "budget_edit": "تعديل الحد",
+  "budget_pause": "إيقاف مؤقت",
+  "budget_resume": "استئناف",
+  "budget_delete": "حذف الحد",
+  "budget_paused": "موقوف مؤقتًا",
+  "budget_paused_hint": "موقوف مؤقتًا — لا يُحتسب في التنبيهات.",
+  "budget_amount_label": "الحد الشهري",
+  "budget_amount_hint": "مثال: 1000",
+  "budget_saved": "تم حفظ الحد.",
+  "budget_deleted": "تم حذف الحد.",
+  "budget_delete_confirm_title": "حذف هذا الحد؟",
+  "budget_delete_confirm_body": "تبقى المصروفات كما هي، ويُحذف الحد فقط.",
+  "budget_empty_title": "لا توجد حدود بعد",
+  "budget_empty_body": "حدّد حدًا شهريًا لتصنيف، أو حدًا إجماليًا واحدًا للأسرة.",
+  "budget_spent_of": "{spent} من {limit}",
+  "@budget_spent_of": {
+    "placeholders": {
+      "spent": { "type": "String" },
+      "limit": { "type": "String" }
+    }
+  },
+  "budget_remaining_value": "المتبقي: {amount}",
+  "@budget_remaining_value": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "budget_projected_value": "المتوقع: {amount}",
+  "@budget_projected_value": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "budget_alert_title": "الميزانيات",
+  "budget_alert_all_ok": "لا يوجد تصنيف قريب من حده أو متجاوز له.",
+  "budget_alert_count": "{count, plural, zero{لا توجد تصنيفات قريبة من الحد} one{تصنيف واحد قريب من الحد أو متجاوز} two{تصنيفان قريبان من الحد أو متجاوزان} few{{count} تصنيفات قريبة من الحد أو متجاوزة} many{{count} تصنيفًا قريبًا من الحد أو متجاوزًا} other{{count} تصنيف قريب من الحد أو متجاوز}}",
+  "@budget_alert_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "budget_alert_overall": "الحد الإجمالي: {amount}",
+  "@budget_alert_overall": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "reports_title": "التقارير",
+  "report_by_category": "المصروفات حسب التصنيف",
+  "report_income_vs_expenses": "الإيرادات مقابل المصروفات",
+  "report_by_person": "الإنفاق حسب الشخص",
+  "report_last_six_months": "آخر 6 أشهر",
+  "report_total": "الإجمالي",
+  "report_expenses_total": "إجمالي المصروفات: {amount}",
+  "@report_expenses_total": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "report_share": "{percent}%",
+  "@report_share": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "report_legend_income": "الإيرادات",
+  "report_empty_title": "لا توجد بيانات بعد",
+  "report_empty_body": "أضف بعض المعاملات وستظهر الرسوم هنا.",
+  "report_by_category_empty": "لا توجد مصروفات هذا الشهر لعرضها.",
+  "report_by_person_empty": "لا يوجد إنفاق هذا الشهر لعرضه."
 }

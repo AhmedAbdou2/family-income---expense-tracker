@@ -1199,4 +1199,178 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get error_already_archived =>
       'That fixed expense was already removed.';
+
+  @override
+  String get error_invalid_category =>
+      'That category doesn\'t belong to this household.';
+
+  @override
+  String get error_invalid_budget => 'That limit doesn\'t exist.';
+
+  @override
+  String get nav_budgets => 'Budgets';
+
+  @override
+  String get nav_reports => 'Reports';
+
+  @override
+  String get budgets_title => 'Budgets';
+
+  @override
+  String get budget_overall_title => 'Overall monthly limit';
+
+  @override
+  String get budget_overall_hint =>
+      'Covers ALL expenses this month, including categories without a limit and posted fixed expenses.';
+
+  @override
+  String get budget_projected_note => 'Projected to exceed the limit';
+
+  @override
+  String get budget_help_spent => 'Includes posted fixed expenses.';
+
+  @override
+  String get budget_status_ok => 'Within limit';
+
+  @override
+  String get budget_status_near => 'Near limit';
+
+  @override
+  String get budget_status_over => 'Over budget';
+
+  @override
+  String budget_percent(int percent) {
+    return '$percent% used';
+  }
+
+  @override
+  String get budget_add => 'Set a limit';
+
+  @override
+  String get budget_add_overall => 'Set overall limit';
+
+  @override
+  String get budget_edit => 'Edit limit';
+
+  @override
+  String get budget_pause => 'Pause';
+
+  @override
+  String get budget_resume => 'Resume';
+
+  @override
+  String get budget_delete => 'Delete limit';
+
+  @override
+  String get budget_paused => 'Paused';
+
+  @override
+  String get budget_paused_hint => 'Paused — not counted in alerts.';
+
+  @override
+  String get budget_amount_label => 'Monthly limit';
+
+  @override
+  String get budget_amount_hint => 'e.g. 1000';
+
+  @override
+  String get budget_saved => 'Limit saved.';
+
+  @override
+  String get budget_deleted => 'Limit deleted.';
+
+  @override
+  String get budget_delete_confirm_title => 'Delete this limit?';
+
+  @override
+  String get budget_delete_confirm_body =>
+      'The spending stays; only the limit is removed.';
+
+  @override
+  String get budget_empty_title => 'No limits yet';
+
+  @override
+  String get budget_empty_body =>
+      'Set a monthly limit for a category, or one overall limit for the whole household.';
+
+  @override
+  String budget_spent_of(String spent, String limit) {
+    return '$spent of $limit';
+  }
+
+  @override
+  String budget_remaining_value(String amount) {
+    return 'Remaining: $amount';
+  }
+
+  @override
+  String budget_projected_value(String amount) {
+    return 'Projected: $amount';
+  }
+
+  @override
+  String get budget_alert_title => 'Budgets';
+
+  @override
+  String get budget_alert_all_ok => 'No category is near or over its limit.';
+
+  @override
+  String budget_alert_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count categories near or over their limits',
+      one: '1 category near or over its limit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String budget_alert_overall(String amount) {
+    return 'Overall limit: $amount';
+  }
+
+  @override
+  String get reports_title => 'Reports';
+
+  @override
+  String get report_by_category => 'Expenses by category';
+
+  @override
+  String get report_income_vs_expenses => 'Income vs expenses';
+
+  @override
+  String get report_by_person => 'Spending by person';
+
+  @override
+  String get report_last_six_months => 'Last 6 months';
+
+  @override
+  String get report_total => 'Total';
+
+  @override
+  String report_expenses_total(String amount) {
+    return 'Total expenses: $amount';
+  }
+
+  @override
+  String report_share(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String get report_legend_income => 'Income';
+
+  @override
+  String get report_empty_title => 'No data yet';
+
+  @override
+  String get report_empty_body =>
+      'Add some transactions and the charts will appear here.';
+
+  @override
+  String get report_by_category_empty => 'No expenses this month to chart.';
+
+  @override
+  String get report_by_person_empty => 'No spending this month to chart.';
 }
