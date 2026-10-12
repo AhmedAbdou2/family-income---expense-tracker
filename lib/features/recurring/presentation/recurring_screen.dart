@@ -5,6 +5,7 @@ import 'package:intl/intl.dart' show DateFormat;
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/settings/settings_controller.dart';
+import '../../../core/utils/currency.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/error_view.dart';
@@ -120,7 +121,7 @@ class _RecurringTile extends ConsumerWidget {
       '${isIncome ? '+' : '-'} ${Money.format(
         minorUnits: rule.amountMinorUnits,
         arabicDigits: arabicDigits,
-        currencyCode: currency,
+        currencyCode: Currency.label(currency, locale: locale),
       )}',
       frequencyLabel(context, rule.frequency),
       ?memberName,

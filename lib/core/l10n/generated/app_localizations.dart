@@ -161,7 +161,7 @@ abstract class AppLocalizations {
   /// No description provided for @reset_email_sent.
   ///
   /// In en, this message translates to:
-  /// **'Check your email for a password reset link.'**
+  /// **'We emailed you a link to reset your password.'**
   String get reset_email_sent;
 
   /// No description provided for @sign_up_email_sent.
@@ -227,7 +227,7 @@ abstract class AppLocalizations {
   /// No description provided for @setup_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'Create a new household, or join an existing one with an invite code.'**
+  /// **'Create a new household, or join one with an invite code.'**
   String get setup_subtitle;
 
   /// No description provided for @create_household_action.
@@ -305,7 +305,7 @@ abstract class AppLocalizations {
   /// No description provided for @empty_dashboard_body.
   ///
   /// In en, this message translates to:
-  /// **'Your monthly income, expenses and charts will appear here.'**
+  /// **'Your monthly income and expenses will appear here.'**
   String get empty_dashboard_body;
 
   /// No description provided for @empty_transactions_title.
@@ -317,7 +317,7 @@ abstract class AppLocalizations {
   /// No description provided for @empty_transactions_body.
   ///
   /// In en, this message translates to:
-  /// **'Once you start recording income and expenses, they will be listed here.'**
+  /// **'Income and expenses you record will be listed here.'**
   String get empty_transactions_body;
 
   /// No description provided for @settings_title.
@@ -493,6 +493,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Used'**
   String get invite_status_used;
+
+  /// No description provided for @invite_status_expired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get invite_status_expired;
 
   /// No description provided for @sign_out.
   ///
@@ -755,7 +761,7 @@ abstract class AppLocalizations {
   /// No description provided for @member_delete_confirm_body.
   ///
   /// In en, this message translates to:
-  /// **'You can only delete people who have no transactions.'**
+  /// **'Only people with no transactions can be deleted.'**
   String get member_delete_confirm_body;
 
   /// No description provided for @delete_action.
@@ -869,7 +875,7 @@ abstract class AppLocalizations {
   /// No description provided for @category_delete_confirm_body.
   ///
   /// In en, this message translates to:
-  /// **'You can only delete categories that have no transactions.'**
+  /// **'Only categories with no transactions can be deleted.'**
   String get category_delete_confirm_body;
 
   /// No description provided for @group_general.
@@ -995,7 +1001,7 @@ abstract class AppLocalizations {
   /// No description provided for @transaction_delete_from_fixed.
   ///
   /// In en, this message translates to:
-  /// **'This transaction came from a fixed expense. Deleting it will not cause regeneration.'**
+  /// **'This came from a fixed expense. Deleting it won\'t make it post again.'**
   String get transaction_delete_from_fixed;
 
   /// No description provided for @transaction_delete_fuel_note.
@@ -1271,7 +1277,7 @@ abstract class AppLocalizations {
   /// No description provided for @vehicles_section.
   ///
   /// In en, this message translates to:
-  /// **'Vehicles & car'**
+  /// **'Vehicles'**
   String get vehicles_section;
 
   /// No description provided for @vehicles_title.
@@ -1811,7 +1817,7 @@ abstract class AppLocalizations {
   /// No description provided for @recurring_delete_confirm_body.
   ///
   /// In en, this message translates to:
-  /// **'It will stop posting and disappear from the list. Choose what happens to the transactions it already posted.'**
+  /// **'It stops posting and leaves the list. Choose what happens to the transactions it already posted.'**
   String get recurring_delete_confirm_body;
 
   /// No description provided for @recurring_delete_option_keep.
@@ -1835,7 +1841,7 @@ abstract class AppLocalizations {
   /// No description provided for @recurring_generated.
   ///
   /// In en, this message translates to:
-  /// **'Posted {count} recurring transactions.'**
+  /// **'{count, plural, =1{Posted 1 recurring transaction.} other{Posted {count} recurring transactions.}}'**
   String recurring_generated(int count);
 
   /// No description provided for @recurring_type_income.
@@ -1865,7 +1871,7 @@ abstract class AppLocalizations {
   /// No description provided for @recurring_resumed_message.
   ///
   /// In en, this message translates to:
-  /// **'Resumed. The next occurrence is the upcoming one; the paused period isn\'t backfilled.'**
+  /// **'Resumed. It continues from the next due date; the missed period isn\'t posted.'**
   String get recurring_resumed_message;
 
   /// No description provided for @error_invalid_vehicle.

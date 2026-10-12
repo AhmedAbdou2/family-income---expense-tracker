@@ -37,11 +37,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sign_up_action => 'إنشاء الحساب';
 
   @override
-  String get send_reset_link => 'إرسال رابط الاستعادة';
+  String get send_reset_link => 'إرسال رابط إعادة التعيين';
 
   @override
   String get reset_email_sent =>
-      'تحقق من بريدك الإلكتروني لرابط إعادة تعيين كلمة المرور.';
+      'أرسلنا إلى بريدك الإلكتروني رابطًا لإعادة تعيين كلمة المرور.';
 
   @override
   String get sign_up_email_sent =>
@@ -63,11 +63,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get passwords_dont_match => 'كلمتا المرور غير متطابقتين';
 
   @override
-  String get invalid_email => 'أدخل بريداً إلكترونياً صحيحاً';
+  String get invalid_email => 'أدخل بريدًا إلكترونيًا صحيحًا';
 
   @override
   String get password_too_short =>
-      'يجب أن تتكون كلمة المرور من ٦ أحرف على الأقل';
+      'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل';
 
   @override
   String get field_required => 'هذا الحقل مطلوب';
@@ -77,7 +77,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get setup_subtitle =>
-      'أنشئ أسرة جديدة، أو انضم إلى أسرة موجودة برمز دعوة.';
+      'أنشئ أسرة جديدة أو انضم إلى أسرة موجودة برمز دعوة.';
 
   @override
   String get create_household_action => 'إنشاء أسرة';
@@ -101,7 +101,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get invite_code_hint => 'مثال: A1B2C3';
 
   @override
-  String get invalid_invite_code => 'أدخل رمز الدعوة المكوّن من ٦ خانات';
+  String get invalid_invite_code => 'أدخل رمز الدعوة المكوّن من 6 خانات';
 
   @override
   String get nav_dashboard => 'الرئيسية';
@@ -116,15 +116,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get empty_dashboard_title => 'لا يوجد شيء بعد';
 
   @override
-  String get empty_dashboard_body =>
-      'ستظهر هنا دخل الشهر ومصروفاته والرسوم البيانية.';
+  String get empty_dashboard_body => 'ستظهر هنا الإيرادات والمصروفات الشهرية.';
 
   @override
   String get empty_transactions_title => 'لا توجد معاملات بعد';
 
   @override
   String get empty_transactions_body =>
-      'عندما تبدأ بتسجيل الدخل والمصروفات ستظهر هنا.';
+      'ستظهر هنا الإيرادات والمصروفات التي تسجّلها.';
 
   @override
   String get settings_title => 'الإعدادات';
@@ -160,7 +159,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get arabic_digits_title => 'الأرقام العربية الهندية';
 
   @override
-  String get arabic_digits_subtitle => 'عرض الأرقام كـ ٠١٢٣ بدلاً من 0123';
+  String get arabic_digits_subtitle => 'عرض الأرقام كـ ٠١٢٣ بدلًا من 0123';
 
   @override
   String get household_section => 'الأسرة';
@@ -201,7 +200,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get invite_code_hint_share =>
-      'شارك هذا الرمز ليتمكن أحد الانضمام إلى أسرتك.';
+      'شارك هذا الرمز مع من تريد دعوته إلى أسرتك.';
 
   @override
   String get copy_code => 'نسخ الرمز';
@@ -211,14 +210,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String invite_expires_on(String date) {
-    return 'ينتهي $date';
+    return 'ينتهي في $date';
   }
 
   @override
   String get invite_status_active => 'نشط';
 
   @override
-  String get invite_status_used => 'مستخدم';
+  String get invite_status_used => 'مُستخدَم';
+
+  @override
+  String get invite_status_expired => 'منتهي';
 
   @override
   String get sign_out => 'تسجيل الخروج';
@@ -228,7 +230,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get sign_out_confirm_body =>
-      'ستحتاج بريدك وكلمة المرور لتسجيل الدخول مرة أخرى.';
+      'ستحتاج إلى بريدك الإلكتروني وكلمة المرور لتسجيل الدخول مرة أخرى.';
 
   @override
   String get loading => 'جارٍ التحميل...';
@@ -246,7 +248,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get close => 'إغلاق';
 
   @override
-  String get error_title => 'حدث خطأ ما';
+  String get error_title => 'حدث خطأ';
 
   @override
   String get error_network => 'لا يوجد اتصال بالإنترنت. حاول مرة أخرى.';
@@ -255,34 +257,34 @@ class AppLocalizationsAr extends AppLocalizations {
   String get error_timeout => 'انتهت مهلة الطلب. حاول مرة أخرى.';
 
   @override
-  String get error_unknown => 'خطأ غير متوقع. حاول مرة أخرى.';
+  String get error_unknown => 'حدث خطأ غير متوقع. حاول مرة أخرى.';
 
   @override
   String get error_invalid_credentials =>
-      'بريد إلكتروني أو كلمة مرور غير صحيحة.';
+      'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
 
   @override
   String get error_email_exists => 'يوجد حساب بهذا البريد الإلكتروني بالفعل.';
 
   @override
-  String get error_email_not_confirmed => 'أكّد بريدك الإلكتروني أولاً.';
+  String get error_email_not_confirmed => 'أكّد بريدك الإلكتروني أولًا.';
 
   @override
   String get error_weak_password =>
-      'كلمة المرور ضعيفة. استخدم ٦ أحرف على الأقل.';
+      'كلمة المرور ضعيفة. استخدم 6 أحرف على الأقل.';
 
   @override
-  String get error_invalid_email => 'أدخل بريداً إلكترونياً صحيحاً.';
+  String get error_invalid_email => 'أدخل بريدًا إلكترونيًا صحيحًا.';
 
   @override
   String get error_too_many_requests =>
-      'محاولات كثيرة. انتظر قليلاً ثم حاول مجدداً.';
+      'محاولات كثيرة. انتظر قليلًا ثم حاول مرة أخرى.';
 
   @override
   String get error_invite_not_found => 'رمز الدعوة غير موجود.';
 
   @override
-  String get error_invite_used => 'رمز الدعوة مستخدم بالفعل.';
+  String get error_invite_used => 'تم استخدام رمز الدعوة من قبل.';
 
   @override
   String get error_invite_expired => 'انتهت صلاحية رمز الدعوة.';
@@ -291,32 +293,32 @@ class AppLocalizationsAr extends AppLocalizations {
   String get error_already_member => 'أنت عضو في هذه الأسرة بالفعل.';
 
   @override
-  String get error_not_member => 'أنت لست منتمياً إلى هذه الأسرة.';
+  String get error_not_member => 'أنت لست عضوًا في هذه الأسرة.';
 
   @override
-  String get error_forbidden => 'لا تملك صلاحية لفعل ذلك.';
+  String get error_forbidden => 'لا تملك صلاحية للقيام بذلك.';
 
   @override
-  String get error_invalid_name => 'أدخل اسماً صحيحاً.';
+  String get error_invalid_name => 'أدخل اسمًا صحيحًا.';
 
   @override
   String get error_invalid_currency => 'أدخل عملة صحيحة.';
 
   @override
-  String get error_invalid_role => 'دور الدعوة هذا غير مسموح.';
+  String get error_invalid_role => 'هذه الصفة غير مسموح بها في الدعوة.';
 
   @override
   String get error_membership_immutable =>
-      'لا يمكن تغيير بيانات العضوية من هنا.';
+      'لا يمكن تعديل بيانات العضوية من هنا.';
 
   @override
   String get nav_people => 'العائلة';
 
   @override
-  String get nav_vehicles => 'المركبات';
+  String get nav_vehicles => 'السيارات';
 
   @override
-  String get members_title => 'العائلة';
+  String get members_title => 'أفراد العائلة';
 
   @override
   String get family_invite_someone => 'دعوة شخص جديد';
@@ -329,7 +331,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String member_connect_hint(String name) {
-    return 'أنشئ رمز دعوة لـ $name. عند القبول يصبح ذلك الحساب هو حساب هذا الشخص.';
+    return 'أنشئ رمز دعوة لـ $name. عند قبوله يصبح ذلك الحساب حساب هذا الشخص.';
   }
 
   @override
@@ -348,7 +350,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get member_name_hint => 'مثال: سارة';
 
   @override
-  String get member_rename => 'إعادة التسمية';
+  String get member_rename => 'تعديل الاسم';
 
   @override
   String get member_delete => 'حذف الشخص';
@@ -358,7 +360,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get member_delete_confirm_body =>
-      'يمكنك حذف الأشخاص الذين ليس لديهم معاملات فقط.';
+      'لا يمكن حذف إلا الأشخاص الذين ليس لديهم معاملات.';
 
   @override
   String get delete_action => 'حذف';
@@ -380,10 +382,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get member_empty_body =>
-      'أضف أفراد أسرتك حتى يتسنى تسجيل المصروفات لكل شخص.';
+      'أضف أفراد عائلتك حتى يمكن تسجيل المصروفات لكل شخص.';
 
   @override
-  String get member_in_use => 'لهذا الشخص معاملات مسجّلة ولا يمكن حذفه.';
+  String get member_in_use => 'لهذا الشخص معاملات ولا يمكن حذفه.';
 
   @override
   String get categories_title => 'التصنيفات';
@@ -417,7 +419,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get category_delete_confirm_body =>
-      'يمكنك حذف التصنيفات التي ليس لها معاملات فقط.';
+      'لا يمكن حذف إلا التصنيفات التي ليس لها معاملات.';
 
   @override
   String get group_general => 'مصروفات عامة';
@@ -429,19 +431,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get group_fixed => 'المصروفات الثابتة';
 
   @override
-  String get group_income => 'الدخل';
+  String get group_income => 'الإيرادات';
 
   @override
-  String get type_expense => 'مصروف';
+  String get type_expense => 'المصروفات';
 
   @override
-  String get type_income => 'دخل';
+  String get type_income => 'الإيرادات';
 
   @override
   String get amount => 'المبلغ';
 
   @override
-  String get amount_invalid => 'أدخل مبلغاً صحيحاً.';
+  String get amount_invalid => 'أدخل مبلغًا صحيحًا.';
 
   @override
   String get amount_zero => 'يجب أن يكون المبلغ أكبر من صفر.';
@@ -482,18 +484,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get transaction_delete_from_fixed =>
-      'نشأت هذه المعاملة من مصروف ثابت. الحذف لن يؤدي إلى إعادة إنشائها.';
+      'نشأت هذه المعاملة من مصروف ثابت. حذفها لن يجعلها تُسجَّل مرة أخرى.';
 
   @override
   String get transaction_delete_fuel_note =>
-      'سيتم حذف سجل التزود بالوقود المرتبط أيضًا.';
+      'سيُحذف سجل الوقود المرتبط بها أيضًا.';
 
   @override
   String get transaction_delete_maintenance_note =>
-      'إذا نشأ هذا المصروف من إكمال تذكير صيانة، فحذفه لن يُعيد التذكير كمستحق.';
+      'إذا نشأ هذا المصروف عن إتمام تذكير صيانة، فلن يعود التذكير مستحقًا بعد حذفه.';
 
   @override
-  String get transaction_delete_pause_rule => 'أوقف هذا المصروف الثابت أيضًا';
+  String get transaction_delete_pause_rule =>
+      'إيقاف هذا المصروف الثابت مؤقتًا أيضًا';
 
   @override
   String get transaction_deleted => 'تم حذف المعاملة.';
@@ -511,10 +514,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get filter_everyone => 'الجميع';
 
   @override
-  String get select_category => 'اختر تصنيفاً';
+  String get select_category => 'اختر تصنيفًا';
 
   @override
-  String get select_person => 'اختر شخصاً';
+  String get select_person => 'اختر شخصًا';
 
   @override
   String get quick_add_title => 'إضافة سريعة';
@@ -539,28 +542,29 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get invite_link_hint =>
-      'عند قبول الدعوة يصبح حساب المقبول هو حساب هذا الشخص.';
+      'عند قبول الدعوة يصبح حساب المقبول حساب هذا الشخص.';
 
   @override
-  String get error_member_linked => 'ذلك الشخص مرتبط بحساب بالفعل.';
+  String get error_member_linked => 'هذا الشخص مرتبط بحساب بالفعل.';
 
   @override
   String get error_login_linked => 'هذا الحساب مرتبط بشخص بالفعل.';
 
   @override
-  String get error_invalid_member => 'ذلك الشخص ليس من هذه الأسرة.';
+  String get error_invalid_member => 'هذا الشخص ليس من أفراد هذه الأسرة.';
 
   @override
-  String get error_category_in_use => 'ذلك التصنيف له معاملات ولا يمكن حذفه.';
+  String get error_category_in_use => 'لهذا التصنيف معاملات ولا يمكن حذفه.';
 
   @override
-  String get error_member_in_use => 'ذلك الشخص له معاملات ولا يمكن حذفه.';
+  String get error_member_in_use => 'لهذا الشخص معاملات ولا يمكن حذفه.';
 
   @override
-  String get error_already_linked => 'ذلك الشخص مرتبط بحساب آخر بالفعل.';
+  String get error_already_linked => 'هذا الشخص مرتبط بحساب آخر بالفعل.';
 
   @override
-  String get error_last_owner => 'أنت آخر مالك. اجعل عضواً آخر مالكاً أولاً.';
+  String get error_last_owner =>
+      'أنت المالك الأخير. اجعل عضوًا آخر مالكًا أولًا.';
 
   @override
   String get error_cannot_change_own_role =>
@@ -571,10 +575,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get error_child_requires_member =>
-      'دور الطفل يتطلب حساباً مرتبطاً بشخص.';
+      'دور الطفل يتطلب حسابًا مرتبطًا بشخص.';
 
   @override
-  String get claim_title => 'أنهِ إعداد حسابك';
+  String get claim_title => 'أكمِل إعداد حسابك';
 
   @override
   String get claim_body =>
@@ -585,13 +589,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get join_name_hint =>
-      'إذا كان المالك قد سمّاك مسبقاً فهذا الاسم لن يُستخدم.';
+      'إذا كان المالك قد اختار لك اسمًا مسبقًا فلن يُستخدم هذا الاسم.';
 
   @override
   String get household_members_title => 'أعضاء الأسرة';
 
   @override
-  String get login_no_person => 'لا يوجد شخص مرتبط';
+  String get login_no_person => 'بدون شخص مرتبط';
 
   @override
   String get login_change_role => 'تغيير الدور';
@@ -604,7 +608,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get login_remove_confirm_body =>
-      'سيبقى الشخص وسجل معاملاته، ويفقد الحساب صلاحيته فقط.';
+      'سيبقى الشخص ومعاملاته، ويفقد الحساب صلاحية الدخول فقط.';
 
   @override
   String get leave_household => 'مغادرة الأسرة';
@@ -614,10 +618,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get leave_confirm_body =>
-      'ستفقد صلاحيتك للدخول. يبقى شخصك وسجل معاملاتك لدى العائلة.';
+      'ستفقد صلاحية الدخول، ويبقى شخصك ومعاملاتك لدى العائلة.';
 
   @override
-  String get leave_last_owner_hint => 'اجعل عضواً آخر مالكاً أولاً.';
+  String get leave_last_owner_hint => 'اجعل عضوًا آخر مالكًا أولًا.';
 
   @override
   String get invite_target_title => 'من سينضم؟';
@@ -629,7 +633,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get quick_add_no_person => 'هذا الحساب غير مرتبط بشخص بعد.';
 
   @override
-  String get vehicles_section => 'السيارات والمصروفات';
+  String get vehicles_section => 'السيارات';
 
   @override
   String get vehicles_title => 'السيارات';
@@ -653,19 +657,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vehicle_name_hint => 'مثال: كورولا البيضاء';
 
   @override
-  String get vehicle_plate => 'اللوحة (اختياري)';
+  String get vehicle_plate => 'رقم اللوحة (اختياري)';
 
   @override
-  String get vehicle_plate_hint => 'مثال: أ ب ج ١٢٣';
+  String get vehicle_plate_hint => 'مثال: أ ب ج 123';
 
   @override
   String get vehicle_fuel_type => 'نوع الوقود';
 
   @override
-  String get vehicle_odometer => 'قراءة العداد الحالية (كم)';
+  String get vehicle_odometer => 'قراءة عدّاد الكيلومترات الحالية';
 
   @override
-  String get vehicle_odometer_hint => 'مثال: ٤٥٠٠٠';
+  String get vehicle_odometer_hint => 'مثال: 45000';
 
   @override
   String get vehicle_archive => 'أرشفة';
@@ -678,7 +682,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String vehicle_odometer_value(String km) {
-    return 'العداد: $km كم';
+    return 'عدّاد الكيلومترات: $km كم';
   }
 
   @override
@@ -689,7 +693,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vehicle_archive_confirm_body =>
-      'تبقى في السجل لكن تُخفى من القوائم.';
+      'ستبقى في السجل لكنها لن تظهر في القوائم.';
 
   @override
   String get fuel_type_petrol => 'بنزين';
@@ -710,10 +714,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get fuel_log_add => 'تسجيل تعبئة';
 
   @override
-  String get fuel_log_odometer => 'العداد (كم)';
+  String get fuel_log_odometer => 'عدّاد الكيلومترات (كم)';
 
   @override
-  String get fuel_log_liters => 'اللترات';
+  String get fuel_log_liters => 'عدد اللترات';
 
   @override
   String get fuel_log_cost => 'التكلفة الإجمالية';
@@ -741,23 +745,23 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get fuel_log_delete_confirm_body =>
-      'سيُحذف مصروف الوقود المرتبط أيضًا.';
+      'سيُحذف مصروف الوقود المرتبط بها أيضًا.';
 
   @override
   String get fuel_log_deleted => 'تم حذف التعبئة.';
 
   @override
-  String get fuel_stats_title => 'الاستهلاك';
+  String get fuel_stats_title => 'معدل الاستهلاك';
 
   @override
-  String get fuel_stats_l_per_100km => 'لتر/١٠٠كم';
+  String get fuel_stats_l_per_100km => 'لتر/100 كم';
 
   @override
-  String get fuel_stats_cost_per_km => 'التكلفة/كم';
+  String get fuel_stats_cost_per_km => 'تكلفة/كم';
 
   @override
   String get fuel_stats_no_data =>
-      'أضف تعبئتين ممتلئتين على الأقل لعرض الاستهلاك.';
+      'سجّل تعبئتين ممتلئتين على الأقل لحساب معدل الاستهلاك.';
 
   @override
   String get maintenance_title => 'الصيانة';
@@ -778,7 +782,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get maintenance_due_date => 'تاريخ الاستحقاق';
 
   @override
-  String get maintenance_due_odometer => 'عداد الاستحقاق (كم)';
+  String get maintenance_due_odometer => 'عدّاد الاستحقاق (كم)';
 
   @override
   String get maintenance_interval_days => 'يتكرر كل (أيام)';
@@ -791,20 +795,20 @@ class AppLocalizationsAr extends AppLocalizations {
       'اختياري: ينشئ تذكيرًا جديدًا بعد الإتمام.';
 
   @override
-  String get maintenance_need_one_due => 'أدخل تاريخ استحقاق أو قراءة عداد.';
+  String get maintenance_need_one_due => 'أدخل تاريخ استحقاق أو قراءة عدّاد.';
 
   @override
   String get maintenance_status_overdue => 'متأخر';
 
   @override
-  String get maintenance_status_due_soon => 'قريب';
+  String get maintenance_status_due_soon => 'قريب الاستحقاق';
 
   @override
   String get maintenance_empty => 'لا توجد تذكيرات صيانة بعد.';
 
   @override
   String maintenance_due_date_line(String date) {
-    return 'الاستحقاق $date';
+    return 'الاستحقاق في $date';
   }
 
   @override
@@ -813,7 +817,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get maintenance_complete => 'تم الإنجاز';
+  String get maintenance_complete => 'إتمام';
 
   @override
   String get maintenance_complete_title => 'إتمام الصيانة';
@@ -831,7 +835,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get maintenance_delete_confirm_title => 'حذف هذا التذكير؟';
 
   @override
-  String get maintenance_delete_confirm_body => 'لا يمكن التراجع عن ذلك.';
+  String get maintenance_delete_confirm_body =>
+      'لا يمكن التراجع عن هذا الإجراء.';
 
   @override
   String get maintenance_saved => 'تم حفظ التذكير.';
@@ -893,16 +898,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recurring_active => 'نشط';
 
   @override
-  String get recurring_paused => 'موقوف';
+  String get recurring_paused => 'موقوف مؤقتًا';
 
   @override
-  String get recurring_pause => 'إيقاف';
+  String get recurring_pause => 'إيقاف مؤقت';
 
   @override
-  String get recurring_resume => 'تشغيل';
+  String get recurring_resume => 'استئناف';
 
   @override
-  String get recurring_saved => 'تم حفظ الالتزام.';
+  String get recurring_saved => 'تم حفظ المصروف الثابت.';
 
   @override
   String get recurring_delete => 'حذف المصروف الثابت';
@@ -912,20 +917,23 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get recurring_delete_confirm_body =>
-      'سيتوقف عن الترحيل ويختفي من القائمة. اختر ما سيحدث للمعاملات التي رحّلها بالفعل.';
+      'سيتوقف عن التسجيل ويختفي من القائمة. اختر ما سيحدث للمعاملات التي سجّلها بالفعل.';
 
   @override
   String get recurring_delete_option_keep =>
-      'تبقى المعاملات المرحّلة وتستمر في احتسابها كمصروفات ثابتة';
+      'تبقى المعاملات المسجّلة وتحسب كمصروف ثابت';
 
   @override
   String recurring_delete_option_delete_month(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'تُحذف أيضًا $count معاملات مرحّلة هذا الشهر',
-      one: 'تُحذف أيضًا معاملة هذا الشهر المرحّلة',
-      zero: 'لا توجد معاملات مرحّلة هذا الشهر لحذفها',
+      other: 'تُحذف أيضًا $count معاملة مسجّلة هذا الشهر',
+      many: 'تُحذف أيضًا $count معاملة مسجّلة هذا الشهر',
+      few: 'تُحذف أيضًا $count معاملات مسجّلة هذا الشهر',
+      two: 'تُحذف أيضًا المعاملتان المسجّلتان هذا الشهر',
+      one: 'تُحذف أيضًا المعاملة المسجّلة هذا الشهر',
+      zero: 'لا توجد معاملات مسجّلة هذا الشهر لحذفها',
     );
     return '$_temp0';
   }
@@ -935,28 +943,38 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String recurring_generated(int count) {
-    return 'تم ترحيل $count حركة دورية.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم تسجيل $count معاملة ثابتة.',
+      many: 'تم تسجيل $count معاملة ثابتة.',
+      few: 'تم تسجيل $count معاملات ثابتة.',
+      two: 'تم تسجيل معاملتين ثابتتين.',
+      one: 'تم تسجيل معاملة ثابتة واحدة.',
+    );
+    return '$_temp0';
   }
 
   @override
-  String get recurring_type_income => 'دخل';
+  String get recurring_type_income => 'الإيرادات';
 
   @override
-  String get recurring_type_expense => 'مصروف';
+  String get recurring_type_expense => 'المصروفات';
 
   @override
-  String get recurring_inactive_hint => 'الالتزامات الموقوفة لا تُرحَّل.';
+  String get recurring_inactive_hint =>
+      'المصروفات الثابتة الموقوفة لا تُسجَّل.';
 
   @override
   String get recurring_paused_message =>
-      'تم الإيقاف. تبقى المعاملات المُدرجة هذا الشهر؛ احذفها منفصلة عند الحاجة.';
+      'تم الإيقاف مؤقتًا. تبقى المعاملات المسجّلة هذا الشهر، ويمكنك حذفها على حدة.';
 
   @override
   String get recurring_resumed_message =>
-      'تم التشغيل. ستكون الحركة القادمة هي التالية؛ لن يتم ترحيل فترة الإيقاف.';
+      'تم الاستئناف. سيُسجَّل الموعد القادم فقط، ولن تُسجَّل الفترة الموقوفة.';
 
   @override
-  String get error_invalid_vehicle => 'هذه السيارة لا تنتمي إلى هذا المنزل.';
+  String get error_invalid_vehicle => 'هذه السيارة ليست من سيارات هذه الأسرة.';
 
   @override
   String get error_invalid_item => 'تذكير الصيانة هذا غير موجود.';
@@ -969,10 +987,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get error_odometer_backwards =>
-      'لا يمكن أن يكون العداد أقل من تعبئة سابقة.';
+      'لا يمكن أن تكون قراءة العدّاد أقل من تعبئة سابقة.';
 
   @override
-  String get error_no_car_category => 'أضف فئة سيارة أولًا.';
+  String get error_no_car_category => 'أضف تصنيفًا للسيارة أولًا.';
 
   @override
   String get error_no_linked_person => 'اربط هذا الحساب بشخص أولًا.';
@@ -984,7 +1002,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get nav_fixed_short => 'الثابتة';
 
   @override
-  String get nav_pets => 'الحيوانات';
+  String get nav_pets => 'الحيوانات الأليفة';
 
   @override
   String get account_fallback => 'حسابي';
@@ -996,26 +1014,25 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profile_month => 'هذا الشهر';
 
   @override
-  String get group_pet => 'الحيوانات';
+  String get group_pet => 'الحيوانات الأليفة';
 
   @override
-  String get pets_section => 'الحيوانات';
+  String get pets_section => 'الحيوانات الأليفة';
 
   @override
-  String get pets_title => 'الحيوانات';
+  String get pets_title => 'الحيوانات الأليفة';
 
   @override
-  String get pets_empty_title => 'لا توجد حيوانات بعد';
+  String get pets_empty_title => 'لا توجد حيوانات أليفة بعد';
 
   @override
-  String get pets_empty_body =>
-      'أضف قططك وكلابك ورفاقك الآخرين لتتبع تكاليفهم.';
+  String get pets_empty_body => 'أضف قططك وكلابك ورفاقك لتتبّع تكاليفهم.';
 
   @override
-  String get pet_add => 'إضافة حيوان';
+  String get pet_add => 'إضافة حيوان أليف';
 
   @override
-  String get pet_edit => 'تعديل الحيوان';
+  String get pet_edit => 'تعديل بيانات الحيوان';
 
   @override
   String get pet_name => 'الاسم';
@@ -1070,14 +1087,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String pet_monthly_total(String amount) {
-    return 'هذا الشهر: $amount';
+    return 'مصروفات هذا الشهر: $amount';
   }
 
   @override
   String get pet_expenses_title => 'المصروفات';
 
   @override
-  String get pet_expenses_empty => 'لا مصروفات هذا الشهر.';
+  String get pet_expenses_empty => 'لا توجد مصروفات هذا الشهر.';
 
   @override
   String get pet_add_expense => 'إضافة مصروف';
@@ -1086,61 +1103,61 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transaction_none => 'بدون';
 
   @override
-  String get transaction_pet => 'الحيوان';
+  String get transaction_pet => 'الحيوان الأليف';
 
   @override
-  String get transaction_pin_fixed => 'اجعله مصروفًا ثابتًا شهريًا';
+  String get transaction_pin_fixed => 'تثبيت كمصروف شهري';
 
   @override
   String get transaction_pin_fixed_confirm_title =>
-      'تحويل هذا إلى مصروف ثابت شهري؟';
+      'تثبيت هذه المعاملة كمصروف شهري؟';
 
   @override
   String get transaction_pin_fixed_confirm_body =>
-      'سيتم إنشاء التزام شهري وترحيله تلقائيًا.';
+      'سيُنشأ مصروف ثابت شهري يُسجَّل تلقائيًا.';
 
   @override
-  String get transaction_pinned_fixed => 'أُضيف إلى الالتزامات الثابتة.';
+  String get transaction_pinned_fixed => 'تمت الإضافة إلى المصروفات الثابتة.';
 
   @override
   String get recurring_link_none => 'بدون';
 
   @override
-  String get recurring_link_vehicle => 'السيارة (اختياري)';
+  String get recurring_link_vehicle => 'ربط بسيارة (اختياري)';
 
   @override
-  String get recurring_link_pet => 'الحيوان (اختياري)';
+  String get recurring_link_pet => 'ربط بحيوان أليف (اختياري)';
 
   @override
   String get dashboard_fixed_header => 'المصروفات الثابتة هذا الشهر';
 
   @override
-  String get dashboard_fixed_posted => 'المُرحَّل';
+  String get dashboard_fixed_posted => 'المسجَّل هذا الشهر';
 
   @override
-  String get dashboard_fixed_due => 'المتبقي';
+  String get dashboard_fixed_due => 'المتبقي تسجيله هذا الشهر';
 
   @override
-  String get dashboard_after_fixed => 'المتبقي بعد الثابتة';
+  String get dashboard_after_fixed => 'المتبقي بعد المصروفات الثابتة';
 
   @override
   String get dashboard_expenses_help =>
-      'كل مصروفات الشهر، بما فيها الثابتة المُرحَّلة.';
+      'كل مصروفات الشهر، بما فيها المصروفات الثابتة المسجّلة.';
 
   @override
   String get dashboard_fixed_posted_help =>
-      'الالتزامات الثابتة التي رُحِّلت هذا الشهر.';
+      'المصروفات الثابتة المسجّلة هذا الشهر.';
 
   @override
   String get dashboard_fixed_due_help =>
-      'الالتزامات الثابتة التي ستُرحَّل لاحقًا هذا الشهر.';
+      'المصروفات الثابتة التي ستُسجَّل لاحقًا هذا الشهر.';
 
   @override
   String get dashboard_after_fixed_help =>
-      'الدخل ناقص الالتزامات الثابتة المُرحَّلة والمتبقية.';
+      'الإيرادات ناقص المصروفات الثابتة المسجّلة والمتبقية.';
 
   @override
-  String get error_invalid_pet => 'هذا الحيوان لا ينتمي إلى هذا المنزل.';
+  String get error_invalid_pet => 'هذا الحيوان ليس من حيوانات هذه الأسرة.';
 
   @override
   String get error_invalid_rule => 'هذا المصروف الثابت غير موجود.';

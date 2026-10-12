@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/settings/settings_controller.dart';
+import '../../../core/utils/currency.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../auth/presentation/providers.dart';
 import '../../household/domain/entities.dart';
@@ -530,7 +531,7 @@ class _HouseholdCard extends ConsumerWidget {
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
             subtitle: Text(
-              '${l10n.household_currency_line(m.household.currency)}  •  '
+              '${l10n.household_currency_line(Currency.label(m.household.currency, locale: Localizations.localeOf(context).toString()))}  •  '
               '${l10n.your_role(_roleLabel(context, m.role))}',
             ),
           );
@@ -606,7 +607,7 @@ class _InviteTile extends StatelessWidget {
       statusText = l10n.invite_status_used;
       statusColor = scheme.surfaceContainerHighest;
     } else if (invite.isExpired) {
-      statusText = l10n.invite_status_active;
+      statusText = l10n.invite_status_expired;
       statusColor = scheme.errorContainer;
     } else {
       statusText = l10n.invite_status_active;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/l10n.dart';
+import '../../../core/utils/currency.dart';
 import '../../../core/utils/form_messages.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/error_view.dart';
@@ -138,7 +139,16 @@ class _CreateHouseholdScreenState extends ConsumerState<CreateHouseholdScreen> {
                         decoration: InputDecoration(labelText: l10n.currency),
                         items: [
                           for (final code in kSupportedCurrencies)
-                            DropdownMenuItem(value: code, child: Text(code)),
+                            DropdownMenuItem(
+                              value: code,
+                              child: Text(
+                                Currency.label(
+                                  code,
+                                  locale: Localizations.localeOf(context)
+                                      .toString(),
+                                ),
+                              ),
+                            ),
                         ],
                         onChanged: _submitting
                             ? null

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
 import '../../../core/l10n/l10n.dart';
+import '../../../core/utils/currency.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_view.dart';
@@ -54,6 +55,8 @@ class _FuelLogFormScreenState extends ConsumerState<FuelLogFormScreen> {
     final l10n = context.l10n;
     final vehicle = _findVehicle();
     final currency = ref.watch(membershipProvider).value?.household.currency;
+    final locale = Localizations.localeOf(context).toString();
+    final currencyLabel = Currency.label(currency, locale: locale);
 
     if (vehicle == null) {
       return Scaffold(
@@ -151,7 +154,7 @@ class _FuelLogFormScreenState extends ConsumerState<FuelLogFormScreen> {
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
                 labelText: l10n.fuel_log_cost,
-                suffixText: currency,
+                suffixText: currencyLabel.isEmpty ? null : currencyLabel,
               ),
               validator: (_) {
                 int? minor;

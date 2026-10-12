@@ -5,6 +5,7 @@ import 'package:intl/intl.dart' show DateFormat;
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/settings/settings_controller.dart';
+import '../../../core/utils/currency.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_view.dart';
@@ -34,6 +35,7 @@ class ProfileScreen extends ConsumerWidget {
     final arabicDigits = ref.watch(settingsProvider).arabicDigits;
     final membership = ref.watch(membershipProvider).value;
     final currency = membership?.household.currency;
+    final locale = Localizations.localeOf(context).toString();
     final members = ref.watch(membersProvider);
     final categories = ref.watch(categoriesProvider).value ?? const [];
     final logins = ref.watch(householdLoginsProvider).value ?? const [];
@@ -102,7 +104,7 @@ class ProfileScreen extends ConsumerWidget {
                 final formatted = Money.format(
                   minorUnits: minorUnits,
                   arabicDigits: arabicDigits,
-                  currencyCode: currency,
+                  currencyCode: Currency.label(currency, locale: locale),
                 );
                 return sign == null ? formatted : '$sign $formatted';
               }

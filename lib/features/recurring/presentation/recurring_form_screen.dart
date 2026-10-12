@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
 import '../../../core/l10n/l10n.dart';
+import '../../../core/utils/currency.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_view.dart';
@@ -130,6 +131,7 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).toString();
     final currency = ref.watch(membershipProvider).value?.household.currency;
+    final currencyLabel = Currency.label(currency, locale: locale);
     final categories = ref.watch(categoriesProvider).value ?? const <Category>[];
     final members = ref.watch(membersProvider).value ?? const <Member>[];
     final vehicles = ref.watch(vehiclesProvider).value ?? const <Vehicle>[];
@@ -256,7 +258,7 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
                 labelText: l10n.recurring_amount,
-                suffixText: currency,
+                suffixText: currencyLabel.isEmpty ? null : currencyLabel,
               ),
               validator: (_) {
                 int? minor;

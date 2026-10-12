@@ -41,4 +41,63 @@ void main() {
     expect(loadArb('lib/core/l10n/app_en.arb')['@@locale'], 'en');
     expect(loadArb('lib/core/l10n/app_ar.arb')['@@locale'], 'ar');
   });
+
+  /// Every `{placeholder}` in a message (works for plain `{currency}` and for
+  /// `{count, plural, ...}` alike).
+  Set<String> placeholders(Object? value) {
+    if (value is! String) return const {};
+    return RegExp(r'\{([a-zA-Z_][a-zA-Z0-9_]*)\s*[,}]')
+        .allMatches(value)
+        .map((match) => match.group(1)!)
+        .toSet();
+  }
+
+  test('placeholders match between the two languages', () {
+    final en = loadArb('lib/core/l10n/app_en.arb');
+    final ar = loadArb('lib/core/l10n/app_ar.arb');
+
+    for (final key in messageKeys(en)) {
+      expect(
+        placeholders(ar[key]),
+        placeholders(en[key]),
+        reason: 'placeholder mismatch for "$key"',
+      );
+    }
+  });
+
+  test('a plural message in English is plural in Arabic too', () {
+    final en = loadArb('lib/core/l10n/app_en.arb');
+    final ar = loadArb('lib/core/l10n/app_ar.arb');
+
+    for (final key in messageKeys(en)) {
+      final enIsPlural = (en[key] as String).contains(', plural,');
+      final arIsPlural = (ar[key] as String).contains(', plural,');
+      expect(arIsPlural, enIsPlural, reason: 'plural mismatch for "$key"');
+      if (enIsPlural) {
+        expect(
+          (ar[key] as String).contains('other{'),
+          isTrue,
+          reason: 'Arabic plural "$key" must keep an "other" branch',
+        );
+      }
+    }
+  });
+
+  test('Arabic plurals carry the Arabic CLDR categories', () {
+    final ar = loadArb('lib/core/l10n/app_ar.arb');
+
+    for (final key in messageKeys(ar)) {
+      final value = ar[key] as String;
+      if (!value.contains(', plural,')) continue;
+      // Arabic needs more than English's one/other; the app uses the full set
+      // (zero is optional - it only reads better for "nothing to delete").
+      for (final category in const ['one', 'two', 'few', 'many', 'other']) {
+        expect(
+          value.contains('$category{'),
+          isTrue,
+          reason: 'Arabic plural "$key" is missing the "$category" category',
+        );
+      }
+    }
+  });
 }

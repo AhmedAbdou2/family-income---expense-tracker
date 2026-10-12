@@ -40,7 +40,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get send_reset_link => 'Send reset link';
 
   @override
-  String get reset_email_sent => 'Check your email for a password reset link.';
+  String get reset_email_sent =>
+      'We emailed you a link to reset your password.';
 
   @override
   String get sign_up_email_sent =>
@@ -75,7 +76,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setup_subtitle =>
-      'Create a new household, or join an existing one with an invite code.';
+      'Create a new household, or join one with an invite code.';
 
   @override
   String get create_household_action => 'Create a household';
@@ -115,14 +116,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get empty_dashboard_body =>
-      'Your monthly income, expenses and charts will appear here.';
+      'Your monthly income and expenses will appear here.';
 
   @override
   String get empty_transactions_title => 'No transactions yet';
 
   @override
   String get empty_transactions_body =>
-      'Once you start recording income and expenses, they will be listed here.';
+      'Income and expenses you record will be listed here.';
 
   @override
   String get settings_title => 'Settings';
@@ -217,6 +218,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invite_status_used => 'Used';
+
+  @override
+  String get invite_status_expired => 'Expired';
 
   @override
   String get sign_out => 'Sign out';
@@ -355,7 +359,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get member_delete_confirm_body =>
-      'You can only delete people who have no transactions.';
+      'Only people with no transactions can be deleted.';
 
   @override
   String get delete_action => 'Delete';
@@ -415,7 +419,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get category_delete_confirm_body =>
-      'You can only delete categories that have no transactions.';
+      'Only categories with no transactions can be deleted.';
 
   @override
   String get group_general => 'General expenses';
@@ -479,7 +483,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transaction_delete_from_fixed =>
-      'This transaction came from a fixed expense. Deleting it will not cause regeneration.';
+      'This came from a fixed expense. Deleting it won\'t make it post again.';
 
   @override
   String get transaction_delete_fuel_note =>
@@ -635,7 +639,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'This account isn\'t linked to a person yet.';
 
   @override
-  String get vehicles_section => 'Vehicles & car';
+  String get vehicles_section => 'Vehicles';
 
   @override
   String get vehicles_title => 'Vehicles';
@@ -920,7 +924,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recurring_delete_confirm_body =>
-      'It will stop posting and disappear from the list. Choose what happens to the transactions it already posted.';
+      'It stops posting and leaves the list. Choose what happens to the transactions it already posted.';
 
   @override
   String get recurring_delete_option_keep =>
@@ -943,7 +947,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String recurring_generated(int count) {
-    return 'Posted $count recurring transactions.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Posted $count recurring transactions.',
+      one: 'Posted 1 recurring transaction.',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -961,7 +971,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recurring_resumed_message =>
-      'Resumed. The next occurrence is the upcoming one; the paused period isn\'t backfilled.';
+      'Resumed. It continues from the next due date; the missed period isn\'t posted.';
 
   @override
   String get error_invalid_vehicle =>

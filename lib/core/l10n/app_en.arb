@@ -12,7 +12,7 @@
   "sign_in_action": "Sign in",
   "sign_up_action": "Create account",
   "send_reset_link": "Send reset link",
-  "reset_email_sent": "Check your email for a password reset link.",
+  "reset_email_sent": "We emailed you a link to reset your password.",
   "sign_up_email_sent": "Your account was created. Confirm your email address, then sign in.",
   "no_account_prompt": "Don't have an account?",
   "have_account_prompt": "Already have an account?",
@@ -24,7 +24,7 @@
   "field_required": "This field is required",
 
   "setup_title": "Set up your household",
-  "setup_subtitle": "Create a new household, or join an existing one with an invite code.",
+  "setup_subtitle": "Create a new household, or join one with an invite code.",
   "create_household_action": "Create a household",
   "join_household_action": "Join with an invite code",
   "household_name": "Household name",
@@ -39,9 +39,9 @@
   "nav_settings": "Settings",
 
   "empty_dashboard_title": "Nothing here yet",
-  "empty_dashboard_body": "Your monthly income, expenses and charts will appear here.",
+  "empty_dashboard_body": "Your monthly income and expenses will appear here.",
   "empty_transactions_title": "No transactions yet",
-  "empty_transactions_body": "Once you start recording income and expenses, they will be listed here.",
+  "empty_transactions_body": "Income and expenses you record will be listed here.",
 
   "settings_title": "Settings",
   "language_section": "Language",
@@ -83,6 +83,7 @@
   },
   "invite_status_active": "Active",
   "invite_status_used": "Used",
+  "invite_status_expired": "Expired",
 
   "sign_out": "Sign out",
   "sign_out_confirm_title": "Sign out?",
@@ -135,7 +136,7 @@
   "member_rename": "Rename",
   "member_delete": "Delete person",
   "member_delete_confirm_title": "Delete this person?",
-  "member_delete_confirm_body": "You can only delete people who have no transactions.",
+  "member_delete_confirm_body": "Only people with no transactions can be deleted.",
   "delete_action": "Delete",
   "member_active": "Active",
   "member_inactive": "Inactive",
@@ -155,7 +156,7 @@
   "category_icon": "Icon",
   "category_color": "Color",
   "category_delete_confirm_title": "Delete this category?",
-  "category_delete_confirm_body": "You can only delete categories that have no transactions.",
+  "category_delete_confirm_body": "Only categories with no transactions can be deleted.",
   "group_general": "General expenses",
   "group_car": "Car expenses",
   "group_fixed": "Fixed expenses",
@@ -177,7 +178,7 @@
   "transaction_delete": "Delete transaction",
   "transaction_delete_confirm_title": "Delete this transaction?",
   "transaction_delete_confirm_body": "This can't be undone.",
-  "transaction_delete_from_fixed": "This transaction came from a fixed expense. Deleting it will not cause regeneration.",
+  "transaction_delete_from_fixed": "This came from a fixed expense. Deleting it won't make it post again.",
   "transaction_delete_fuel_note": "The linked fuel log will also be deleted.",
   "transaction_delete_maintenance_note": "If this expense came from completing a maintenance reminder, deleting it won't make the reminder due again.",
   "transaction_delete_pause_rule": "Also pause this fixed expense",
@@ -234,7 +235,7 @@
 
   "quick_add_no_person": "This account isn't linked to a person yet.",
 
-  "vehicles_section": "Vehicles & car",
+  "vehicles_section": "Vehicles",
   "vehicles_title": "Vehicles",
   "vehicles_empty_title": "No vehicles yet",
   "vehicles_empty_body": "Add a vehicle to track fuel and maintenance.",
@@ -341,7 +342,7 @@
   "recurring_saved": "Commitment saved.",
   "recurring_delete": "Delete fixed expense",
   "recurring_delete_confirm_title": "Delete this fixed expense?",
-  "recurring_delete_confirm_body": "It will stop posting and disappear from the list. Choose what happens to the transactions it already posted.",
+  "recurring_delete_confirm_body": "It stops posting and leaves the list. Choose what happens to the transactions it already posted.",
   "recurring_delete_option_keep": "Posted transactions stay and keep counting as fixed expenses",
   "recurring_delete_option_delete_month": "{count, plural, =0{No posted transactions this month to delete} =1{This month's 1 posted transaction is deleted too} other{This month's {count} posted transactions are deleted too}}",
   "@recurring_delete_option_delete_month": {
@@ -352,7 +353,7 @@
     }
   },
   "recurring_deleted": "Fixed expense deleted.",
-  "recurring_generated": "Posted {count} recurring transactions.",
+  "recurring_generated": "{count, plural, =1{Posted 1 recurring transaction.} other{Posted {count} recurring transactions.}}",
   "@recurring_generated": {
     "placeholders": { "count": { "type": "int" } }
   },
@@ -360,7 +361,7 @@
   "recurring_type_expense": "Expense",
   "recurring_inactive_hint": "Paused commitments don't post.",
   "recurring_paused_message": "Paused. Transactions already posted this month stay; delete them separately if needed.",
-  "recurring_resumed_message": "Resumed. The next occurrence is the upcoming one; the paused period isn't backfilled.",
+  "recurring_resumed_message": "Resumed. It continues from the next due date; the missed period isn't posted.",
 
   "error_invalid_vehicle": "That vehicle doesn't belong to this household.",
   "error_invalid_item": "That maintenance reminder doesn't exist.",

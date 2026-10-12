@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/settings/preferences.dart';
 import '../../../core/settings/settings_controller.dart';
+import '../../../core/utils/currency.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../auth/presentation/providers.dart';
@@ -109,6 +110,8 @@ class _QuickAddSheetState extends ConsumerState<_QuickAddSheet> {
     final arabicDigits = ref.watch(settingsProvider).arabicDigits;
     final membership = ref.watch(membershipProvider).value;
     final currency = membership?.household.currency;
+    final locale = Localizations.localeOf(context).toString();
+    final currencyLabel = Currency.label(currency, locale: locale);
     final scheme = Theme.of(context).colorScheme;
     final isChild = membership?.role == MemberRole.child;
 
@@ -146,9 +149,9 @@ class _QuickAddSheetState extends ConsumerState<_QuickAddSheet> {
               borderRadius: BorderRadius.circular(14),
             ),
             child: Text(
-              currency == null || currency.isEmpty
+              currencyLabel.isEmpty
                   ? _display(arabicDigits)
-                  : '${_display(arabicDigits)} $currency',
+                  : '${_display(arabicDigits)} $currencyLabel',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),

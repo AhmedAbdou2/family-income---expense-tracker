@@ -5,6 +5,7 @@ import 'package:intl/intl.dart' show DateFormat;
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/settings/settings_controller.dart';
+import '../../../core/utils/currency.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/app_buttons.dart';
 import '../../../core/widgets/error_view.dart';
@@ -532,7 +533,10 @@ class _EconomyCard extends StatelessWidget {
                 : Money.format(
                     minorUnits: stats.costPerKmMinor!.round(),
                     arabicDigits: arabicDigits,
-                    currencyCode: currency,
+                    currencyCode: Currency.label(
+                      currency,
+                      locale: Localizations.localeOf(context).toString(),
+                    ),
                   ),
           ),
         ),
@@ -623,7 +627,7 @@ class _FuelLogTile extends StatelessWidget {
             Money.format(
               minorUnits: log.totalCostMinorUnits,
               arabicDigits: arabicDigits,
-              currencyCode: currency,
+              currencyCode: Currency.label(currency, locale: locale),
             ),
             style: const TextStyle(fontWeight: FontWeight.w700),
           ),

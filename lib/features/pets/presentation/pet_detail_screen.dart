@@ -5,6 +5,7 @@ import 'package:intl/intl.dart' show DateFormat;
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/settings/settings_controller.dart';
+import '../../../core/utils/currency.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/app_buttons.dart';
 import '../../../core/widgets/error_view.dart';
@@ -147,7 +148,7 @@ class _PetDetailScreenState extends ConsumerState<PetDetailScreen> {
                           Money.format(
                             minorUnits: total,
                             arabicDigits: arabicDigits,
-                            currencyCode: currency,
+                            currencyCode: Currency.label(currency, locale: locale),
                           ),
                         ),
                         style: Theme.of(context)
@@ -195,7 +196,7 @@ class _PetDetailScreenState extends ConsumerState<PetDetailScreen> {
                         amountLabel: Money.format(
                           minorUnits: transaction.amountMinorUnits,
                           arabicDigits: arabicDigits,
-                          currencyCode: currency,
+                          currencyCode: Currency.label(currency, locale: locale),
                         ),
                         date: DateFormat.yMMMd(locale).format(transaction.date),
                       ),

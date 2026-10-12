@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/settings/preferences.dart';
 import '../../../core/settings/settings_controller.dart';
+import '../../../core/utils/currency.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_view.dart';
@@ -109,6 +110,9 @@ class _TransactionFormScreenState
     final members = ref.watch(membersProvider).value ?? const <Member>[];
     final pets = ref.watch(petsProvider).value ?? const <Pet>[];
     final membership = ref.watch(membershipProvider).value;
+    final locale = Localizations.localeOf(context).toString();
+    final currencyLabel =
+        Currency.label(membership?.household.currency, locale: locale);
 
     if (_loading) {
       return Scaffold(
@@ -203,7 +207,7 @@ class _TransactionFormScreenState
               decoration: InputDecoration(
                 labelText: l10n.amount,
                 prefixText: _type == TransactionType.expense ? '- ' : '+ ',
-                suffixText: membership?.household.currency,
+                suffixText: currencyLabel.isEmpty ? null : currencyLabel,
               ),
               validator: (_) {
                 final raw = _amountController.text.trim();
@@ -537,7 +541,10 @@ class _TransactionFormScreenState
     final amountLabel = Money.format(
       minorUnits: transaction.amountMinorUnits,
       arabicDigits: ref.read(settingsProvider).arabicDigits,
-      currencyCode: ref.read(membershipProvider).value?.household.currency,
+      currencyCode: Currency.label(
+        ref.read(membershipProvider).value?.household.currency,
+        locale: locale,
+      ),
     );
     final fuelLinked = await isFuelLinkedTransaction(ref, transaction.id);
     if (!mounted) return;

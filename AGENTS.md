@@ -358,4 +358,23 @@ owner can delete the leftover unlinked person from the Family tab.
   analyze clean, 140 tests (`test/recurring_archive_test.dart` pins the exact
   figures: Keep ⇒ Posted 2,000 / due 0 / expenses unchanged; delete-month ⇒
   Posted 0 / expenses −2,000), web release build OK.
+- Copy & translation pass (text only, no DB/behaviour change): full EN/AR
+  audit against one glossary (Income=الإيرادات, Expenses=المصروفات,
+  Balance=الرصيد, Fixed expenses=المصروفات الثابتة, Posted=المسجَّل,
+  Still due=المتبقي تسجيله, Left after fixed=المتبقي بعد المصروفات الثابتة,
+  Family=العائلة, Owner/Adult/Child=مالك/بالغ/طفل, Vehicles=السيارات,
+  Pets=الحيوانات الأليفة, Odometer=عدّاد الكيلومترات, Pause/Resume=
+  إيقاف مؤقت/استئناف, Make monthly fixed=تثبيت كمصروف شهري, Category=التصنيف,
+  Person=الشخص). 120 strings changed + `invite_status_expired` added
+  (expired invites used to read "Active"); Arabic rewritten to natural MSA
+  with full ICU plural categories (e.g. `recurring_generated`,
+  `recurring_delete_option_delete_month`), Western digits 0-9 in text (the
+  Arabic-Indic toggle still converts displayed numbers), and "ترحيل/المنزل"
+  replaced by "تسجيل/الأسرة". New `lib/core/utils/currency.dart` shows an
+  Arabic currency symbol (EGP→ج.م) in Arabic and the ISO code in English at
+  every amount site. Deliverable `docs/copy-review.md` (key | English | old
+  Arabic | new Arabic, changed rows, grouped by screen). Tests 150
+  (`test/currency_test.dart`, `test/arabic_dialogs_layout_test.dart`,
+  extended parity checks for placeholders + plural categories); analyze
+  clean, web release build OK.
 - Phase 4: reports/charts/CSV export/polish.
