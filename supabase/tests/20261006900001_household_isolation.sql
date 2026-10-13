@@ -2433,12 +2433,19 @@ end $$;
 -- --------------------------------------------------------------------
 -- 12. PHASE 4b: transaction receipts + receipt-aware deletion (17)
 -- --------------------------------------------------------------------
-set local role authenticated;
-set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
-set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
-
 -- 12.0 The bucket exists, is PRIVATE, and carries the real server-side
 --      size cap + mime allow list.
+--
+--      METADATA READ -- runs as the privileged login role, on purpose.
+--      On hosted Supabase storage.buckets has RLS enabled and NO policy lets
+--      `authenticated` (or `anon`) read it, so a select made while acting as
+--      authenticated silently returns zero rows ("bucket missing" even though
+--      the bucket is there -- the bug this section hit on the cloud). This
+--      check is about migration 17's bucket CONFIGURATION, not about RLS, so
+--      it runs as the privileged login role (`set local role none` = the
+--      migration runner). Everything below runs as the real roles, and every
+--      storage.objects read/write still goes through the real policies.
+set local role none;
 do $$
 declare v_public boolean; v_limit bigint; v_mimes text[];
 begin
@@ -2453,6 +2460,10 @@ begin
     raise exception 'FAIL: bucket mime list = %', v_mimes;
   end if;
 end $$;
+
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
+set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
 
 -- 12.1 A fresh transaction to attach receipts to.
 do $$
