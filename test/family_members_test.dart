@@ -84,17 +84,18 @@ Future<void> _openMenu(WidgetTester tester, int rowIndex) async {
 }
 
 void main() {
-  testWidgets('owner sees add-person and invite actions', (tester) async {
+  testWidgets('owner sees one add action and no separate invite action',
+      (tester) async {
     await _pump(
       tester,
       _app(role: MemberRole.owner, members: const [_me, _other]),
     );
 
     expect(find.byIcon(Icons.person_add_alt_1_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.person_add_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.person_add_outlined), findsNothing);
   });
 
-  testWidgets('child sees no add/invite actions', (tester) async {
+  testWidgets('child sees no add action', (tester) async {
     await _pump(
       tester,
       _app(role: MemberRole.child, members: const [_me]),
@@ -121,10 +122,10 @@ void main() {
     expect(find.text('Change role'), findsOneWidget);
     expect(find.text('Remove account'), findsOneWidget);
     expect(find.text('Delete person'), findsNothing);
-    expect(find.text('Connect a login'), findsNothing);
+    expect(find.text('Create invite'), findsNothing);
   });
 
-  testWidgets('owner: unlinked person offers connect + delete, not role',
+  testWidgets('owner: unlinked person offers create-invite + delete, not role',
       (tester) async {
     await _pump(
       tester,
@@ -134,7 +135,7 @@ void main() {
     await _openMenu(tester, 1);
 
     expect(find.text('Rename'), findsOneWidget);
-    expect(find.text('Connect a login'), findsOneWidget);
+    expect(find.text('Create invite'), findsOneWidget);
     expect(find.text('Delete person'), findsOneWidget);
     expect(find.text('Archive'), findsOneWidget);
     expect(find.text('Change role'), findsNothing);
@@ -176,7 +177,7 @@ void main() {
 
     // An unlinked person can be connected and deleted by an adult.
     await _openMenu(tester, 2);
-    expect(find.text('Connect a login'), findsOneWidget);
+    expect(find.text('Create invite'), findsOneWidget);
     expect(find.text('Delete person'), findsOneWidget);
   });
 
@@ -193,22 +194,40 @@ void main() {
     expect(find.text('Leave household'), findsOneWidget);
     expect(find.text('Change role'), findsNothing);
     expect(find.text('Remove account'), findsNothing);
-    expect(find.text('Connect a login'), findsNothing);
+    expect(find.text('Create invite'), findsNothing);
     expect(find.text('Delete person'), findsNothing);
   });
 
-  testWidgets('invite role picker never offers the owner role',
+  testWidgets('merged add dialog never offers the owner role',
       (tester) async {
     await _pump(
       tester,
       _app(role: MemberRole.owner, members: const [_me]),
     );
 
-    await tester.tap(find.byIcon(Icons.person_add_outlined));
+    await tester.tap(find.byIcon(Icons.person_add_alt_1_outlined));
     await tester.pumpAndSettle();
 
-    expect(find.text('Invite as'), findsOneWidget);
     final dialog = find.byType(AlertDialog);
+    expect(
+      find.descendant(of: dialog, matching: find.text('Add family member')),
+      findsOneWidget,
+    );
+
+    // The role choice only appears on the login path.
+    expect(
+      find.descendant(of: dialog, matching: find.text('Invite as')),
+      findsNothing,
+    );
+    await tester.tap(
+      find.descendant(of: dialog, matching: find.text('Create invite code')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(of: dialog, matching: find.text('Invite as')),
+      findsOneWidget,
+    );
     expect(
       find.descendant(of: dialog, matching: find.text('Adult')),
       findsOneWidget,

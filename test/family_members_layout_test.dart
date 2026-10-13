@@ -173,4 +173,73 @@ void main() {
     expect(find.text(_longName), findsOneWidget);
     expect(find.text('Owner'), findsOneWidget);
   });
+
+  // The merged "Add family member" dialog must lay out at every width, in EN
+  // and AR, for the roles that get the action (owner / adult - a child has
+  // none, pinned below). The login radio group is shown first, then the role
+  // group on top of it, so the whole dialog is exercised.
+  for (final role in const [MemberRole.owner, MemberRole.adult]) {
+    for (final locale in const [Locale('en'), Locale('ar')]) {
+      for (final entry in sizes.entries) {
+        testWidgets(
+          'add-member dialog ${role.name} ${locale.languageCode} at '
+          '${entry.key}',
+          (tester) async {
+            await _pumpAt(
+              tester,
+              entry.value,
+              _shell(
+                role: role,
+                members: const [_longMember],
+                locale: locale,
+                child: const FamilyMembersScreen(),
+              ),
+            );
+
+            await tester.tap(find.byIcon(Icons.person_add_alt_1_outlined));
+            await tester.pumpAndSettle();
+
+            await tester.tap(find.byType(RadioListTile<bool>).last);
+            await tester.pumpAndSettle();
+
+            expect(_drainExceptions(tester), isEmpty,
+                reason: 'unexpected dialog layout exception at ${entry.key}');
+            expect(find.byType(AlertDialog), findsOneWidget);
+            expect(
+              find.byType(RadioListTile<MemberRole>),
+              findsNWidgets(2),
+            );
+            expect(
+              Directionality.of(
+                tester.element(find.byType(AlertDialog)),
+              ),
+              locale.languageCode == 'ar'
+                  ? TextDirection.rtl
+                  : TextDirection.ltr,
+            );
+          },
+        );
+      }
+    }
+  }
+
+  testWidgets('child has no add action at any width', (tester) async {
+    for (final entry in sizes.entries) {
+      await _pumpAt(
+        tester,
+        entry.value,
+        _shell(
+          role: MemberRole.child,
+          members: const [_longMember],
+          child: const FamilyMembersScreen(),
+        ),
+      );
+      expect(_drainExceptions(tester), isEmpty);
+      expect(
+        find.byIcon(Icons.person_add_alt_1_outlined),
+        findsNothing,
+        reason: 'a child must not see the add action at ${entry.key}',
+      );
+    }
+  });
 }

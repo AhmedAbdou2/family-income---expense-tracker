@@ -349,13 +349,27 @@ class AppLocalizationsAr extends AppLocalizations {
   String get members_title => 'أفراد العائلة';
 
   @override
-  String get family_invite_someone => 'دعوة شخص جديد';
+  String get family_add_member => 'إضافة فرد';
+
+  @override
+  String get family_add_login_label => 'تسجيل الدخول';
+
+  @override
+  String get family_add_no_login_hint =>
+      'تسجيل المصروفات لهذا الشخص فقط، دون حساب.';
+
+  @override
+  String get family_add_with_login_hint =>
+      'يحصل على رمز، وعند قبوله يُربط الحساب بهذا الشخص.';
+
+  @override
+  String get family_add_action => 'إضافة';
+
+  @override
+  String get family_create_invite => 'إنشاء دعوة';
 
   @override
   String get role_no_login => 'بدون حساب';
-
-  @override
-  String get member_connect_login => 'ربط حساب';
 
   @override
   String member_connect_hint(String name) {
@@ -367,9 +381,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get member_restore => 'استعادة';
-
-  @override
-  String get member_add => 'إضافة شخص';
 
   @override
   String get member_name => 'اسم الشخص';

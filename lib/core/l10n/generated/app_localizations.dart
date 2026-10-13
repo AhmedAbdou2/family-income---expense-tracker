@@ -692,23 +692,47 @@ abstract class AppLocalizations {
   /// **'Family members'**
   String get members_title;
 
-  /// No description provided for @family_invite_someone.
+  /// No description provided for @family_add_member.
   ///
   /// In en, this message translates to:
-  /// **'Invite someone new'**
-  String get family_invite_someone;
+  /// **'Add family member'**
+  String get family_add_member;
+
+  /// No description provided for @family_add_login_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get family_add_login_label;
+
+  /// No description provided for @family_add_no_login_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Track expenses for this person only, without a login.'**
+  String get family_add_no_login_hint;
+
+  /// No description provided for @family_add_with_login_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'They get a code; accepting it links the login to this person.'**
+  String get family_add_with_login_hint;
+
+  /// No description provided for @family_add_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get family_add_action;
+
+  /// No description provided for @family_create_invite.
+  ///
+  /// In en, this message translates to:
+  /// **'Create invite'**
+  String get family_create_invite;
 
   /// No description provided for @role_no_login.
   ///
   /// In en, this message translates to:
   /// **'No login'**
   String get role_no_login;
-
-  /// No description provided for @member_connect_login.
-  ///
-  /// In en, this message translates to:
-  /// **'Connect a login'**
-  String get member_connect_login;
 
   /// No description provided for @member_connect_hint.
   ///
@@ -727,12 +751,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restore'**
   String get member_restore;
-
-  /// No description provided for @member_add.
-  ///
-  /// In en, this message translates to:
-  /// **'Add person'**
-  String get member_add;
 
   /// No description provided for @member_name.
   ///

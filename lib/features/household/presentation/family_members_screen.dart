@@ -41,18 +41,12 @@ class FamilyMembersScreen extends ConsumerWidget {
         // FAB (quick-add) and two default-tagged FABs in one Navigator
         // subtree trip the duplicate-hero assertion on transitions.
         actions: [
-          if (canManage) ...[
+          if (canManage)
             IconButton(
-              tooltip: l10n.member_add,
+              tooltip: l10n.family_add_member,
               icon: const Icon(Icons.person_add_alt_1_outlined),
-              onPressed: () => addPerson(context, ref),
+              onPressed: () => addFamilyMember(context, ref),
             ),
-            IconButton(
-              tooltip: l10n.family_invite_someone,
-              icon: const Icon(Icons.person_add_outlined),
-              onPressed: () => inviteNewPerson(context, ref),
-            ),
-          ],
         ],
       ),
       body: members.when(
@@ -263,7 +257,7 @@ class _FamilyTile extends ConsumerWidget {
                 if (actions.connectLogin)
                   PopupMenuItem(
                     value: 'connect',
-                    child: Text(l10n.member_connect_login),
+                    child: Text(l10n.family_create_invite),
                   ),
                 if (actions.archive)
                   PopupMenuItem(
@@ -607,37 +601,180 @@ IconData _roleIcon(MemberRole role) => switch (role) {
       MemberRole.child => Icons.child_care_outlined,
     };
 
-/// Creates a join-only invite for a brand-new person (they choose their own
-/// name when accepting).
-Future<void> inviteNewPerson(BuildContext context, WidgetRef ref) async {
-  final membership = ref.read(membershipProvider).value;
-  if (membership == null) return;
-  final role = await showRolePicker(context);
-  if (role == null || !context.mounted) return;
-  await createInviteAndShowCode(
-    context,
-    ref,
-    householdId: membership.household.id,
-    role: role,
-    hint: context.l10n.invite_code_hint_share,
-  );
+/// What the merged "Add family member" dialog collected.
+class AddMemberRequest {
+  const AddMemberRequest({
+    required this.name,
+    required this.withLogin,
+    required this.role,
+  });
+
+  /// Trimmed, non-empty person name.
+  final String name;
+
+  /// false = create just the person; true = also create a person-bound invite.
+  final bool withLogin;
+
+  /// Role for the invite (only meaningful when [withLogin] is true).
+  final MemberRole role;
 }
 
-/// Adds a person with no login (spending can be tracked per person).
-Future<void> addPerson(BuildContext context, WidgetRef ref) async {
+/// The one "add" entry point: collects a name, whether the person should get
+/// a login, and (for a login) the invite role, then creates the person and -
+/// when a login was requested - a person-bound invite.
+///
+/// - no login: creates the person only, exactly like the old "Add person";
+/// - with login: creates the person (unlinked), then binds an invite to it
+///   through `create_invite`'s `p_member_id` (migration 11). `accept_invite`
+///   links the joiner to that very person - so "a child login always has a
+///   person" holds without any new rule, and the invite can only ever carry
+///   the adult/child role (the `invites` CHECK + `create_invite` enforce it).
+Future<void> addFamilyMember(BuildContext context, WidgetRef ref) async {
   final membership = ref.read(membershipProvider).value;
   if (membership == null) return;
-  final name = await _promptName(context);
-  if (name == null || !context.mounted) return;
+
+  final request = await showAddMemberDialog(context);
+  if (request == null || !context.mounted) return;
+
+  final householdId = membership.household.id;
   try {
-    await ref.read(membersRepositoryProvider).createMember(
-          householdId: membership.household.id,
-          name: name,
+    final member = await ref.read(membersRepositoryProvider).createMember(
+          householdId: householdId,
+          name: request.name,
         );
     ref.invalidate(membersProvider);
+    if (!request.withLogin || !context.mounted) return;
+
+    await createInviteAndShowCode(
+      context,
+      ref,
+      householdId: householdId,
+      role: request.role,
+      memberId: member.id,
+      hint: context.l10n.member_connect_hint(member.name),
+    );
   } catch (error) {
     if (context.mounted) _showError(context, error);
   }
+}
+
+/// The merged "Add family member" dialog.
+///
+/// Collects a name, whether the person should get a login, and (only for the
+/// login path - a person without a login has no role) the invite role. The
+/// role choice is always limited to adult/child: the `invites` CHECK and
+/// `create_invite` both forbid inviting an owner.
+Future<AddMemberRequest?> showAddMemberDialog(BuildContext context) async {
+  final controller = TextEditingController();
+  var withLogin = false;
+  var role = MemberRole.adult;
+  return showDialog<AddMemberRequest>(
+    context: context,
+    builder: (dialogContext) => StatefulBuilder(
+      builder: (context, setLocal) {
+        final l10n = context.l10n;
+        final name = controller.text.trim();
+        return AlertDialog(
+          title: Text(l10n.family_add_member),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: controller,
+                  autofocus: true,
+                  maxLength: 40,
+                  textInputAction: TextInputAction.done,
+                  onChanged: (_) => setLocal(() {}),
+                  decoration: InputDecoration(
+                    labelText: l10n.member_name,
+                    hintText: l10n.member_name_hint,
+                    counterText: '',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.family_add_login_label,
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                RadioGroup<bool>(
+                  groupValue: withLogin,
+                  onChanged: (value) {
+                    if (value == null) return;
+                    setLocal(() => withLogin = value);
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      RadioListTile<bool>(
+                        value: false,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(l10n.role_no_login),
+                        subtitle: Text(l10n.family_add_no_login_hint),
+                      ),
+                      RadioListTile<bool>(
+                        value: true,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(l10n.create_invite_action),
+                        subtitle: Text(l10n.family_add_with_login_hint),
+                      ),
+                    ],
+                  ),
+                ),
+                if (withLogin) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.invite_as,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  RadioGroup<MemberRole>(
+                    groupValue: role,
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setLocal(() => role = value);
+                    },
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (final option in const [
+                          MemberRole.adult,
+                          MemberRole.child,
+                        ])
+                          RadioListTile<MemberRole>(
+                            value: option,
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(roleLabel(context, option)),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: name.isEmpty
+                  ? null
+                  : () => Navigator.of(dialogContext).pop(
+                        AddMemberRequest(
+                          name: name,
+                          withLogin: withLogin,
+                          role: role,
+                        ),
+                      ),
+              child: Text(l10n.family_add_action),
+            ),
+          ],
+        );
+      },
+    ),
+  );
 }
 
 /// Creates an invite via `create_invite` and shows the code with copy/share.

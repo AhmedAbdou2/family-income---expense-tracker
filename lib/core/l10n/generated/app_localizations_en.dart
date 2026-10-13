@@ -348,13 +348,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get members_title => 'Family members';
 
   @override
-  String get family_invite_someone => 'Invite someone new';
+  String get family_add_member => 'Add family member';
+
+  @override
+  String get family_add_login_label => 'Login';
+
+  @override
+  String get family_add_no_login_hint =>
+      'Track expenses for this person only, without a login.';
+
+  @override
+  String get family_add_with_login_hint =>
+      'They get a code; accepting it links the login to this person.';
+
+  @override
+  String get family_add_action => 'Add';
+
+  @override
+  String get family_create_invite => 'Create invite';
 
   @override
   String get role_no_login => 'No login';
-
-  @override
-  String get member_connect_login => 'Connect a login';
 
   @override
   String member_connect_hint(String name) {
@@ -366,9 +380,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get member_restore => 'Restore';
-
-  @override
-  String get member_add => 'Add person';
 
   @override
   String get member_name => 'Person name';

@@ -121,9 +121,13 @@
   "nav_vehicles": "السيارات",
 
   "members_title": "أفراد العائلة",
-  "family_invite_someone": "دعوة شخص جديد",
+  "family_add_member": "إضافة فرد",
+  "family_add_login_label": "تسجيل الدخول",
+  "family_add_no_login_hint": "تسجيل المصروفات لهذا الشخص فقط، دون حساب.",
+  "family_add_with_login_hint": "يحصل على رمز، وعند قبوله يُربط الحساب بهذا الشخص.",
+  "family_add_action": "إضافة",
+  "family_create_invite": "إنشاء دعوة",
   "role_no_login": "بدون حساب",
-  "member_connect_login": "ربط حساب",
   "member_connect_hint": "أنشئ رمز دعوة لـ {name}. عند قبوله يصبح ذلك الحساب حساب هذا الشخص.",
   "@member_connect_hint": {
     "placeholders": {
@@ -132,7 +136,6 @@
   },
   "member_archive": "أرشفة",
   "member_restore": "استعادة",
-  "member_add": "إضافة شخص",
   "member_name": "اسم الشخص",
   "member_name_hint": "مثال: سارة",
   "member_rename": "تعديل الاسم",

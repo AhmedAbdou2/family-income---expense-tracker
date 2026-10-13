@@ -123,9 +123,13 @@
   "nav_vehicles": "Vehicles",
 
   "members_title": "Family members",
-  "family_invite_someone": "Invite someone new",
+  "family_add_member": "Add family member",
+  "family_add_login_label": "Login",
+  "family_add_no_login_hint": "Track expenses for this person only, without a login.",
+  "family_add_with_login_hint": "They get a code; accepting it links the login to this person.",
+  "family_add_action": "Add",
+  "family_create_invite": "Create invite",
   "role_no_login": "No login",
-  "member_connect_login": "Connect a login",
   "member_connect_hint": "Create an invite code for {name}. When it's accepted, that login becomes this person's account.",
   "@member_connect_hint": {
     "placeholders": {
@@ -134,7 +138,6 @@
   },
   "member_archive": "Archive",
   "member_restore": "Restore",
-  "member_add": "Add person",
   "member_name": "Person name",
   "member_name_hint": "e.g. Sara",
   "member_rename": "Rename",

@@ -445,6 +445,23 @@ owner can delete the leftover unlinked person from the Family tab.
   extended rail; collapsed-rail tooltip carries the role). Tests 102
   (`test/role_badge_test.dart`, `test/family_members_test.dart`,
   `test/family_members_layout_test.dart` sweep 360/800/1854 for all roles).
+- UI: the Family screen's two look-alike app-bar buttons ("Add person" and
+  "Invite someone") became ONE "Add family member" action opening a single
+  dialog: name (required, trimmed, ≤40) → login choice ("No login" creates the
+  person only, exactly like the old add; "Create invite code" creates the
+  person and then a person-bound invite) → role (adult/child, shown only on
+  the login path because a person without a login has no role; an invite can
+  never carry the owner role). The role radios reuse `roleLabel`; the per-row
+  action (was "Connect a login") is now "Create invite" and still binds an
+  invite to an existing unlinked person. No DB change: reuses the
+  `members_insert_adult` policy + `create_invite(p_member_id)` +
+  `accept_invite`, so a child login still always has a person. ARB keys
+  `family_add_member` / `family_add_login_label` / `family_add_no_login_hint` /
+  `family_add_with_login_hint` / `family_add_action` / `family_create_invite`
+  added (EN+AR); `member_add`, `family_invite_someone` and
+  `member_connect_login` removed. Tests 385 (`test/family_add_member_test.dart`
+  pins the exact repo calls, `test/family_members_layout_test.dart` sweeps
+  360/800/1854 × AR/EN × owner/adult/child for the list and the dialog).
 - Fix (fixed commitments didn't affect the dashboard): the form/DB wrote
   `next_due = start_date`, ignoring `day_of_month`, so the generator posted
   the first occurrence on the wrong day and the dashboard projection skipped
