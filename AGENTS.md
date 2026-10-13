@@ -247,7 +247,8 @@ runs it on the cloud next; after that it is frozen. Migration 16 is
 validated in Docker (all 16 files + extended isolation test section 11 +
 privilege matrix clean, plus both legacy-guard cases `category_id is null`
 aborts / category row kept) — the user runs it on the cloud next; after
-that it is frozen. Migration 17 is validated in Docker two ways:
+that it is frozen. Migration 17 is validated in Docker two ways, both using
+the honest stub in `supabase/tests/support/` (see `tool/docker/README.md`):
 `fresh17final` (fresh DB + the Supabase stub *with* the storage schema — all
 17 migration files, the full extended isolation test incl. sections 12/13 +
 the amendment-G block, and the privilege matrix with 0 violations) and
@@ -257,6 +258,23 @@ still apply, because migration 17 wraps its whole storage block in
 there, since its receipts section asserts against `storage.buckets`, which only
 exists on Supabase). The user runs 17 on the cloud next; after that it is
 frozen. Any further DB change must be a NEW migration file.
+
+Two hosted-only Storage behaviours were found by running the isolation test on
+the real project (Docker's stub predated them); both are now mirrored in the
+stub, so the test fails locally instead of only on the cloud:
+
+- `storage.buckets` has RLS enabled with **no** read policy for
+  `authenticated`/`anon`, so §12.0's bucket-configuration check reads that row
+  as the privileged login role (`set local role none`) instead of as
+  `authenticated` (fixed in `ef637d4`). Enabling RLS on the stub's
+  `storage.buckets` (no policy) makes this class of bug fail in Docker too.
+- `storage.objects` carries `protect_objects_delete`, a `BEFORE DELETE ... FOR
+  EACH STATEMENT` trigger that raises `42501` unless
+  `storage.allow_delete_query = 'true'` — the GUC the Storage API sets when it
+  deletes on a user's behalf. It fires even when zero rows match. The test's own
+  direct deletes (§12.7-§12.13) set that GUC, §12.0a pins the refusal without
+  it, and the GUC is switched back off afterwards so it cannot leak. Neither the
+  app nor migration 17 ever deletes storage rows directly.
 
 **Migration 17 deliberately does NOT revoke direct DELETE on `transactions`.**
 Doing so would make isolation-test sections 3d/4d (which assert that a child
@@ -315,6 +333,8 @@ RLS design (full plain-language comments in migration 10):
 
 Test: `supabase/tests/20261006900001_household_isolation.sql` (single
 transaction, rolls back, prints `ALL RLS ISOLATION TESTS PASSED`).
+Docker harness (honest stubs, privilege matrix, validate script + README):
+`supabase/tests/support/` and `tool/docker/` — see `tool/docker/README.md`.
 
 ### Known item
 
@@ -590,7 +610,10 @@ owner can delete the leftover unlinked person from the Family tab.
 
 ### Phase 4b cloud checklist (what Docker cannot prove)
 
-Docker has no Supabase Storage, so these four things are only proven once
+Docker now mirrors the two hosted-only Storage *metadata/guard* behaviours
+(RLS on `storage.buckets`, and the `protect_objects_delete` trigger), so those
+no longer need a manual check. What Docker still cannot prove is the Storage
+**API** and the service behind it, so these five things are only proven once
 migration 17 is applied on the cloud. Do them in this order, right after
 pasting migration 17 (step 18 of the manual list):
 
@@ -617,4 +640,11 @@ pasting migration 17 (step 18 of the manual list):
    child, the transaction form must show *no* receipts section content at all
    (RLS returns zero rows), and the `/export` route must bounce back to the
    dashboard.
+5. **The app can remove its own receipt object through the Storage API.**
+   Attach a photo, then delete that receipt (or the whole transaction). The
+   thumbnail must disappear, the object must vanish from Storage → `receipts`,
+   and Settings → "clean up unused receipt files" must then report *Nothing to
+   clean up*. Docker proves the RLS DELETE policy but not the Storage API path
+   that sets `storage.allow_delete_query` — this is the end-to-end check that
+   the guard does not block the app's own delete.
 
