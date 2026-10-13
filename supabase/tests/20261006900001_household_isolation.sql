@@ -2465,6 +2465,27 @@ set local role authenticated;
 set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
 set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
 
+-- 12.0a HOSTED GUARD -- pin it before anything relies on it.
+--       Hosted Supabase guards storage.objects with a FOR EACH STATEMENT
+--       BEFORE DELETE trigger (storage.protect_delete) that raises 42501
+--       unless storage.allow_delete_query = 'true' -- the GUC the Storage API
+--       sets when IT deletes an object on a user's behalf. Neither the app nor
+--       migration 17 ever deletes storage rows directly, so this test is the
+--       only thing that hits it. Done as a real adult (DELETE granted, RLS
+--       visible) with the GUC unset: the delete must be refused, and the
+--       statement-level trigger fires even though the table is empty here.
+do $$
+begin
+  begin
+    delete from storage.objects where bucket_id = 'receipts';
+    raise exception 'FAIL: direct storage.objects delete allowed without storage.allow_delete_query';
+  exception when insufficient_privilege then
+    if sqlerrm not like 'Direct deletion from storage tables%' then
+      raise exception 'FAIL: unexpected 42501 on storage.objects delete: %', sqlerrm;
+    end if;
+  end;
+end $$;
+
 -- 12.1 A fresh transaction to attach receipts to.
 do $$
 declare v_tx uuid;
@@ -2620,6 +2641,13 @@ begin
   exception when insufficient_privilege then null;
   end;
 end $$;
+
+-- Direct storage.objects deletes start in 12.7. Mimic the Storage API by
+-- turning the statement-level guard OFF with storage.allow_delete_query =
+-- 'true'. This removes ONLY the guard trigger: the RLS DELETE policy and the
+-- real role (authenticated / anon; adult, child, outsider) still decide what
+-- can go -- that is what these blocks assert.
+set local storage.allow_delete_query = 'true';
 
 -- 12.7 Child C: sees no receipts, cannot mint/attach/delete, and cannot
 --      touch the storage object.
@@ -2823,6 +2851,10 @@ begin
   select count(*) into n from public.list_orphan_receipts();
   if n <> 0 then raise exception 'FAIL: % orphans survived the cleanup', n; end if;
 end $$;
+
+-- The guard GUC is transaction-scoped, so switch it back off explicitly to
+-- stop it leaking into later sections.
+set local storage.allow_delete_query = 'false';
 
 do $$ begin raise notice 'RECEIPTS PASSED (3 max, stored mime/size, orphan sweep, object delete after row gone)'; end $$;
 
