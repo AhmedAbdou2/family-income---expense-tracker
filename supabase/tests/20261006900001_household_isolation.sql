@@ -1,5 +1,5 @@
 -- ===================================================================
--- RLS ISOLATION TEST - Phase 1 + 2 + 2.5 + 3 extensions
+-- RLS ISOLATION TEST - Phase 1 + 2 + 2.5 + 3 + 3.5 + 4a + 4b extensions
 -- ===================================================================
 -- Proves that a user from household B cannot SELECT / INSERT / UPDATE /
 -- DELETE any row of household A, and that child-role restrictions hold.
@@ -71,15 +71,34 @@
 --   * direct DELETE on recurring_rules is revoked; a child and an
 --     outsider get forbidden.
 --
+-- Phase 4a additions (section 11):
+--   * budgets are one-per-category + one overall, paused rows keep the
+--     slot, writes are RPC-only, children/outsiders are locked out;
+--   * monthly_totals stays exact past 1000 rows and matches the
+--     dashboard definition.
+--
+-- Phase 4b additions (sections 12-13):
+--   * receipts: the private bucket's real limits, a server-minted path,
+--     stored mime/size winning over the client's, the 3-per-transaction
+--     cap, child/outsider/anon lockout on the table AND the storage
+--     object, and the AMENDMENT A proof that an adult can still delete a
+--     transaction's objects after the row is gone (orphan sweep included);
+--   * delete_transaction keeps the exact old delete rule (owner/adult any
+--     row, child only its own person, foreign adult forbidden);
+--   * pet reminders: validation, repeat-clamp (Jan 31 -> Feb 28), an
+--     optional pet expense in the right pet category, the no-linked-person
+--     rule (raises, writes nothing), and child/outsider lockout.
+--
 -- Logins used: A + B (isolation), C + D + E (phase 2), F + G + H
--- (phase 2.5 joiners/legacy), J + K + L (role / leave / remove cast).
+-- (phase 2.5 joiners/legacy), J + K + L (role / leave / remove cast),
+-- M (phase 4b: an adult with no person of their own).
 --
 -- HOW TO RUN: paste this ENTIRE file into the Supabase SQL editor and run
 -- it. It executes inside ONE transaction and always ROLLS BACK, so it
 -- leaves no data behind. Success = green notice below; any failure =
 -- red error starting with "FAIL:" or "TEST SETUP FAILED:".
 --
--- Prerequisite: migrations 1..15 have been run in that order.
+-- Prerequisite: migrations 1..17 have been run in that order.
 -- ===================================================================
 
 begin;
@@ -2042,10 +2061,18 @@ begin
 end $$;
 
 do $$
-declare v_rule uuid := current_setting('test.archive_rule')::uuid; n int;
+declare
+  v_rule uuid := current_setting('test.archive_rule')::uuid;
+  v_res jsonb;
+  n int;
 begin
-  if public.archive_recurring_rule(v_rule, false) <> 0 then
+  -- Migration 17: the RPC now returns jsonb {deleted, receipt_paths}.
+  v_res := public.archive_recurring_rule(v_rule, false);
+  if (v_res ->> 'deleted')::int <> 0 then
     raise exception 'FAIL: keep-archive reported a deleted row';
+  end if;
+  if v_res ->> 'receipt_paths' <> '[]' then
+    raise exception 'FAIL: keep-archive handed back receipt paths';
   end if;
 
   select count(*) into n from public.recurring_rules
@@ -2085,7 +2112,7 @@ begin
   select count(*) into n from public.transactions where recurring_rule_id = v_rule;
   if n <> 1 then raise exception 'FAIL: purge rule posted % rows (expected 1)', n; end if;
 
-  if public.archive_recurring_rule(v_rule, true) <> 1 then
+  if (public.archive_recurring_rule(v_rule, true) ->> 'deleted')::int <> 1 then
     raise exception 'FAIL: delete-month did not report 1 deleted row';
   end if;
 
@@ -2402,6 +2429,705 @@ begin
     if sqlerrm <> 'forbidden' then raise; end if;
   end;
 end $$;
+
+-- --------------------------------------------------------------------
+-- 12. PHASE 4b: transaction receipts + receipt-aware deletion (17)
+-- --------------------------------------------------------------------
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
+set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
+
+-- 12.0 The bucket exists, is PRIVATE, and carries the real server-side
+--      size cap + mime allow list.
+do $$
+declare v_public boolean; v_limit bigint; v_mimes text[];
+begin
+  select b.public, b.file_size_limit, b.allowed_mime_types
+    into v_public, v_limit, v_mimes
+    from storage.buckets b where b.id = 'receipts';
+  if not found then raise exception 'FAIL: receipts bucket missing'; end if;
+  if v_public is not false then raise exception 'FAIL: receipts bucket is public'; end if;
+  if v_limit <> 5242880 then raise exception 'FAIL: bucket size limit = %', v_limit; end if;
+  if v_mimes is distinct from
+     array['image/jpeg','image/png','image/webp','application/pdf']::text[] then
+    raise exception 'FAIL: bucket mime list = %', v_mimes;
+  end if;
+end $$;
+
+-- 12.1 A fresh transaction to attach receipts to.
+do $$
+declare v_tx uuid;
+begin
+  insert into public.transactions (household_id, type, amount, category_id, member_id, date)
+  values (current_setting('test.hh_a')::uuid, 'expense', 40.00,
+          current_setting('test.category_a')::uuid,
+          current_setting('test.member_a')::uuid, current_date)
+  returning id into v_tx;
+  perform set_config('test.receipt_tx', v_tx::text, false);
+end $$;
+
+-- 12.2 request_receipt_upload mints the path from the transaction row.
+do $$
+declare v_path text;
+begin
+  v_path := public.request_receipt_upload(
+    current_setting('test.receipt_tx')::uuid, 'image/jpeg', 2048);
+  if split_part(v_path, '/', 1) <> current_setting('test.hh_a') then
+    raise exception 'FAIL: path household folder is %', v_path;
+  end if;
+  if split_part(v_path, '/', 2) <> current_setting('test.receipt_tx') then
+    raise exception 'FAIL: path transaction folder is %', v_path;
+  end if;
+  if v_path !~ '\.jpg$' then raise exception 'FAIL: path extension is %', v_path; end if;
+  perform set_config('test.receipt_path1', v_path, false);
+end $$;
+
+-- 12.3 AMENDMENT C: the stored object wins over the client's mime/size.
+do $$
+declare v_id uuid; v_mime text; v_size int;
+begin
+  insert into storage.objects (bucket_id, name, owner, metadata)
+  values ('receipts', current_setting('test.receipt_path1'), auth.uid(),
+          jsonb_build_object('mimetype', 'image/jpeg', 'size', 2048));
+
+  -- The client LIES (says PDF, 4.9 MB). The row must record the object.
+  v_id := public.attach_receipt(current_setting('test.receipt_tx')::uuid,
+                                current_setting('test.receipt_path1'),
+                                'application/pdf', 4999999);
+
+  select r.mime, r.size_bytes into v_mime, v_size
+    from public.transaction_receipts r where r.id = v_id;
+  if v_mime <> 'image/jpeg' then
+    raise exception 'FAIL: client mime trusted (stored %)', v_mime;
+  end if;
+  if v_size <> 2048 then
+    raise exception 'FAIL: client size trusted (stored %)', v_size;
+  end if;
+  perform set_config('test.receipt1', v_id::text, false);
+end $$;
+
+-- 12.4 Three is the cap; a fourth is rejected.
+do $$
+declare v_p text; v_id uuid; i int;
+begin
+  for i in 1..2 loop
+    v_p := public.request_receipt_upload(
+      current_setting('test.receipt_tx')::uuid, 'image/png', 1024);
+    insert into storage.objects (bucket_id, name, owner, metadata)
+    values ('receipts', v_p, auth.uid(),
+            jsonb_build_object('mimetype', 'image/png', 'size', 1024));
+    v_id := public.attach_receipt(current_setting('test.receipt_tx')::uuid,
+                                  v_p, 'image/png', 1024);
+    perform set_config('test.receipt_path' || (i + 1), v_p, false);
+  end loop;
+
+  if (select count(*) from public.transaction_receipts
+       where transaction_id = current_setting('test.receipt_tx')::uuid) <> 3 then
+    raise exception 'FAIL: expected exactly 3 receipts';
+  end if;
+
+  begin
+    perform public.request_receipt_upload(
+      current_setting('test.receipt_tx')::uuid, 'image/png', 1024);
+    raise exception 'FAIL: a 4th receipt was allowed';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'limit_reached' then raise; end if;
+  end;
+end $$;
+
+-- 12.5 Attachment validation.
+do $$
+begin
+  begin
+    perform public.attach_receipt(current_setting('test.receipt_tx')::uuid,
+      current_setting('test.hh_a') || '/' || current_setting('test.receipt_tx') ||
+      '/99999999-9999-4999-8999-999999999999.jpg', 'image/jpeg', 100);
+    raise exception 'FAIL: attach accepted an object that does not exist';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_receipt' then raise; end if;
+  end;
+
+  begin
+    perform public.attach_receipt(current_setting('test.receipt_tx')::uuid,
+      '00000000-0000-4000-8000-000000000000/' || current_setting('test.receipt_tx') ||
+      '/x.jpg', 'image/jpeg', 100);
+    raise exception 'FAIL: attach accepted a foreign-household path';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_receipt' then raise; end if;
+  end;
+
+  begin
+    perform public.request_receipt_upload(
+      current_setting('test.receipt_tx')::uuid, 'image/gif', 100);
+    raise exception 'FAIL: a gif was accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_mime' then raise; end if;
+  end;
+
+  begin
+    perform public.request_receipt_upload(
+      current_setting('test.receipt_tx')::uuid, 'image/png', 5242881);
+    raise exception 'FAIL: an oversize upload was accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_value' then raise; end if;
+  end;
+
+  begin
+    perform public.request_receipt_upload(
+      current_setting('test.receipt_tx')::uuid, 'image/png', 0);
+    raise exception 'FAIL: a zero-size upload was accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_value' then raise; end if;
+  end;
+
+  begin
+    perform public.request_receipt_upload('00000000-0000-4000-8000-000000000000',
+                                           'image/png', 10);
+    raise exception 'FAIL: an unknown transaction was accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_transaction' then raise; end if;
+  end;
+end $$;
+
+-- 12.6 Receipts are RPC-only: a direct insert is denied.
+do $$
+begin
+  begin
+    insert into public.transaction_receipts
+      (household_id, transaction_id, storage_path, mime, size_bytes)
+    values
+      (current_setting('test.hh_a')::uuid, current_setting('test.receipt_tx')::uuid,
+       'x/y/z.jpg', 'image/jpeg', 10);
+    raise exception 'FAIL: a direct receipt insert was allowed';
+  exception when insufficient_privilege then null;
+  end;
+end $$;
+
+-- 12.7 Child C: sees no receipts, cannot mint/attach/delete, and cannot
+--      touch the storage object.
+set local request.jwt.claims to '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated"}';
+set local request.jwt.claim.sub to '33333333-3333-4333-8333-333333333333';
+
+do $$
+declare n int;
+begin
+  select count(*) into n from public.transaction_receipts;
+  if n <> 0 then raise exception 'FAIL: child sees % receipt rows', n; end if;
+
+  begin
+    perform public.request_receipt_upload(current_setting('test.receipt_tx')::uuid,
+                                           'image/png', 10);
+    raise exception 'FAIL: child minted an upload path';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    perform public.attach_receipt(current_setting('test.receipt_tx')::uuid,
+      current_setting('test.receipt_path1'), 'image/jpeg', 100);
+    raise exception 'FAIL: child attached a receipt';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    perform public.delete_receipt(current_setting('test.receipt1')::uuid);
+    raise exception 'FAIL: child deleted a receipt';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  select count(*) into n from storage.objects where bucket_id = 'receipts';
+  if n <> 0 then raise exception 'FAIL: child sees % receipt objects', n; end if;
+
+  begin
+    insert into storage.objects (bucket_id, name, owner, metadata)
+    values ('receipts', current_setting('test.receipt_path1'), auth.uid(), '{}'::jsonb);
+    raise exception 'FAIL: child uploaded a receipt object';
+  exception when insufficient_privilege then null;
+  end;
+
+  delete from storage.objects where name = current_setting('test.receipt_path1');
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'FAIL: child deleted % receipt objects', n; end if;
+end $$;
+
+-- 12.8 Outsider J (adult of ANOTHER household): locked out the same way.
+set local request.jwt.claims to '{"sub":"99999999-9999-4999-8999-999999999999","role":"authenticated"}';
+set local request.jwt.claim.sub to '99999999-9999-4999-8999-999999999999';
+
+do $$
+declare n int;
+begin
+  select count(*) into n from public.transaction_receipts;
+  if n <> 0 then raise exception 'FAIL: outsider sees % receipt rows', n; end if;
+  select count(*) into n from storage.objects where bucket_id = 'receipts';
+  if n <> 0 then raise exception 'FAIL: outsider sees % receipt objects', n; end if;
+  select count(*) into n from public.list_orphan_receipts();
+  if n <> 0 then raise exception 'FAIL: outsider sweep saw % objects', n; end if;
+
+  begin
+    perform public.request_receipt_upload(current_setting('test.receipt_tx')::uuid,
+                                           'image/png', 10);
+    raise exception 'FAIL: outsider minted an upload path';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    insert into storage.objects (bucket_id, name, owner, metadata)
+    values ('receipts', current_setting('test.receipt_path1'), auth.uid(), '{}'::jsonb);
+    raise exception 'FAIL: outsider uploaded into another household folder';
+  exception when insufficient_privilege then null;
+  end;
+
+  delete from storage.objects where name = current_setting('test.receipt_path1');
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'FAIL: outsider deleted % receipt objects', n; end if;
+end $$;
+
+-- 12.9 anon has no business with the bucket at all.
+set local role anon;
+set local request.jwt.claims to '{"role":"anon"}';
+
+do $$
+begin
+  begin
+    insert into storage.objects (bucket_id, name, owner, metadata)
+    values ('receipts', current_setting('test.receipt_path1'), null, '{}'::jsonb);
+    raise exception 'FAIL: anon uploaded a receipt object';
+  exception when insufficient_privilege then null;
+  end;
+
+  begin
+    delete from storage.objects where name = current_setting('test.receipt_path1');
+  exception when insufficient_privilege then null;
+  end;
+end $$;
+
+set local role authenticated;
+
+-- 12.10 AMENDMENT B: delete_transaction keeps the old delete rule.
+--       Child C deletes only their own person's rows.
+set local request.jwt.claims to '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated"}';
+set local request.jwt.claim.sub to '33333333-3333-4333-8333-333333333333';
+
+do $$
+begin
+  perform public.delete_transaction(current_setting('test.txn_kid')::uuid);
+  if (select count(*) from public.transactions
+       where id = current_setting('test.txn_kid')::uuid) <> 0 then
+    raise exception 'FAIL: child could not delete their own transaction';
+  end if;
+
+  begin
+    perform public.delete_transaction(current_setting('test.txn_a')::uuid);
+    raise exception 'FAIL: child deleted another person''s transaction';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+end $$;
+
+-- 12.11 An adult of another household is forbidden too.
+set local request.jwt.claims to '{"sub":"99999999-9999-4999-8999-999999999999","role":"authenticated"}';
+set local request.jwt.claim.sub to '99999999-9999-4999-8999-999999999999';
+
+do $$
+begin
+  begin
+    perform public.delete_transaction(current_setting('test.txn_a')::uuid);
+    raise exception 'FAIL: a foreign adult deleted a transaction';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+end $$;
+
+-- 12.12 An owner/adult may delete ANY row of their household.
+set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
+set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
+
+do $$
+declare v_tx uuid; v_paths text[];
+begin
+  insert into public.transactions (household_id, type, amount, category_id, member_id, date)
+  values (current_setting('test.hh_a')::uuid, 'expense', 3.00,
+          current_setting('test.category_a')::uuid,
+          current_setting('test.member_kid')::uuid, current_date)
+  returning id into v_tx;
+
+  v_paths := public.delete_transaction(v_tx);
+  if cardinality(coalesce(v_paths, array[]::text[])) <> 0 then
+    raise exception 'FAIL: unexpected receipt paths on a clean delete';
+  end if;
+  if (select count(*) from public.transactions where id = v_tx) <> 0 then
+    raise exception 'FAIL: adult could not delete another person''s row';
+  end if;
+
+  begin
+    perform public.delete_transaction('00000000-0000-4000-8000-000000000000');
+    raise exception 'FAIL: an unknown transaction was deleted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_transaction' then raise; end if;
+  end;
+end $$;
+
+-- 12.13 AMENDMENT A + the orphan sweep: once the transaction is gone its
+--       receipts cascade away, the objects survive as orphans, the sweep
+--       finds them, and the adult can STILL delete them.
+do $$
+declare v_paths text[]; n int;
+begin
+  v_paths := public.delete_transaction(current_setting('test.receipt_tx')::uuid);
+  if cardinality(v_paths) <> 3 then
+    raise exception 'FAIL: delete_transaction returned % paths (expected 3)', cardinality(v_paths);
+  end if;
+  if (select count(*) from public.transaction_receipts
+       where transaction_id = current_setting('test.receipt_tx')::uuid) <> 0 then
+    raise exception 'FAIL: receipt rows survived the transaction delete';
+  end if;
+
+  select count(*) into n from public.list_orphan_receipts() p where p = any(v_paths);
+  if n <> 3 then raise exception 'FAIL: sweep found % orphans (expected 3)', n; end if;
+
+  delete from storage.objects where name = any(v_paths);
+  get diagnostics n = row_count;
+  if n <> 3 then
+    raise exception 'FAIL: could not delete the orphans after the row was gone (%)', n;
+  end if;
+
+  select count(*) into n from public.list_orphan_receipts();
+  if n <> 0 then raise exception 'FAIL: % orphans survived the cleanup', n; end if;
+end $$;
+
+do $$ begin raise notice 'RECEIPTS PASSED (3 max, stored mime/size, orphan sweep, object delete after row gone)'; end $$;
+
+-- --------------------------------------------------------------------
+-- 13. PHASE 4b: pet reminders (migration 17)
+-- --------------------------------------------------------------------
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
+set local request.jwt.claim.sub to '11111111-1111-4111-8111-111111111111';
+
+-- 13.0 Create (title trimmed) a repeating reminder whose due date is the
+--      31st, to prove the month clamp into a shorter month.
+do $$
+declare v_id uuid;
+begin
+  v_id := public.create_pet_reminder(current_setting('test.pet_a')::uuid,
+                                     '  Rabies booster  ', 'vaccine',
+                                     date '2026-01-31', 1);
+  perform set_config('test.rem1', v_id::text, false);
+  if (select title from public.pet_reminders where id = v_id) <> 'Rabies booster' then
+    raise exception 'FAIL: reminder title was not trimmed';
+  end if;
+end $$;
+
+-- 13.1 Validation.
+do $$
+begin
+  begin
+    perform public.create_pet_reminder(current_setting('test.pet_a')::uuid, 'X',
+                                       'spa', current_date, null);
+    raise exception 'FAIL: a bad kind was accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_value' then raise; end if;
+  end;
+
+  begin
+    perform public.create_pet_reminder(current_setting('test.pet_a')::uuid, 'X',
+                                       'vet', current_date, 0);
+    raise exception 'FAIL: repeat 0 was accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_value' then raise; end if;
+  end;
+
+  begin
+    perform public.create_pet_reminder(current_setting('test.pet_a')::uuid, 'X',
+                                       'vet', current_date, 121);
+    raise exception 'FAIL: repeat 121 was accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_value' then raise; end if;
+  end;
+
+  begin
+    perform public.create_pet_reminder(current_setting('test.pet_a')::uuid,
+                                       repeat('x', 61), 'vet', current_date, null);
+    raise exception 'FAIL: a 61-character title was accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_name' then raise; end if;
+  end;
+
+  begin
+    perform public.create_pet_reminder('00000000-0000-4000-8000-000000000000', 'X',
+                                       'vet', current_date, null);
+    raise exception 'FAIL: an unknown pet was accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'invalid_pet' then raise; end if;
+  end;
+
+  -- A pet of another household is not "invalid" - the caller is simply
+  -- not an adult of that household (same convention as add_fuel_log).
+  begin
+    perform public.create_pet_reminder(current_setting('test.pet_j')::uuid, 'X',
+                                       'vet', current_date, null);
+    raise exception 'FAIL: a foreign household''s pet was accepted';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+end $$;
+
+-- 13.2 Update works, and completing without an amount posts nothing.
+do $$
+declare v_id uuid; n int;
+begin
+  v_id := public.create_pet_reminder(current_setting('test.pet_a')::uuid,
+                                     'Plain visit', 'vet', current_date, null);
+  perform set_config('test.rem2', v_id::text, false);
+  perform public.update_pet_reminder(v_id, 'Plain vet visit', 'vet',
+                                     current_date + 3, null);
+  if (select title from public.pet_reminders where id = v_id) <> 'Plain vet visit' then
+    raise exception 'FAIL: update did not change the title';
+  end if;
+
+  select count(*) into n from public.transactions
+   where pet_id = current_setting('test.pet_a')::uuid;
+  perform public.complete_pet_reminder(v_id);
+  if (select done_at is null from public.pet_reminders where id = v_id) then
+    raise exception 'FAIL: completing did not set done_at';
+  end if;
+  if (select count(*) from public.pet_reminders where id = v_id) <> 1 then
+    raise exception 'FAIL: a non-repeating reminder multiplied';
+  end if;
+  if (select count(*) from public.transactions
+       where pet_id = current_setting('test.pet_a')::uuid) <> n then
+    raise exception 'FAIL: completing without an amount posted an expense';
+  end if;
+end $$;
+
+-- 13.3 Completing a repeating reminder keeps the history and schedules the
+--      next one, clamping the day (Jan 31 -> Feb 28).
+do $$
+declare n int;
+begin
+  perform public.complete_pet_reminder(current_setting('test.rem1')::uuid);
+
+  select count(*) into n from public.pet_reminders
+   where id = current_setting('test.rem1')::uuid and done_at is not null;
+  if n <> 1 then raise exception 'FAIL: the completed reminder is not marked done'; end if;
+
+  select count(*) into n from public.pet_reminders
+   where pet_id = current_setting('test.pet_a')::uuid
+     and title = 'Rabies booster'
+     and done_at is null
+     and due_date = date '2026-02-28';
+  if n <> 1 then raise exception 'FAIL: the next occurrence is not 2026-02-28 (got %)',
+    (select due_date from public.pet_reminders
+      where pet_id = current_setting('test.pet_a')::uuid and done_at is null
+        and title = 'Rabies booster' limit 1); end if;
+end $$;
+
+-- 13.4 Completing with an amount posts ONE pet expense in a pet category
+--      (Vaccines for a vaccine), for the caller's own person.
+do $$
+declare v_amt numeric; v_cat text; v_pet uuid; v_mem uuid; v_id uuid;
+begin
+  v_id := public.create_pet_reminder(current_setting('test.pet_a')::uuid,
+                                     'Booster shot', 'vaccine', current_date, null);
+  perform public.complete_pet_reminder(v_id, 12345, 'Annual booster');
+
+  select t.amount, c.name_en, t.pet_id, t.member_id
+    into v_amt, v_cat, v_pet, v_mem
+    from public.transactions t
+    join public.categories c on c.id = t.category_id
+   where t.pet_id = current_setting('test.pet_a')::uuid
+     and t.note = 'Annual booster';
+
+  if v_amt <> 123.45 then raise exception 'FAIL: pet expense amount % (expected 123.45)', v_amt; end if;
+  if v_cat <> 'Vaccines' then raise exception 'FAIL: pet expense category % (expected Vaccines)', v_cat; end if;
+  if v_pet is distinct from current_setting('test.pet_a')::uuid then
+    raise exception 'FAIL: pet expense is linked to the wrong pet';
+  end if;
+  if v_mem is distinct from current_setting('test.member_a')::uuid then
+    raise exception 'FAIL: pet expense is linked to the wrong person';
+  end if;
+end $$;
+
+-- 13.5 AMENDMENT G: an adult with no person of their own. Completing
+--      WITHOUT an amount is fine; WITH an amount raises no_linked_person
+--      and writes nothing at all (not even done_at).
+set local role none;
+insert into auth.users (instance_id, id, aud, role, email, encrypted_password,
+                        email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+                        created_at, updated_at)
+values ('00000000-0000-0000-0000-000000000000', 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+        'authenticated', 'authenticated', 'rls-test-m@test.local', 'not-a-real-hash',
+        now(), '{}'::jsonb, '{}'::jsonb, now(), now())
+on conflict (id) do nothing;
+
+insert into public.household_users (household_id, user_id, role)
+values (current_setting('test.hh_a')::uuid, 'cccccccc-cccc-4ccc-8ccc-cccccccccccc', 'adult')
+on conflict (household_id, user_id) do nothing;
+
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"cccccccc-cccc-4ccc-8ccc-cccccccccccc","role":"authenticated"}';
+set local request.jwt.claim.sub to 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+
+do $$
+declare v_id uuid; n int; v_before int;
+begin
+  if public.is_household_adult(current_setting('test.hh_a')::uuid) is not true then
+    raise exception 'TEST SETUP FAILED: the no-person login is not an adult';
+  end if;
+  select count(*) into n from public.members where user_id = auth.uid();
+  if n <> 0 then raise exception 'TEST SETUP FAILED: the no-person login has a person'; end if;
+
+  v_id := public.create_pet_reminder(current_setting('test.pet_a')::uuid,
+                                     'No person', 'vet', current_date, null);
+  perform set_config('test.rem_noperson', v_id::text, false);
+
+  select count(*) into v_before from public.transactions
+   where pet_id = current_setting('test.pet_a')::uuid;
+
+  begin
+    perform public.complete_pet_reminder(v_id, 5000, 'should not post');
+    raise exception 'FAIL: an adult with no person posted a pet expense';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'no_linked_person' then raise; end if;
+  end;
+
+  -- The failed call must not have left any trace behind.
+  if (select done_at is not null from public.pet_reminders where id = v_id) then
+    raise exception 'FAIL: the failed completion left done_at set';
+  end if;
+  if (select count(*) from public.transactions
+       where pet_id = current_setting('test.pet_a')::uuid) <> v_before then
+    raise exception 'FAIL: the failed completion posted an expense';
+  end if;
+
+  -- Without an amount it works: no person is needed to tick a reminder off.
+  perform public.complete_pet_reminder(v_id);
+  if (select done_at is null from public.pet_reminders where id = v_id) then
+    raise exception 'FAIL: a no-person completion without an amount failed';
+  end if;
+end $$;
+
+-- 13.6 Child C: zero rows, every reminder RPC forbidden, no direct writes.
+set local request.jwt.claims to '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated"}';
+set local request.jwt.claim.sub to '33333333-3333-4333-8333-333333333333';
+
+do $$
+declare n int;
+begin
+  select count(*) into n from public.pet_reminders;
+  if n <> 0 then raise exception 'FAIL: child sees % reminders', n; end if;
+
+  begin
+    perform public.create_pet_reminder(current_setting('test.pet_a')::uuid, 'X',
+                                       'vet', current_date, null);
+    raise exception 'FAIL: child created a reminder';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    perform public.update_pet_reminder(current_setting('test.rem2')::uuid, 'x',
+                                       'vet', current_date, null);
+    raise exception 'FAIL: child updated a reminder';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    perform public.complete_pet_reminder(current_setting('test.rem2')::uuid);
+    raise exception 'FAIL: child completed a reminder';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    perform public.delete_pet_reminder(current_setting('test.rem2')::uuid);
+    raise exception 'FAIL: child deleted a reminder';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    delete from public.pet_reminders;
+    raise exception 'FAIL: child deleted reminder rows directly';
+  exception when insufficient_privilege then null;
+  end;
+end $$;
+
+-- 13.7 Outsider J: zero rows, every reminder RPC forbidden, no direct writes.
+set local request.jwt.claims to '{"sub":"99999999-9999-4999-8999-999999999999","role":"authenticated"}';
+set local request.jwt.claim.sub to '99999999-9999-4999-8999-999999999999';
+
+do $$
+declare n int;
+begin
+  select count(*) into n from public.pet_reminders;
+  if n <> 0 then raise exception 'FAIL: outsider sees % reminders', n; end if;
+
+  begin
+    perform public.create_pet_reminder(current_setting('test.pet_a')::uuid, 'X',
+                                       'vet', current_date, null);
+    raise exception 'FAIL: outsider created a reminder for another household''s pet';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    perform public.delete_pet_reminder(current_setting('test.rem2')::uuid);
+    raise exception 'FAIL: outsider deleted A''s reminder';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    perform public.complete_pet_reminder(current_setting('test.rem2')::uuid, 100);
+    raise exception 'FAIL: outsider completed A''s reminder';
+  exception when others then
+    if sqlerrm like 'FAIL:%' then raise; end if;
+    if sqlerrm <> 'forbidden' then raise; end if;
+  end;
+
+  begin
+    insert into public.pet_reminders (household_id, pet_id, title, kind, due_date)
+    values (current_setting('test.hh_j')::uuid, current_setting('test.pet_j')::uuid,
+            'J reminder', 'vet', current_date);
+    raise exception 'FAIL: outsider wrote a reminder row directly';
+  exception when insufficient_privilege then null;
+  end;
+end $$;
+
+do $$ begin raise notice 'PET REMINDERS PASSED (repeat clamp, pet expense, no-person rule, child/outsider lockout)'; end $$;
 
 -- --------------------------------------------------------------------
 -- 7. Nothing above is persisted.
