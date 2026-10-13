@@ -39,3 +39,50 @@ class Pet {
   final String? notes;
   final bool isActive;
 }
+
+/// What a reminder is for. `vaccine`/`vet` also decide which pet category a
+/// completed reminder's expense lands in (migration 17).
+enum PetReminderKind {
+  vaccine('vaccine'),
+  vet('vet'),
+  other('other');
+
+  const PetReminderKind(this.dbValue);
+
+  final String dbValue;
+
+  static PetReminderKind fromDb(String value) => PetReminderKind.values
+      .firstWhere((kind) => kind.dbValue == value);
+}
+
+/// A vaccine / vet-visit / other reminder for one pet.
+///
+/// Completing one sets [doneAt]; a repeating reminder inserts the NEXT row
+/// server-side (same title/kind), so history is preserved as separate rows.
+class PetReminder {
+  const PetReminder({
+    required this.id,
+    required this.householdId,
+    required this.petId,
+    required this.title,
+    required this.kind,
+    required this.dueDate,
+    this.repeatMonths,
+    this.doneAt,
+  });
+
+  final String id;
+  final String householdId;
+  final String petId;
+  final String title;
+  final PetReminderKind kind;
+  final DateTime dueDate;
+
+  /// Repeat every N months (1..120), or null for a one-off.
+  final int? repeatMonths;
+
+  /// When it was ticked off, or null while it is still due.
+  final DateTime? doneAt;
+
+  bool get isDone => doneAt != null;
+}

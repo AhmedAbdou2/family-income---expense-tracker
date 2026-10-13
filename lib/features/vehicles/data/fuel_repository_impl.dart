@@ -89,9 +89,13 @@ class FuelRepositoryImpl implements FuelRepository {
   }
 
   @override
-  Future<void> deleteFuelLog({required String logId}) async {
+  Future<List<String>> deleteFuelLog({required String logId}) async {
     try {
-      await _client.rpc('delete_fuel_log', params: {'p_log_id': logId});
+      final result = await _client.rpc(
+        'delete_fuel_log',
+        params: {'p_log_id': logId},
+      );
+      return (result as List<dynamic>? ?? const []).cast<String>();
     } catch (error) {
       throw ExceptionMapper.map(error);
     }

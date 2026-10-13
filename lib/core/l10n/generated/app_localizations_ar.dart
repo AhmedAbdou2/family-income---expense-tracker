@@ -1371,4 +1371,319 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get report_by_person_empty => 'لا يوجد إنفاق هذا الشهر لعرضه.';
+
+  @override
+  String get receipt_section_title => 'الإيصالات';
+
+  @override
+  String receipt_count(int count, int max) {
+    return '$count من $max';
+  }
+
+  @override
+  String get receipt_add => 'إضافة إيصال';
+
+  @override
+  String get receipt_add_camera => 'التقاط صورة';
+
+  @override
+  String get receipt_add_gallery => 'اختيار من الصور';
+
+  @override
+  String get receipt_add_document => 'اختيار ملف (PDF أو صورة)';
+
+  @override
+  String get receipt_empty => 'لا توجد إيصالات مرفقة بعد.';
+
+  @override
+  String get receipt_uploaded => 'تم إرفاق الإيصال.';
+
+  @override
+  String get receipt_deleted => 'تم حذف الإيصال.';
+
+  @override
+  String get receipt_delete_confirm_title => 'حذف هذا الإيصال؟';
+
+  @override
+  String get receipt_delete_confirm_body =>
+      'سيُحذف الملف من التخزين، وتبقى العملية كما هي.';
+
+  @override
+  String receipt_limit_hint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'يمكن إرفاق $count إيصال لكل عملية.',
+      many: 'يمكن إرفاق $count إيصالًا لكل عملية.',
+      few: 'يمكن إرفاق $count إيصالات لكل عملية.',
+      two: 'يمكن إرفاق إيصالين لكل عملية.',
+      one: 'يمكن إرفاق إيصال واحد لكل عملية.',
+      zero: 'لا يمكن إرفاق إيصالات.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get receipt_pdf_label => 'مستند PDF';
+
+  @override
+  String get receipt_view_title => 'الإيصال';
+
+  @override
+  String get receipt_open_file => 'فتح الملف';
+
+  @override
+  String get receipt_load_failed => 'تعذّر فتح هذا الإيصال.';
+
+  @override
+  String get receipt_sweep_title => 'تنظيف ملفات الإيصالات غير المستخدمة';
+
+  @override
+  String get receipt_sweep_hint => 'يحذف الملفات التي لم تعد مرتبطة بعملية.';
+
+  @override
+  String get receipt_sweep_action => 'تنظيف';
+
+  @override
+  String get receipt_sweep_confirm_title => 'تنظيف الملفات غير المستخدمة؟';
+
+  @override
+  String get receipt_sweep_confirm_body =>
+      'سيُحذف فقط الملفات التي لم تعد مرتبطة بأي عملية، ولن يتغير شيء آخر.';
+
+  @override
+  String get receipt_sweep_none => 'لا يوجد ما يُنظَّف.';
+
+  @override
+  String receipt_sweep_done(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم حذف $count ملف.',
+      many: 'تم حذف $count ملفًا.',
+      few: 'تم حذف $count ملفات.',
+      two: 'تم حذف ملفين.',
+      one: 'تم حذف ملف واحد.',
+      zero: 'لا يوجد ما يُنظَّف.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pet_reminders_title => 'التذكيرات';
+
+  @override
+  String get pet_reminder_add => 'إضافة تذكير';
+
+  @override
+  String get pet_reminders_empty => 'لا توجد تذكيرات بعد.';
+
+  @override
+  String get pet_reminder_status_overdue => 'متأخر';
+
+  @override
+  String get pet_reminder_status_due_soon => 'يستحق قريبًا';
+
+  @override
+  String get pet_reminder_status_ok => 'مجدول';
+
+  @override
+  String get pet_reminder_status_done => 'منتهٍ';
+
+  @override
+  String pet_reminder_due_on(String date) {
+    return 'يستحق في $date';
+  }
+
+  @override
+  String pet_reminder_done_on(String date) {
+    return 'تم في $date';
+  }
+
+  @override
+  String pet_reminder_next(String date) {
+    return 'التالي: $date';
+  }
+
+  @override
+  String get pet_reminder_complete => 'تسجيل الإنجاز';
+
+  @override
+  String get pet_reminder_complete_title => 'إنجاز التذكير';
+
+  @override
+  String get pet_reminder_complete_body =>
+      'أضف التكلفة إذا دفعت مقابل ذلك؛ ستُسجَّل كمصروف على الحيوان.';
+
+  @override
+  String get pet_reminder_amount_label => 'التكلفة (اختياري)';
+
+  @override
+  String get pet_reminder_amount_hint => 'مثال: 250';
+
+  @override
+  String get pet_reminder_completed => 'تم إنجاز التذكير.';
+
+  @override
+  String get pet_reminder_deleted => 'تم حذف التذكير.';
+
+  @override
+  String get pet_reminder_delete_confirm_title => 'حذف هذا التذكير؟';
+
+  @override
+  String get pet_reminder_delete_confirm_body =>
+      'سيُحذف سجله، وتبقى المصروفات المسجَّلة كما هي.';
+
+  @override
+  String get pet_reminder_new_title => 'تذكير جديد';
+
+  @override
+  String get pet_reminder_edit_title => 'تعديل التذكير';
+
+  @override
+  String get pet_reminder_title_label => 'التذكير';
+
+  @override
+  String get pet_reminder_title_hint => 'مثال: تطعيم السعار';
+
+  @override
+  String get pet_reminder_kind_vaccine => 'تطعيم';
+
+  @override
+  String get pet_reminder_kind_vet => 'زيارة الطبيب البيطري';
+
+  @override
+  String get pet_reminder_kind_other => 'أخرى';
+
+  @override
+  String get pet_reminder_due_label => 'تاريخ الاستحقاق';
+
+  @override
+  String get pet_reminder_repeat_label => 'التكرار';
+
+  @override
+  String get pet_reminder_repeat_none => 'بدون تكرار';
+
+  @override
+  String get pet_reminder_repeat_yearly => 'كل سنة';
+
+  @override
+  String pet_reminder_repeat_months(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'كل $count شهر',
+      many: 'كل $count شهرًا',
+      few: 'كل $count أشهر',
+      two: 'كل شهرين',
+      one: 'كل شهر',
+      zero: 'بدون تكرار',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pet_reminder_saved => 'تم حفظ التذكير.';
+
+  @override
+  String get export_section => 'البيانات';
+
+  @override
+  String get export_section_hint => 'نزّل عملياتك أو ملخصًا شهريًا.';
+
+  @override
+  String get export_title => 'تصدير';
+
+  @override
+  String get export_intro => 'اختر الفترة وعوامل التصفية ثم نزّل الملف.';
+
+  @override
+  String get export_type_all => 'الكل';
+
+  @override
+  String get export_from => 'من';
+
+  @override
+  String get export_to => 'إلى';
+
+  @override
+  String get export_person => 'الشخص';
+
+  @override
+  String get export_all_people => 'كل الأشخاص';
+
+  @override
+  String get export_category => 'التصنيف';
+
+  @override
+  String get export_all_categories => 'كل التصنيفات';
+
+  @override
+  String get export_csv_action => 'تنزيل CSV (إكسل)';
+
+  @override
+  String get export_pdf_action => 'تنزيل ملخص PDF';
+
+  @override
+  String export_csv_done(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم تصدير $count عملية.',
+      many: 'تم تصدير $count عملية.',
+      few: 'تم تصدير $count عمليات.',
+      two: 'تم تصدير عمليتين.',
+      one: 'تم تصدير عملية واحدة.',
+      zero: 'لا يوجد ما يُصدَّر.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get export_pdf_done => 'تم حفظ الملخص.';
+
+  @override
+  String get export_empty => 'لا توجد عمليات في هذه الفترة.';
+
+  @override
+  String get export_hint =>
+      'يفتح ملف CSV في إكسل أو Google Sheets، وملف PDF ملخص من صفحة واحدة.';
+
+  @override
+  String export_range_note(String from, String to) {
+    return 'الفترة: $from – $to';
+  }
+
+  @override
+  String get export_pdf_title => 'الملخص الشهري';
+
+  @override
+  String get export_household => 'الأسرة';
+
+  @override
+  String get export_period => 'الفترة';
+
+  @override
+  String get export_pdf_footer => 'تطبيق متابعة إيرادات ومصروفات الأسرة';
+
+  @override
+  String get error_invalid_transaction => 'هذه العملية لم تعد موجودة.';
+
+  @override
+  String get error_invalid_receipt => 'تعذّر حفظ هذا الإيصال. حاول مرة أخرى.';
+
+  @override
+  String get error_invalid_mime =>
+      'يمكن إرفاق الصور (JPG أو PNG أو WebP) أو ملف PDF فقط.';
+
+  @override
+  String get error_limit_reached =>
+      'بلغت حد الإيصالات: 3 إيصالات لكل عملية كحد أقصى.';
+
+  @override
+  String get error_invalid_reminder => 'هذا التذكير لم يعد موجودًا.';
+
+  @override
+  String get error_no_pet_category =>
+      'لا يوجد تصنيف للحيوانات لتسجيل هذا المصروف.';
 }

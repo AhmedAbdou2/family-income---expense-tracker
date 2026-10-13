@@ -8,6 +8,7 @@ import '../../vehicles/domain/entities.dart';
 import '../../vehicles/presentation/providers.dart';
 import '../domain/entities.dart';
 import 'providers.dart';
+import '../../receipts/presentation/providers.dart';
 
 /// What the user chose in the delete-confirmation dialog.
 class TransactionDeleteResult {
@@ -187,12 +188,18 @@ Future<void> deleteTransactionCascade({
       break;
     }
   }
+  // Older version differences: both RPCs return the storage paths of the
+  // receipts they cascade away, so the objects can be removed as well.
+  final List<String> receiptPaths;
   if (linkedLog != null) {
-    await fuelRepo.deleteFuelLog(logId: linkedLog.id);
+    receiptPaths = await fuelRepo.deleteFuelLog(logId: linkedLog.id);
   } else {
-    await ref
+    receiptPaths = await ref
         .read(transactionsRepositoryProvider)
         .deleteTransaction(id: transaction.id);
+  }
+  if (receiptPaths.isNotEmpty) {
+    await ref.read(receiptsRepositoryProvider).deleteObjects(receiptPaths);
   }
   if (pauseRule && transaction.recurringRuleId != null) {
     await ref

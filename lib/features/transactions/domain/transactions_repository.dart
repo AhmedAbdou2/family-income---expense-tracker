@@ -38,5 +38,8 @@ abstract interface class TransactionsRepository {
     String? petId,
   });
 
-  Future<void> deleteTransaction({required String id});
+  /// Deletes the row and returns the storage paths of its receipts (the
+  /// metadata rows cascade away). The caller removes those objects from the
+  /// private bucket; an empty list means there was nothing attached.
+  Future<List<String>> deleteTransaction({required String id});
 }

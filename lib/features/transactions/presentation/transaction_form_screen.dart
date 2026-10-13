@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/l10n/l10n.dart';
@@ -19,6 +20,7 @@ import '../../members/presentation/providers.dart';
 import '../../pets/domain/entities.dart';
 import '../../pets/presentation/pet_visuals.dart';
 import '../../pets/presentation/providers.dart';
+import '../../receipts/presentation/receipt_section.dart';
 import '../../recurring/domain/entities.dart';
 import '../../recurring/presentation/providers.dart';
 import '../domain/entities.dart';
@@ -28,12 +30,23 @@ import 'transaction_delete.dart';
 /// Full add/edit form. Reached from quick-add's "More options" and by
 /// tapping a row in the list (`/transactions/edit/:id`).
 class TransactionFormScreen extends ConsumerStatefulWidget {
-  const TransactionFormScreen({super.key, this.transactionId, this.initialPetId});
+  const TransactionFormScreen({
+    super.key,
+    this.transactionId,
+    this.initialPetId,
+    this.openReceiptPicker = false,
+  });
 
   final String? transactionId;
 
   /// Pre-selects a pet (the pet detail screen's "Add expense" action).
   final String? initialPetId;
+
+  /// True when the route was reached right after saving a NEW transaction
+  /// (`?receipt=add`): the receipts picker opens by itself, so "save, then
+  /// attach the receipt" stays one flow. A receipt always needs a saved
+  /// transaction to live under.
+  final bool openReceiptPicker;
 
   @override
   ConsumerState<TransactionFormScreen> createState() =>
@@ -280,6 +293,16 @@ class _TransactionFormScreenState
                 counterText: '',
               ),
             ),
+            // Receipts need a saved transaction to live under, so the
+            // section only appears while editing. A child login gets an
+            // empty, read-only block (RLS hides the rows).
+            if (_isEdit) ...[
+              const Divider(height: 32),
+              ReceiptSection(
+                transactionId: widget.transactionId!,
+                openPickerOnStart: widget.openReceiptPicker,
+              ),
+            ],
             const SizedBox(height: 8),
             FilledButton.icon(
               onPressed: _saving ? null : _save,
@@ -482,7 +505,7 @@ class _TransactionFormScreenState
           petId: _petId,
         );
       } else {
-        await repository.createTransaction(
+        final created = await repository.createTransaction(
           householdId: membership.household.id,
           type: _type,
           amountMinorUnits: amountMinor,
@@ -492,6 +515,23 @@ class _TransactionFormScreenState
           note: _noteController.text,
           petId: _petId,
         );
+        ref
+          ..invalidate(monthTransactionsProvider)
+          ..invalidate(dashboardMonthTransactionsProvider);
+        await ref.read(preferencesProvider).setQuickAddDefaults(
+              type: _type.dbValue,
+              categoryId: _categoryId!,
+              memberId: _memberId!,
+            );
+        if (!mounted) return;
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.transaction_saved)));
+        // Saved first, receipts next: switch to the edit route and let the
+        // receipts section open its picker straight away.
+        context.pushReplacement(
+          '/transactions/edit/${created.id}?receipt=add',
+        );
+        return;
       }
       ref
         ..invalidate(monthTransactionsProvider)

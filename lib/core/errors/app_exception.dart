@@ -45,6 +45,12 @@ enum AppErrorCode {
   alreadyArchived,
   invalidCategory,
   invalidBudget,
+  invalidTransaction,
+  invalidReceipt,
+  invalidMime,
+  limitReached,
+  invalidReminder,
+  noPetCategory,
   unknown,
 }
 
@@ -185,6 +191,18 @@ abstract final class ExceptionMapper {
         return const AppException(AppErrorCode.invalidCategory);
       case 'invalid_budget':
         return const AppException(AppErrorCode.invalidBudget);
+      case 'invalid_transaction':
+        return const AppException(AppErrorCode.invalidTransaction);
+      case 'invalid_receipt':
+        return const AppException(AppErrorCode.invalidReceipt);
+      case 'invalid_mime':
+        return const AppException(AppErrorCode.invalidMime);
+      case 'limit_reached':
+        return const AppException(AppErrorCode.limitReached);
+      case 'invalid_reminder':
+        return const AppException(AppErrorCode.invalidReminder);
+      case 'no_pet_category':
+        return const AppException(AppErrorCode.noPetCategory);
     }
 
     final message = error.message.toLowerCase();

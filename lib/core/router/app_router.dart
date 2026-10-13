@@ -20,8 +20,10 @@ import '../../features/household/presentation/setup_screen.dart';
 import '../../features/household/presentation/splash_screen.dart';
 import '../../features/members/presentation/profile_screen.dart';
 import '../../features/members/presentation/providers.dart';
+import '../../features/export/presentation/export_screen.dart';
 import '../../features/pets/presentation/pet_detail_screen.dart';
 import '../../features/pets/presentation/pet_form_screen.dart';
+import '../../features/pets/presentation/pet_reminder_form_screen.dart';
 import '../../features/pets/presentation/pets_screen.dart';
 import '../../features/recurring/presentation/recurring_form_screen.dart';
 import '../../features/recurring/presentation/recurring_screen.dart';
@@ -111,6 +113,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/transactions/edit/:id',
         builder: (context, state) => TransactionFormScreen(
           transactionId: state.pathParameters['id'],
+          openReceiptPicker:
+              state.uri.queryParameters['receipt'] == 'add',
         ),
       ),
       GoRoute(
@@ -177,10 +181,30 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             PetFormScreen(petId: state.pathParameters['id']),
       ),
+      // Phase 4b: pet reminders. Declared before '/pets/:id' so 'reminders'
+      // is not swallowed as a pet id.
+      GoRoute(
+        path: '/pets/:id/reminders/new',
+        builder: (context, state) => PetReminderFormScreen(
+          petId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/pets/:id/reminders/edit/:reminderId',
+        builder: (context, state) => PetReminderFormScreen(
+          petId: state.pathParameters['id']!,
+          reminderId: state.pathParameters['reminderId'],
+        ),
+      ),
       GoRoute(
         path: '/pets/:id',
         builder: (context, state) =>
             PetDetailScreen(petId: state.pathParameters['id']!),
+      ),
+      // Phase 4b: CSV / PDF export (adult only).
+      GoRoute(
+        path: '/export',
+        builder: (context, state) => const ExportScreen(),
       ),
       GoRoute(
         path: '/profile/:id',

@@ -45,9 +45,10 @@ abstract interface class RecurringRulesRepository {
   /// When [deleteMonthTransactions] is true, this rule's already-posted rows
   /// of the current calendar month are deleted in the SAME server-side call
   /// (atomic - if anything fails, nothing is deleted and the rule stays
-  /// live). Returns how many transactions were deleted (0 for a plain
-  /// archive).
-  Future<int> archiveRule({
+  /// live). The result carries how many transactions were deleted (0 for a
+  /// plain archive) plus the storage paths of every receipt that went with
+  /// them, so the caller can clean the objects up.
+  Future<ArchiveRuleResult> archiveRule({
     required String id,
     bool deleteMonthTransactions = false,
   });

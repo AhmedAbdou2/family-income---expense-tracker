@@ -48,6 +48,12 @@ String errorMessage(BuildContext context, Object error) {
     AppErrorCode.alreadyArchived => l10n.error_already_archived,
     AppErrorCode.invalidCategory => l10n.error_invalid_category,
     AppErrorCode.invalidBudget => l10n.error_invalid_budget,
+    AppErrorCode.invalidTransaction => l10n.error_invalid_transaction,
+    AppErrorCode.invalidReceipt => l10n.error_invalid_receipt,
+    AppErrorCode.invalidMime => l10n.error_invalid_mime,
+    AppErrorCode.limitReached => l10n.error_limit_reached,
+    AppErrorCode.invalidReminder => l10n.error_invalid_reminder,
+    AppErrorCode.noPetCategory => l10n.error_no_pet_category,
     AppErrorCode.unknown => l10n.error_unknown,
   };
 }

@@ -1373,4 +1373,306 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get report_by_person_empty => 'No spending this month to chart.';
+
+  @override
+  String get receipt_section_title => 'Receipts';
+
+  @override
+  String receipt_count(int count, int max) {
+    return '$count of $max';
+  }
+
+  @override
+  String get receipt_add => 'Add receipt';
+
+  @override
+  String get receipt_add_camera => 'Take a photo';
+
+  @override
+  String get receipt_add_gallery => 'Choose from gallery';
+
+  @override
+  String get receipt_add_document => 'Choose a file (PDF or image)';
+
+  @override
+  String get receipt_empty => 'No receipts attached yet.';
+
+  @override
+  String get receipt_uploaded => 'Receipt attached.';
+
+  @override
+  String get receipt_deleted => 'Receipt removed.';
+
+  @override
+  String get receipt_delete_confirm_title => 'Remove this receipt?';
+
+  @override
+  String get receipt_delete_confirm_body =>
+      'The file is deleted from storage; the transaction itself stays.';
+
+  @override
+  String receipt_limit_hint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Up to $count receipts per transaction.',
+      one: 'Up to 1 receipt per transaction.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get receipt_pdf_label => 'PDF document';
+
+  @override
+  String get receipt_view_title => 'Receipt';
+
+  @override
+  String get receipt_open_file => 'Open file';
+
+  @override
+  String get receipt_load_failed => 'Could not open this receipt.';
+
+  @override
+  String get receipt_sweep_title => 'Clean up unused receipt files';
+
+  @override
+  String get receipt_sweep_hint => 'Removes files whose transaction is gone.';
+
+  @override
+  String get receipt_sweep_action => 'Clean up';
+
+  @override
+  String get receipt_sweep_confirm_title => 'Clean up unused files?';
+
+  @override
+  String get receipt_sweep_confirm_body =>
+      'Only files that no longer belong to a transaction are removed. Nothing else changes.';
+
+  @override
+  String get receipt_sweep_none => 'Nothing to clean up.';
+
+  @override
+  String receipt_sweep_done(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Removed $count files.',
+      one: 'Removed 1 file.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pet_reminders_title => 'Reminders';
+
+  @override
+  String get pet_reminder_add => 'Add reminder';
+
+  @override
+  String get pet_reminders_empty => 'No reminders yet.';
+
+  @override
+  String get pet_reminder_status_overdue => 'Overdue';
+
+  @override
+  String get pet_reminder_status_due_soon => 'Due soon';
+
+  @override
+  String get pet_reminder_status_ok => 'Scheduled';
+
+  @override
+  String get pet_reminder_status_done => 'Done';
+
+  @override
+  String pet_reminder_due_on(String date) {
+    return 'Due $date';
+  }
+
+  @override
+  String pet_reminder_done_on(String date) {
+    return 'Done $date';
+  }
+
+  @override
+  String pet_reminder_next(String date) {
+    return 'Next: $date';
+  }
+
+  @override
+  String get pet_reminder_complete => 'Mark as done';
+
+  @override
+  String get pet_reminder_complete_title => 'Complete reminder';
+
+  @override
+  String get pet_reminder_complete_body =>
+      'Add the cost if you paid for this visit; it is recorded as a pet expense.';
+
+  @override
+  String get pet_reminder_amount_label => 'Cost (optional)';
+
+  @override
+  String get pet_reminder_amount_hint => 'e.g. 250';
+
+  @override
+  String get pet_reminder_completed => 'Reminder completed.';
+
+  @override
+  String get pet_reminder_deleted => 'Reminder deleted.';
+
+  @override
+  String get pet_reminder_delete_confirm_title => 'Delete this reminder?';
+
+  @override
+  String get pet_reminder_delete_confirm_body =>
+      'Its history is removed; expenses already recorded stay.';
+
+  @override
+  String get pet_reminder_new_title => 'New reminder';
+
+  @override
+  String get pet_reminder_edit_title => 'Edit reminder';
+
+  @override
+  String get pet_reminder_title_label => 'Reminder';
+
+  @override
+  String get pet_reminder_title_hint => 'e.g. Rabies vaccine';
+
+  @override
+  String get pet_reminder_kind_vaccine => 'Vaccine';
+
+  @override
+  String get pet_reminder_kind_vet => 'Vet visit';
+
+  @override
+  String get pet_reminder_kind_other => 'Other';
+
+  @override
+  String get pet_reminder_due_label => 'Due date';
+
+  @override
+  String get pet_reminder_repeat_label => 'Repeat';
+
+  @override
+  String get pet_reminder_repeat_none => 'Does not repeat';
+
+  @override
+  String get pet_reminder_repeat_yearly => 'Every year';
+
+  @override
+  String pet_reminder_repeat_months(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Every $count months',
+      one: 'Every month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pet_reminder_saved => 'Reminder saved.';
+
+  @override
+  String get export_section => 'Data';
+
+  @override
+  String get export_section_hint =>
+      'Download your transactions or a monthly summary.';
+
+  @override
+  String get export_title => 'Export';
+
+  @override
+  String get export_intro =>
+      'Choose a period and the filters, then download the file.';
+
+  @override
+  String get export_type_all => 'All';
+
+  @override
+  String get export_from => 'From';
+
+  @override
+  String get export_to => 'To';
+
+  @override
+  String get export_person => 'Person';
+
+  @override
+  String get export_all_people => 'All people';
+
+  @override
+  String get export_category => 'Category';
+
+  @override
+  String get export_all_categories => 'All categories';
+
+  @override
+  String get export_csv_action => 'Download CSV (Excel)';
+
+  @override
+  String get export_pdf_action => 'Download PDF summary';
+
+  @override
+  String export_csv_done(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions exported.',
+      one: '1 transaction exported.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get export_pdf_done => 'Summary saved.';
+
+  @override
+  String get export_empty => 'No transactions in this period.';
+
+  @override
+  String get export_hint =>
+      'CSV opens in Excel or Google Sheets; the PDF is a one-page summary.';
+
+  @override
+  String export_range_note(String from, String to) {
+    return 'Period: $from – $to';
+  }
+
+  @override
+  String get export_pdf_title => 'Monthly summary';
+
+  @override
+  String get export_household => 'Household';
+
+  @override
+  String get export_period => 'Period';
+
+  @override
+  String get export_pdf_footer => 'Family income & expense tracker';
+
+  @override
+  String get error_invalid_transaction => 'This transaction no longer exists.';
+
+  @override
+  String get error_invalid_receipt =>
+      'That receipt could not be saved. Try again.';
+
+  @override
+  String get error_invalid_mime =>
+      'Only images (JPG, PNG, WebP) or a PDF can be attached.';
+
+  @override
+  String get error_limit_reached =>
+      'Receipt limit reached: up to 3 receipts per transaction.';
+
+  @override
+  String get error_invalid_reminder => 'This reminder no longer exists.';
+
+  @override
+  String get error_no_pet_category =>
+      'No pet category is available to record this expense.';
 }

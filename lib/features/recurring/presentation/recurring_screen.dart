@@ -18,6 +18,7 @@ import '../../household/presentation/home_shell.dart';
 import '../../household/presentation/providers.dart';
 import '../../members/domain/entities.dart';
 import '../../members/presentation/providers.dart';
+import '../../receipts/presentation/providers.dart';
 import '../../transactions/presentation/providers.dart';
 import '../domain/entities.dart';
 import '../domain/recurring_schedule.dart';
@@ -224,11 +225,17 @@ class _RecurringTile extends ConsumerWidget {
     );
     if (choice == null || !context.mounted) return;
     try {
-      await ref.read(recurringRulesRepositoryProvider).archiveRule(
+      final result = await ref.read(recurringRulesRepositoryProvider).archiveRule(
             id: rule.id,
             deleteMonthTransactions:
                 choice == RecurringDeleteChoice.deleteMonth,
           );
+      // Purged postings may have carried receipts - drop the objects too.
+      if (result.receiptPaths.isNotEmpty) {
+        await ref
+            .read(receiptsRepositoryProvider)
+            .deleteObjects(result.receiptPaths);
+      }
       ref
         ..invalidate(recurringRulesProvider)
         ..invalidate(monthTransactionsProvider)

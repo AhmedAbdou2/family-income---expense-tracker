@@ -51,3 +51,27 @@ class Transaction {
   final String? recurringRuleId;
   final String? createdBy;
 }
+
+/// Columns every transaction read selects. `amount::text` keeps Postgres'
+/// numeric(12,2) out of Dart's `double` world entirely - see AGENTS.md.
+const String transactionColumns =
+    'id, household_id, type, amount::text, category_id, member_id, '
+    'vehicle_id, pet_id, recurring_rule_id, date, note, created_by';
+
+/// Maps one PostgREST row to a [Transaction]. Shared by the list repository
+/// and the export repository so both read identical values.
+Transaction transactionFromRow(Map<String, dynamic> row) => Transaction(
+      id: row['id'] as String,
+      householdId: row['household_id'] as String,
+      type: TransactionType.fromDb(row['type'] as String),
+      amountMinorUnits:
+          Money.decimalStringToMinorUnits(row['amount'] as String),
+      categoryId: row['category_id'] as String,
+      memberId: row['member_id'] as String,
+      date: DateTime.parse(row['date'] as String),
+      note: row['note'] as String?,
+      vehicleId: row['vehicle_id'] as String?,
+      petId: row['pet_id'] as String?,
+      recurringRuleId: row['recurring_rule_id'] as String?,
+      createdBy: row['created_by'] as String?,
+    );

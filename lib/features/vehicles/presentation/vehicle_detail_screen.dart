@@ -11,6 +11,7 @@ import '../../../core/widgets/app_buttons.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_view.dart';
 import '../../household/presentation/providers.dart';
+import '../../receipts/presentation/providers.dart';
 import '../../transactions/presentation/providers.dart';
 import '../domain/entities.dart';
 import '../domain/fuel_stats.dart';
@@ -287,7 +288,13 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen> {
     );
     if (confirmed != true || !mounted) return;
     try {
-      await ref.read(fuelRepositoryProvider).deleteFuelLog(logId: log.id);
+      final receiptPaths =
+          await ref.read(fuelRepositoryProvider).deleteFuelLog(logId: log.id);
+      if (receiptPaths.isNotEmpty) {
+        await ref
+            .read(receiptsRepositoryProvider)
+            .deleteObjects(receiptPaths);
+      }
       _invalidateSpending();
       if (!mounted) return;
       ScaffoldMessenger.of(context)

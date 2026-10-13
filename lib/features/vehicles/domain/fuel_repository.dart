@@ -21,6 +21,8 @@ abstract interface class FuelRepository {
     required bool isFull,
   });
 
-  /// Delete a log and its linked expense together.
-  Future<void> deleteFuelLog({required String logId});
+  /// Delete a log and its linked expense together. Returns the storage
+  /// paths of the receipts that cascaded away with that expense (empty when
+  /// there were none) so the caller can remove the objects too.
+  Future<List<String>> deleteFuelLog({required String logId});
 }

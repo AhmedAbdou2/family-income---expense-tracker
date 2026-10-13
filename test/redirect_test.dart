@@ -322,6 +322,12 @@ void main() {
         '/pets/p1',
         '/budgets',
         '/reports',
+        // Phase 4b: the export screen and the pet-reminder forms live under
+        // adult-only prefixes, so a child cannot deep-link into them either.
+        '/export',
+        '/export/anything',
+        '/pets/p1/reminders/new',
+        '/pets/p1/reminders/edit/r1',
       ]) {
         expect(
           appRedirect(
@@ -346,6 +352,9 @@ void main() {
         '/pets',
         '/budgets',
         '/reports',
+        '/export',
+        '/pets/p1/reminders/new',
+        '/pets/p1/reminders/edit/r1',
       ]) {
         expect(
           appRedirect(

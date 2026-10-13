@@ -19,6 +19,7 @@ import '../../transactions/domain/entities.dart';
 import '../../transactions/presentation/providers.dart';
 import '../../transactions/presentation/transaction_delete.dart';
 import '../domain/entities.dart';
+import 'pet_reminders_section.dart';
 import 'pet_visuals.dart';
 import 'providers.dart';
 
@@ -103,6 +104,7 @@ class _PetDetailScreenState extends ConsumerState<PetDetailScreen> {
         padding: const EdgeInsetsDirectional.only(bottom: 96),
         children: [
           _PetHeaderCard(pet: pet),
+          PetRemindersSection(petId: pet.id),
           _SectionHeader(
             title: l10n.pet_expenses_title,
             action: FilledButton.tonalIcon(

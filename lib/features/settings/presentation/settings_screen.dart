@@ -13,6 +13,7 @@ import '../../household/domain/entities.dart';
 import '../../household/presentation/home_shell.dart';
 import '../../household/presentation/providers.dart';
 import '../../members/presentation/providers.dart';
+import '../../receipts/presentation/providers.dart';
 
 String _roleLabel(BuildContext context, MemberRole role) => switch (role) {
       MemberRole.owner => context.l10n.role_owner,
@@ -211,6 +212,28 @@ class SettingsScreen extends ConsumerWidget {
                 leading: Icon(Icons.pets_outlined, color: scheme.primary),
                 title: Text(l10n.pets_title),
                 onTap: () => context.go('/pets'),
+              ),
+            ),
+
+            // ------------------------------------------------------------
+            // Phase 4b: export + receipt housekeeping
+            // ------------------------------------------------------------
+            _SectionHeader(title: l10n.export_section),
+            Card(
+              child: ListTile(
+                leading: Icon(Icons.ios_share_outlined, color: scheme.primary),
+                title: Text(l10n.export_title),
+                subtitle: Text(l10n.export_section_hint),
+                onTap: () => context.push('/export'),
+              ),
+            ),
+            Card(
+              child: ListTile(
+                leading: Icon(Icons.cleaning_services_outlined,
+                    color: scheme.primary),
+                title: Text(l10n.receipt_sweep_title),
+                subtitle: Text(l10n.receipt_sweep_hint),
+                onTap: () => _cleanOrphanReceipts(context, ref),
               ),
             ),
 
@@ -471,6 +494,54 @@ class SettingsScreen extends ConsumerWidget {
         );
       }
     }
+  }
+}
+
+/// Removes receipt objects that no longer have a metadata row (e.g. a
+/// transaction deleted through a path that skipped the receipt cleanup).
+///
+/// The list comes from the server (`list_orphan_receipts`) and is scoped to
+/// this household's folder, so this can never touch another family's files.
+Future<void> _cleanOrphanReceipts(BuildContext context, WidgetRef ref) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: Text(dialogContext.l10n.receipt_sweep_confirm_title),
+      content: Text(dialogContext.l10n.receipt_sweep_confirm_body),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(false),
+          child: Text(dialogContext.l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(dialogContext).pop(true),
+          child: Text(dialogContext.l10n.receipt_sweep_action),
+        ),
+      ],
+    ),
+  );
+  if (confirmed != true || !context.mounted) return;
+
+  final l10n = context.l10n;
+  final messenger = ScaffoldMessenger.of(context);
+  try {
+    final repository = ref.read(receiptsRepositoryProvider);
+    final paths = await repository.listOrphanPaths();
+    if (paths.isEmpty) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.receipt_sweep_none)),
+      );
+      return;
+    }
+    await repository.deleteObjects(paths);
+    messenger.showSnackBar(
+      SnackBar(content: Text(l10n.receipt_sweep_done(paths.length))),
+    );
+  } catch (error) {
+    if (!context.mounted) return;
+    messenger.showSnackBar(
+      SnackBar(content: Text(errorMessage(context, error))),
+    );
   }
 }
 

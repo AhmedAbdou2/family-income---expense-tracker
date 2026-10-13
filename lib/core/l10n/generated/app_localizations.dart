@@ -2545,6 +2545,504 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No spending this month to chart.'**
   String get report_by_person_empty;
+
+  /// No description provided for @receipt_section_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipts'**
+  String get receipt_section_title;
+
+  /// No description provided for @receipt_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {max}'**
+  String receipt_count(int count, int max);
+
+  /// No description provided for @receipt_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add receipt'**
+  String get receipt_add;
+
+  /// No description provided for @receipt_add_camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get receipt_add_camera;
+
+  /// No description provided for @receipt_add_gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get receipt_add_gallery;
+
+  /// No description provided for @receipt_add_document.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a file (PDF or image)'**
+  String get receipt_add_document;
+
+  /// No description provided for @receipt_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No receipts attached yet.'**
+  String get receipt_empty;
+
+  /// No description provided for @receipt_uploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt attached.'**
+  String get receipt_uploaded;
+
+  /// No description provided for @receipt_deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt removed.'**
+  String get receipt_deleted;
+
+  /// No description provided for @receipt_delete_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this receipt?'**
+  String get receipt_delete_confirm_title;
+
+  /// No description provided for @receipt_delete_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'The file is deleted from storage; the transaction itself stays.'**
+  String get receipt_delete_confirm_body;
+
+  /// No description provided for @receipt_limit_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Up to 1 receipt per transaction.} other{Up to {count} receipts per transaction.}}'**
+  String receipt_limit_hint(int count);
+
+  /// No description provided for @receipt_pdf_label.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF document'**
+  String get receipt_pdf_label;
+
+  /// No description provided for @receipt_view_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get receipt_view_title;
+
+  /// No description provided for @receipt_open_file.
+  ///
+  /// In en, this message translates to:
+  /// **'Open file'**
+  String get receipt_open_file;
+
+  /// No description provided for @receipt_load_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open this receipt.'**
+  String get receipt_load_failed;
+
+  /// No description provided for @receipt_sweep_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean up unused receipt files'**
+  String get receipt_sweep_title;
+
+  /// No description provided for @receipt_sweep_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Removes files whose transaction is gone.'**
+  String get receipt_sweep_hint;
+
+  /// No description provided for @receipt_sweep_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean up'**
+  String get receipt_sweep_action;
+
+  /// No description provided for @receipt_sweep_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean up unused files?'**
+  String get receipt_sweep_confirm_title;
+
+  /// No description provided for @receipt_sweep_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Only files that no longer belong to a transaction are removed. Nothing else changes.'**
+  String get receipt_sweep_confirm_body;
+
+  /// No description provided for @receipt_sweep_none.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to clean up.'**
+  String get receipt_sweep_none;
+
+  /// No description provided for @receipt_sweep_done.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Removed 1 file.} other{Removed {count} files.}}'**
+  String receipt_sweep_done(int count);
+
+  /// No description provided for @pet_reminders_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get pet_reminders_title;
+
+  /// No description provided for @pet_reminder_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add reminder'**
+  String get pet_reminder_add;
+
+  /// No description provided for @pet_reminders_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No reminders yet.'**
+  String get pet_reminders_empty;
+
+  /// No description provided for @pet_reminder_status_overdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get pet_reminder_status_overdue;
+
+  /// No description provided for @pet_reminder_status_due_soon.
+  ///
+  /// In en, this message translates to:
+  /// **'Due soon'**
+  String get pet_reminder_status_due_soon;
+
+  /// No description provided for @pet_reminder_status_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get pet_reminder_status_ok;
+
+  /// No description provided for @pet_reminder_status_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get pet_reminder_status_done;
+
+  /// No description provided for @pet_reminder_due_on.
+  ///
+  /// In en, this message translates to:
+  /// **'Due {date}'**
+  String pet_reminder_due_on(String date);
+
+  /// No description provided for @pet_reminder_done_on.
+  ///
+  /// In en, this message translates to:
+  /// **'Done {date}'**
+  String pet_reminder_done_on(String date);
+
+  /// No description provided for @pet_reminder_next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {date}'**
+  String pet_reminder_next(String date);
+
+  /// No description provided for @pet_reminder_complete.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as done'**
+  String get pet_reminder_complete;
+
+  /// No description provided for @pet_reminder_complete_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete reminder'**
+  String get pet_reminder_complete_title;
+
+  /// No description provided for @pet_reminder_complete_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the cost if you paid for this visit; it is recorded as a pet expense.'**
+  String get pet_reminder_complete_body;
+
+  /// No description provided for @pet_reminder_amount_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost (optional)'**
+  String get pet_reminder_amount_label;
+
+  /// No description provided for @pet_reminder_amount_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 250'**
+  String get pet_reminder_amount_hint;
+
+  /// No description provided for @pet_reminder_completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder completed.'**
+  String get pet_reminder_completed;
+
+  /// No description provided for @pet_reminder_deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder deleted.'**
+  String get pet_reminder_deleted;
+
+  /// No description provided for @pet_reminder_delete_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this reminder?'**
+  String get pet_reminder_delete_confirm_title;
+
+  /// No description provided for @pet_reminder_delete_confirm_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Its history is removed; expenses already recorded stay.'**
+  String get pet_reminder_delete_confirm_body;
+
+  /// No description provided for @pet_reminder_new_title.
+  ///
+  /// In en, this message translates to:
+  /// **'New reminder'**
+  String get pet_reminder_new_title;
+
+  /// No description provided for @pet_reminder_edit_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit reminder'**
+  String get pet_reminder_edit_title;
+
+  /// No description provided for @pet_reminder_title_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder'**
+  String get pet_reminder_title_label;
+
+  /// No description provided for @pet_reminder_title_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Rabies vaccine'**
+  String get pet_reminder_title_hint;
+
+  /// No description provided for @pet_reminder_kind_vaccine.
+  ///
+  /// In en, this message translates to:
+  /// **'Vaccine'**
+  String get pet_reminder_kind_vaccine;
+
+  /// No description provided for @pet_reminder_kind_vet.
+  ///
+  /// In en, this message translates to:
+  /// **'Vet visit'**
+  String get pet_reminder_kind_vet;
+
+  /// No description provided for @pet_reminder_kind_other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get pet_reminder_kind_other;
+
+  /// No description provided for @pet_reminder_due_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Due date'**
+  String get pet_reminder_due_label;
+
+  /// No description provided for @pet_reminder_repeat_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get pet_reminder_repeat_label;
+
+  /// No description provided for @pet_reminder_repeat_none.
+  ///
+  /// In en, this message translates to:
+  /// **'Does not repeat'**
+  String get pet_reminder_repeat_none;
+
+  /// No description provided for @pet_reminder_repeat_yearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Every year'**
+  String get pet_reminder_repeat_yearly;
+
+  /// No description provided for @pet_reminder_repeat_months.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Every month} other{Every {count} months}}'**
+  String pet_reminder_repeat_months(int count);
+
+  /// No description provided for @pet_reminder_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder saved.'**
+  String get pet_reminder_saved;
+
+  /// No description provided for @export_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Data'**
+  String get export_section;
+
+  /// No description provided for @export_section_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Download your transactions or a monthly summary.'**
+  String get export_section_hint;
+
+  /// No description provided for @export_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get export_title;
+
+  /// No description provided for @export_intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a period and the filters, then download the file.'**
+  String get export_intro;
+
+  /// No description provided for @export_type_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get export_type_all;
+
+  /// No description provided for @export_from.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get export_from;
+
+  /// No description provided for @export_to.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get export_to;
+
+  /// No description provided for @export_person.
+  ///
+  /// In en, this message translates to:
+  /// **'Person'**
+  String get export_person;
+
+  /// No description provided for @export_all_people.
+  ///
+  /// In en, this message translates to:
+  /// **'All people'**
+  String get export_all_people;
+
+  /// No description provided for @export_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get export_category;
+
+  /// No description provided for @export_all_categories.
+  ///
+  /// In en, this message translates to:
+  /// **'All categories'**
+  String get export_all_categories;
+
+  /// No description provided for @export_csv_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Download CSV (Excel)'**
+  String get export_csv_action;
+
+  /// No description provided for @export_pdf_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Download PDF summary'**
+  String get export_pdf_action;
+
+  /// No description provided for @export_csv_done.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 transaction exported.} other{{count} transactions exported.}}'**
+  String export_csv_done(int count);
+
+  /// No description provided for @export_pdf_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary saved.'**
+  String get export_pdf_done;
+
+  /// No description provided for @export_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions in this period.'**
+  String get export_empty;
+
+  /// No description provided for @export_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'CSV opens in Excel or Google Sheets; the PDF is a one-page summary.'**
+  String get export_hint;
+
+  /// No description provided for @export_range_note.
+  ///
+  /// In en, this message translates to:
+  /// **'Period: {from} – {to}'**
+  String export_range_note(String from, String to);
+
+  /// No description provided for @export_pdf_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly summary'**
+  String get export_pdf_title;
+
+  /// No description provided for @export_household.
+  ///
+  /// In en, this message translates to:
+  /// **'Household'**
+  String get export_household;
+
+  /// No description provided for @export_period.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get export_period;
+
+  /// No description provided for @export_pdf_footer.
+  ///
+  /// In en, this message translates to:
+  /// **'Family income & expense tracker'**
+  String get export_pdf_footer;
+
+  /// No description provided for @error_invalid_transaction.
+  ///
+  /// In en, this message translates to:
+  /// **'This transaction no longer exists.'**
+  String get error_invalid_transaction;
+
+  /// No description provided for @error_invalid_receipt.
+  ///
+  /// In en, this message translates to:
+  /// **'That receipt could not be saved. Try again.'**
+  String get error_invalid_receipt;
+
+  /// No description provided for @error_invalid_mime.
+  ///
+  /// In en, this message translates to:
+  /// **'Only images (JPG, PNG, WebP) or a PDF can be attached.'**
+  String get error_invalid_mime;
+
+  /// No description provided for @error_limit_reached.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt limit reached: up to 3 receipts per transaction.'**
+  String get error_limit_reached;
+
+  /// No description provided for @error_invalid_reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'This reminder no longer exists.'**
+  String get error_invalid_reminder;
+
+  /// No description provided for @error_no_pet_category.
+  ///
+  /// In en, this message translates to:
+  /// **'No pet category is available to record this expense.'**
+  String get error_no_pet_category;
 }
 
 class _AppLocalizationsDelegate

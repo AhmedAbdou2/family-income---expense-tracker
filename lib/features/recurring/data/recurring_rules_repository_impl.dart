@@ -168,11 +168,12 @@ class RecurringRulesRepositoryImpl implements RecurringRulesRepository {
   }
 
   @override
-  Future<int> archiveRule({
+  Future<ArchiveRuleResult> archiveRule({
     required String id,
     bool deleteMonthTransactions = false,
   }) async {
     try {
+      // jsonb: {"deleted": n, "receipt_paths": [...]}
       final result = await _client.rpc(
         'archive_recurring_rule',
         params: {
@@ -180,7 +181,12 @@ class RecurringRulesRepositoryImpl implements RecurringRulesRepository {
           'p_delete_month_transactions': deleteMonthTransactions,
         },
       );
-      return (result as num).toInt();
+      final map = (result as Map).cast<String, dynamic>();
+      return ArchiveRuleResult(
+        deleted: (map['deleted'] as num?)?.toInt() ?? 0,
+        receiptPaths:
+            (map['receipt_paths'] as List<dynamic>? ?? const []).cast<String>(),
+      );
     } catch (error) {
       throw ExceptionMapper.map(error);
     }

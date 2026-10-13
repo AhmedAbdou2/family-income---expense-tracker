@@ -9,14 +9,16 @@ const Set<String> authRoutes = {'/sign-in', '/sign-up', '/forgot-password'};
 const Set<String> setupRoutes = {'/setup', '/setup/create', '/setup/join'};
 
 /// Routes only owner/adult logins may open. Vehicles (with fuel/maintenance),
-/// pets, recurring fixed commitments, budgets and reports are adult features;
-/// a child landing here (e.g. a stale bookmark) is sent back to the dashboard.
+/// pets (with reminders), recurring fixed commitments, budgets, reports and
+/// export are adult features; a child landing here (e.g. a stale bookmark) is
+/// sent back to the dashboard.
 const Set<String> adultOnlyRoutes = {
   '/vehicles',
   '/recurring',
   '/pets',
   '/budgets',
   '/reports',
+  '/export',
 };
 
 bool _isAdultOnly(String location) {

@@ -17,6 +17,7 @@ import '../../members/presentation/providers.dart';
 import '../../pets/domain/entities.dart';
 import '../../pets/presentation/pet_visuals.dart';
 import '../../pets/presentation/providers.dart';
+import '../../receipts/presentation/providers.dart';
 import '../../transactions/domain/entities.dart';
 import '../../transactions/presentation/providers.dart';
 import '../../vehicles/domain/entities.dart';
@@ -603,11 +604,17 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
     );
     if (choice == null || !context.mounted) return;
     try {
-      await ref.read(recurringRulesRepositoryProvider).archiveRule(
+      final result = await ref.read(recurringRulesRepositoryProvider).archiveRule(
             id: ruleId,
             deleteMonthTransactions:
                 choice == RecurringDeleteChoice.deleteMonth,
           );
+      // Purged postings may have carried receipts - drop the objects too.
+      if (result.receiptPaths.isNotEmpty) {
+        await ref
+            .read(receiptsRepositoryProvider)
+            .deleteObjects(result.receiptPaths);
+      }
       ref
         ..invalidate(recurringRulesProvider)
         ..invalidate(monthTransactionsProvider)

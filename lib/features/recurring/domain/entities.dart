@@ -62,3 +62,18 @@ class RecurringRule {
 
   bool get isArchived => archivedAt != null;
 }
+
+/// Outcome of archiving a fixed expense (migration 15 + 17).
+///
+/// [deleted] counts the posted transactions of the current month that the
+/// caller asked to purge (0 for a plain archive); [receiptPaths] lists the
+/// storage objects that went with them, so the caller can delete those too.
+class ArchiveRuleResult {
+  const ArchiveRuleResult({
+    required this.deleted,
+    this.receiptPaths = const <String>[],
+  });
+
+  final int deleted;
+  final List<String> receiptPaths;
+}

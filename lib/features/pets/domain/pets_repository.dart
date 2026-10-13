@@ -26,3 +26,41 @@ abstract interface class PetsRepository {
     String? notes,
   });
 }
+
+/// Reminders of a pet. Adult-only: every write is an RPC, reads go through
+/// the SELECT policy (a child sees zero rows).
+abstract interface class PetRemindersRepository {
+  /// All reminders of [petId], any state (the UI splits due vs done).
+  Future<List<PetReminder>> listReminders({required String petId});
+
+  Future<PetReminder> createReminder({
+    required String petId,
+    required String title,
+    required PetReminderKind kind,
+    required DateTime dueDate,
+    int? repeatMonths,
+  });
+
+  /// Edits the schedule of a still-open reminder. Completed rows are kept
+  /// as history and are not editable.
+  Future<void> updateReminder({
+    required String id,
+    required String title,
+    required PetReminderKind kind,
+    required DateTime dueDate,
+    int? repeatMonths,
+  });
+
+  /// Ticks the reminder off. When [amountMinorUnits] is given, a pet
+  /// expense is posted in the same server-side call (categories: Vaccines
+  /// for a vaccine, Vet otherwise); that needs the caller to have a person
+  /// of their own, otherwise the RPC refuses with `no_linked_person` and
+  /// writes nothing at all.
+  Future<void> completeReminder({
+    required String id,
+    int? amountMinorUnits,
+    String? note,
+  });
+
+  Future<void> deleteReminder({required String id});
+}

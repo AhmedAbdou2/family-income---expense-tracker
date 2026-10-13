@@ -7,30 +7,14 @@ import '../domain/transactions_repository.dart';
 
 /// Reads `amount::text` so no float ever enters the app: the decimal
 /// string goes straight through [Money.decimalStringToMinorUnits].
-const _columns =
-    'id, household_id, type, amount::text, category_id, member_id, '
-    'vehicle_id, pet_id, recurring_rule_id, date, note, created_by';
+const _columns = transactionColumns;
 
 class TransactionsRepositoryImpl implements TransactionsRepository {
   TransactionsRepositoryImpl(this._client);
 
   final SupabaseClient _client;
 
-  Transaction _map(Map<String, dynamic> row) => Transaction(
-        id: row['id'] as String,
-        householdId: row['household_id'] as String,
-        type: TransactionType.fromDb(row['type'] as String),
-        amountMinorUnits:
-            Money.decimalStringToMinorUnits(row['amount'] as String),
-        categoryId: row['category_id'] as String,
-        memberId: row['member_id'] as String,
-        date: DateTime.parse(row['date'] as String),
-        note: row['note'] as String?,
-        vehicleId: row['vehicle_id'] as String?,
-        petId: row['pet_id'] as String?,
-        recurringRuleId: row['recurring_rule_id'] as String?,
-        createdBy: row['created_by'] as String?,
-      );
+  Transaction _map(Map<String, dynamic> row) => transactionFromRow(row);
 
   String _dateKey(DateTime day) =>
       '${day.year.toString().padLeft(4, '0')}-'
@@ -142,9 +126,16 @@ class TransactionsRepositoryImpl implements TransactionsRepository {
   }
 
   @override
-  Future<void> deleteTransaction({required String id}) async {
+  Future<List<String>> deleteTransaction({required String id}) async {
     try {
-      await _client.from('transactions').delete().eq('id', id);
+      // RPC-only: the function applies the same rule the delete policy used
+      // to (owner/adult: any household row; child: only their own person's)
+      // and hands back the receipt paths so the objects can be cleaned up.
+      final result = await _client.rpc(
+        'delete_transaction',
+        params: {'p_transaction_id': id},
+      );
+      return (result as List<dynamic>? ?? const []).cast<String>();
     } catch (error) {
       throw ExceptionMapper.map(error);
     }
