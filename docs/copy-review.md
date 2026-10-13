@@ -257,3 +257,156 @@ Decisions worth noting:
 | `report_empty_body` | Add some transactions and the charts will appear here. | *(new)* | أضف بعض المعاملات وستظهر الرسوم هنا. |
 | `report_by_category_empty` | No expenses this month to chart. | *(new)* | لا توجد مصروفات هذا الشهر لعرضها. |
 | `report_by_person_empty` | No spending this month to chart. | *(new)* | لا يوجد إنفاق هذا الشهر لعرضه. |
+
+## Phase 4b — receipts, pet reminders, export
+
+Text-only additions for Phase 4b; every key below is new in both ARB files
+(`flutter gen-l10n` + `test/l10n_parity_test.dart` green, 491 keys each).
+
+**Glossary additions:** الإيصالات (receipts) · إرفاق (attach) · التخزين (storage) · التذكيرات (reminders) · تطعيم (vaccine) · زيارة الطبيب البيطري (vet visit) · يستحق قريبًا (due soon) · متأخر (overdue) · مجدول (scheduled) · تسجيل الإنجاز (mark as done) · تصدير (export) · البيانات (data) · تنزيل (download) · الفترة (period) · التصفية (filter).
+
+### Receipts (transaction attachments)
+
+| key | English | new Arabic |
+| --- | --- | --- |
+| `receipt_section_title` | Receipts | الإيصالات |
+| `receipt_count` | {count} of {max} | {count} من {max} |
+| `receipt_add` | Add receipt | إضافة إيصال |
+| `receipt_add_camera` | Take a photo | التقاط صورة |
+| `receipt_add_gallery` | Choose from gallery | اختيار من الصور |
+| `receipt_add_document` | Choose a file (PDF or image) | اختيار ملف (PDF أو صورة) |
+| `receipt_empty` | No receipts attached yet. | لا توجد إيصالات مرفقة بعد. |
+| `receipt_uploaded` | Receipt attached. | تم إرفاق الإيصال. |
+| `receipt_deleted` | Receipt removed. | تم حذف الإيصال. |
+| `receipt_delete_confirm_title` | Remove this receipt? | حذف هذا الإيصال؟ |
+| `receipt_delete_confirm_body` | The file is deleted from storage; the transaction itself stays. | سيُحذف الملف من التخزين، وتبقى العملية كما هي. |
+| `receipt_limit_hint` | {count, plural, one{Up to 1 receipt per transaction.} other{Up to {count} receipts per transaction.}} | {count, plural, zero{لا يمكن إرفاق إيصالات.} one{يمكن إرفاق إيصال واحد لكل عملية.} two{يمكن إرفاق إيصالين لكل عملية.} few{يمكن إرفاق {count} إيصالات لكل عملية.} many{يمكن إرفاق {count} إيصالًا لكل عملية.} other{يمكن إرفاق {count} إيصال لكل عملية.}} |
+| `receipt_pdf_label` | PDF document | مستند PDF |
+| `receipt_view_title` | Receipt | الإيصال |
+| `receipt_open_file` | Open file | فتح الملف |
+| `receipt_load_failed` | Could not open this receipt. | تعذّر فتح هذا الإيصال. |
+| `receipt_sweep_title` | Clean up unused receipt files | تنظيف ملفات الإيصالات غير المستخدمة |
+| `receipt_sweep_hint` | Removes files whose transaction is gone. | يحذف الملفات التي لم تعد مرتبطة بعملية. |
+| `receipt_sweep_action` | Clean up | تنظيف |
+| `receipt_sweep_confirm_title` | Clean up unused files? | تنظيف الملفات غير المستخدمة؟ |
+| `receipt_sweep_confirm_body` | Only files that no longer belong to a transaction are removed. Nothing else changes. | سيُحذف فقط الملفات التي لم تعد مرتبطة بأي عملية، ولن يتغير شيء آخر. |
+| `receipt_sweep_none` | Nothing to clean up. | لا يوجد ما يُنظَّف. |
+| `receipt_sweep_done` | {count, plural, one{Removed 1 file.} other{Removed {count} files.}} | {count, plural, zero{لا يوجد ما يُنظَّف.} one{تم حذف ملف واحد.} two{تم حذف ملفين.} few{تم حذف {count} ملفات.} many{تم حذف {count} ملفًا.} other{تم حذف {count} ملف.}} |
+
+### Pet reminders
+
+| key | English | new Arabic |
+| --- | --- | --- |
+| `pet_reminders_title` | Reminders | التذكيرات |
+| `pet_reminder_add` | Add reminder | إضافة تذكير |
+| `pet_reminders_empty` | No reminders yet. | لا توجد تذكيرات بعد. |
+| `pet_reminder_status_overdue` | Overdue | متأخر |
+| `pet_reminder_status_due_soon` | Due soon | يستحق قريبًا |
+| `pet_reminder_status_ok` | Scheduled | مجدول |
+| `pet_reminder_status_done` | Done | منتهٍ |
+| `pet_reminder_due_on` | Due {date} | يستحق في {date} |
+| `pet_reminder_done_on` | Done {date} | تم في {date} |
+| `pet_reminder_next` | Next: {date} | التالي: {date} |
+| `pet_reminder_complete` | Mark as done | تسجيل الإنجاز |
+| `pet_reminder_complete_title` | Complete reminder | إنجاز التذكير |
+| `pet_reminder_complete_body` | Add the cost if you paid for this visit; it is recorded as a pet expense. | أضف التكلفة إذا دفعت مقابل ذلك؛ ستُسجَّل كمصروف على الحيوان. |
+| `pet_reminder_amount_label` | Cost (optional) | التكلفة (اختياري) |
+| `pet_reminder_amount_hint` | e.g. 250 | مثال: 250 |
+| `pet_reminder_completed` | Reminder completed. | تم إنجاز التذكير. |
+| `pet_reminder_deleted` | Reminder deleted. | تم حذف التذكير. |
+| `pet_reminder_delete_confirm_title` | Delete this reminder? | حذف هذا التذكير؟ |
+| `pet_reminder_delete_confirm_body` | Its history is removed; expenses already recorded stay. | سيُحذف سجله، وتبقى المصروفات المسجَّلة كما هي. |
+| `pet_reminder_new_title` | New reminder | تذكير جديد |
+| `pet_reminder_edit_title` | Edit reminder | تعديل التذكير |
+| `pet_reminder_title_label` | Reminder | التذكير |
+| `pet_reminder_title_hint` | e.g. Rabies vaccine | مثال: تطعيم السعار |
+| `pet_reminder_kind_vaccine` | Vaccine | تطعيم |
+| `pet_reminder_kind_vet` | Vet visit | زيارة الطبيب البيطري |
+| `pet_reminder_kind_other` | Other | أخرى |
+| `pet_reminder_due_label` | Due date | تاريخ الاستحقاق |
+| `pet_reminder_repeat_label` | Repeat | التكرار |
+| `pet_reminder_repeat_none` | Does not repeat | بدون تكرار |
+| `pet_reminder_repeat_yearly` | Every year | كل سنة |
+| `pet_reminder_repeat_months` | {count, plural, one{Every month} other{Every {count} months}} | {count, plural, zero{بدون تكرار} one{كل شهر} two{كل شهرين} few{كل {count} أشهر} many{كل {count} شهرًا} other{كل {count} شهر}} |
+| `pet_reminder_saved` | Reminder saved. | تم حفظ التذكير. |
+
+### Export (CSV / PDF)
+
+| key | English | new Arabic |
+| --- | --- | --- |
+| `export_section` | Data | البيانات |
+| `export_section_hint` | Download your transactions or a monthly summary. | نزّل عملياتك أو ملخصًا شهريًا. |
+| `export_title` | Export | تصدير |
+| `export_intro` | Choose a period and the filters, then download the file. | اختر الفترة وعوامل التصفية ثم نزّل الملف. |
+| `export_type_all` | All | الكل |
+| `export_from` | From | من |
+| `export_to` | To | إلى |
+| `export_person` | Person | الشخص |
+| `export_all_people` | All people | كل الأشخاص |
+| `export_category` | Category | التصنيف |
+| `export_all_categories` | All categories | كل التصنيفات |
+| `export_csv_action` | Download CSV (Excel) | تنزيل CSV (إكسل) |
+| `export_pdf_action` | Download PDF summary | تنزيل ملخص PDF |
+| `export_csv_done` | {count, plural, one{1 transaction exported.} other{{count} transactions exported.}} | {count, plural, zero{لا يوجد ما يُصدَّر.} one{تم تصدير عملية واحدة.} two{تم تصدير عمليتين.} few{تم تصدير {count} عمليات.} many{تم تصدير {count} عملية.} other{تم تصدير {count} عملية.}} |
+| `export_pdf_done` | Summary saved. | تم حفظ الملخص. |
+| `export_empty` | No transactions in this period. | لا توجد عمليات في هذه الفترة. |
+| `export_hint` | CSV opens in Excel or Google Sheets; the PDF is a one-page summary. | يفتح ملف CSV في إكسل أو Google Sheets، وملف PDF ملخص من صفحة واحدة. |
+| `export_range_note` | Period: {from} – {to} | الفترة: {from} – {to} |
+| `export_pdf_title` | Monthly summary | الملخص الشهري |
+| `export_household` | Household | الأسرة |
+| `export_period` | Period | الفترة |
+| `export_pdf_footer` | Family income & expense tracker | تطبيق متابعة إيرادات ومصروفات الأسرة |
+
+### New error messages
+
+| key | English | new Arabic |
+| --- | --- | --- |
+| `error_title` | Something went wrong | حدث خطأ |
+| `error_network` | No internet connection. Please try again. | لا يوجد اتصال بالإنترنت. حاول مرة أخرى. |
+| `error_timeout` | The request timed out. Please try again. | انتهت مهلة الطلب. حاول مرة أخرى. |
+| `error_unknown` | Unexpected error. Please try again. | حدث خطأ غير متوقع. حاول مرة أخرى. |
+| `error_invalid_credentials` | Wrong email or password. | البريد الإلكتروني أو كلمة المرور غير صحيحة. |
+| `error_email_exists` | An account with this email already exists. | يوجد حساب بهذا البريد الإلكتروني بالفعل. |
+| `error_email_not_confirmed` | Confirm your email address first. | أكّد بريدك الإلكتروني أولًا. |
+| `error_weak_password` | Password is too weak. Use at least 6 characters. | كلمة المرور ضعيفة. استخدم 6 أحرف على الأقل. |
+| `error_invalid_email` | Enter a valid email address. | أدخل بريدًا إلكترونيًا صحيحًا. |
+| `error_too_many_requests` | Too many attempts. Wait a moment and try again. | محاولات كثيرة. انتظر قليلًا ثم حاول مرة أخرى. |
+| `error_invite_not_found` | That invite code doesn't exist. | رمز الدعوة غير موجود. |
+| `error_invite_used` | That invite code was already used. | تم استخدام رمز الدعوة من قبل. |
+| `error_invite_expired` | That invite code has expired. | انتهت صلاحية رمز الدعوة. |
+| `error_already_member` | You're already part of that household. | أنت عضو في هذه الأسرة بالفعل. |
+| `error_not_member` | You don't belong to that household. | أنت لست عضوًا في هذه الأسرة. |
+| `error_forbidden` | You don't have permission to do that. | لا تملك صلاحية للقيام بذلك. |
+| `error_invalid_name` | Enter a valid name. | أدخل اسمًا صحيحًا. |
+| `error_invalid_currency` | Enter a valid currency. | أدخل عملة صحيحة. |
+| `error_invalid_role` | That invite role is not allowed. | هذه الصفة غير مسموح بها في الدعوة. |
+| `error_membership_immutable` | Membership details can't be changed here. | لا يمكن تعديل بيانات العضوية من هنا. |
+| `error_member_linked` | That person is already linked to an account. | هذا الشخص مرتبط بحساب بالفعل. |
+| `error_login_linked` | This account is already linked to a person. | هذا الحساب مرتبط بشخص بالفعل. |
+| `error_invalid_member` | That person doesn't belong to this household. | هذا الشخص ليس من أفراد هذه الأسرة. |
+| `error_category_in_use` | That category has transactions and can't be deleted. | لهذا التصنيف معاملات ولا يمكن حذفه. |
+| `error_member_in_use` | That person has transactions and can't be deleted. | لهذا الشخص معاملات ولا يمكن حذفه. |
+| `error_already_linked` | That person was already linked to another account. | هذا الشخص مرتبط بحساب آخر بالفعل. |
+| `error_last_owner` | You're the last owner. Make another member an owner first. | أنت المالك الأخير. اجعل عضوًا آخر مالكًا أولًا. |
+| `error_cannot_change_own_role` | You can't change your own role. Ask another owner. | لا يمكنك تغيير دورك بنفسك. اطلب من مالك آخر. |
+| `error_cannot_remove_self` | To leave, use Leave household instead. | للخروج استخدم خيار مغادرة الأسرة. |
+| `error_child_requires_member` | A child role needs an account linked to a person. | دور الطفل يتطلب حسابًا مرتبطًا بشخص. |
+| `error_invalid_vehicle` | That vehicle doesn't belong to this household. | هذه السيارة ليست من سيارات هذه الأسرة. |
+| `error_invalid_item` | That maintenance reminder doesn't exist. | تذكير الصيانة هذا غير موجود. |
+| `error_invalid_log` | That fill-up doesn't exist. | تعبئة الوقود هذه غير موجودة. |
+| `error_invalid_value` | Enter valid values. | أدخل قيمًا صحيحة. |
+| `error_odometer_backwards` | The odometer can't be lower than an earlier fill-up. | لا يمكن أن تكون قراءة العدّاد أقل من تعبئة سابقة. |
+| `error_no_car_category` | Add a car category first. | أضف تصنيفًا للسيارة أولًا. |
+| `error_no_linked_person` | Link this account to a person first. | اربط هذا الحساب بشخص أولًا. |
+| `error_invalid_pet` | That pet doesn't belong to this household. | هذا الحيوان ليس من حيوانات هذه الأسرة. |
+| `error_invalid_rule` | That fixed expense doesn't exist. | هذا المصروف الثابت غير موجود. |
+| `error_already_archived` | That fixed expense was already removed. | تمت إزالة هذا المصروف الثابت بالفعل. |
+| `error_invalid_category` | That category doesn't belong to this household. | هذا التصنيف ليس من تصنيفات هذه الأسرة. |
+| `error_invalid_budget` | That limit doesn't exist. | هذا الحد غير موجود. |
+| `error_invalid_transaction` | This transaction no longer exists. | هذه العملية لم تعد موجودة. |
+| `error_invalid_receipt` | That receipt could not be saved. Try again. | تعذّر حفظ هذا الإيصال. حاول مرة أخرى. |
+| `error_invalid_mime` | Only images (JPG, PNG, WebP) or a PDF can be attached. | يمكن إرفاق الصور (JPG أو PNG أو WebP) أو ملف PDF فقط. |
+| `error_limit_reached` | Receipt limit reached: up to 3 receipts per transaction. | بلغت حد الإيصالات: 3 إيصالات لكل عملية كحد أقصى. |
+| `error_invalid_reminder` | This reminder no longer exists. | هذا التذكير لم يعد موجودًا. |
+| `error_no_pet_category` | No pet category is available to record this expense. | لا يوجد تصنيف للحيوانات لتسجيل هذا المصروف. |
+

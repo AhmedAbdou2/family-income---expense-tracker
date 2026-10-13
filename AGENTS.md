@@ -32,7 +32,7 @@ Flutter (Riverpod 3, go_router 18, Supabase) + Postgres with RLS.
 ```sh
 flutter gen-l10n        # only if .arb files changed
 flutter analyze         # must be clean
-flutter test            # must pass (221 tests)
+flutter test            # must pass (359 tests)
 flutter build web --release   # compile check; ~3-4 min
 ```
 
@@ -68,18 +68,45 @@ lib/features  auth/  domain (AuthRepository, SignUpOutcome), data
               categories/ domain (Category, CategoryGroup), data, presentation
                    (categoriesProvider, category_visuals icon/color maps,
                    grouped list + editor dialog)
-              transactions/ domain (Transaction, TransactionType), data,
+              transactions/ domain (Transaction, TransactionType, shared
+                   transactionColumns/transactionFromRow mapper), data,
                    presentation (month/member/pet-filtered list, create/edit
                    form with pet picker + "Make monthly fixed",
-                   QuickAddAmountController + quick-add sheet, month providers)
+                   QuickAddAmountController + quick-add sheet, month providers;
+                   every delete — list, dashboard, person, pet, form — goes
+                   through the shared transaction_delete.dart dialog and the
+                   delete_transaction RPC)
+              receipts/  domain (Receipt + pure receipt_validation.dart:
+                   mime/size/count rules, maxReceiptsPerTransaction = 3,
+                   allowedMimes), data (mint → client upload → attach, signed
+                   URL per object, RPC-only writes), presentation
+                   (transactionReceiptsProvider(transactionId),
+                   receiptSignedUrlProvider(path), inline receipt_section.dart
+                   in the transaction form - picker opens by itself after a
+                   NEW transaction is saved via `?receipt=add`, viewer,
+                   3-step upload; children read-only)
+              export/    domain (ExportFilter, pure csv_export.dart: RFC-4180
+                   quoting + injection guard for `= + - @ \t \r`, UTF-8 BOM,
+                   plain decimals; month_summary.dart MonthSummary),
+                   data (export_repository_impl.dart: `.range()` paging with
+                   `collectTransactionPages`, because PostgREST caps ~1000
+                   rows), presentation (export_screen.dart at `/export`,
+                   pdf_summary.dart buildMonthSummaryPdf with the Cairo subset
+                   embedded - GATED by `pdfExportEnabled`, see
+                   docs/phase4b/README.md)
               vehicles/  domain (Vehicle, FuelType, FuelLog, MaintenanceItem,
                    FuelStats full-to-full, MaintenanceReminder), data,
                    presentation (vehiclesProvider, fuelLogsProvider(vehicleId),
                    maintenanceProvider(vehicleId): list/form/detail screens,
                    fuel-log form, maintenance form; L/100km + cost/km)
-              pets/     domain (Pet, PetType, PetsRepository), data,
-                   presentation (petsProvider, pet_visuals, list/form/detail
-                   screens: monthly total + expense list; adult-only)
+              pets/     domain (Pet, PetType, PetReminder, PetReminderKind,
+                   pure pet_reminder_status.dart: dueSoonDays = 14 + status +
+                   nextDueDate with day clamping + sorted, PetsRepository,
+                   PetRemindersRepository), data, presentation (petsProvider,
+                   petRemindersProvider(petId), pet_visuals, list/form/detail
+                   screens: monthly total + expense list + reminders section
+                   (status chip, complete with optional cost → pet expense,
+                   repeat re-arms server-side); adult-only)
               recurring/ domain (RecurrenceFrequency, RecurringRule +
                    fixedMonthSummary + recurring_schedule pure helpers:
                    firstOccurrence/resolveNextDue/occurrencesInMonth), data,
@@ -89,7 +116,8 @@ lib/features  auth/  domain (AuthRepository, SignUpOutcome), data
                    dashboard — idempotent)
               settings/  settings screen (language/theme/digits, invites with
                    optional person link, manage categories, vehicles + pets +
-                   fixed commitments entries, sign out)
+                   fixed commitments entries, a Data section - export tile to
+                   `/export` + the orphan-receipt cleanup action, sign out)
               budgets/  domain (Budget, BudgetsRepository, pure
                    budget_progress.dart: budgetOverview() + BudgetProgress +
                    BudgetStatus from SPENT, 80% near / 100% over, projected =
@@ -129,10 +157,14 @@ lib/features  auth/  domain (AuthRepository, SignUpOutcome), data
   `/vehicles/:id/fuel/new`, `/vehicles/:id/maintenance/new`,
   `/vehicles/:id/maintenance/edit/:itemId`, `/recurring` (shell branch),
   `/recurring/new`, `/recurring/edit/:id`, `/pets` (shell branch),
-  `/pets/new`, `/pets/edit/:id`, `/pets/:id`, `/budgets` (shell branch),
-  `/reports` (shell branch), `/profile/:id` (`me` resolves
+  `/pets/new`, `/pets/edit/:id`, `/pets/:id`, `/pets/:id/reminders/new`,
+  `/pets/:id/reminders/edit/:reminderId`, `/budgets` (shell branch),
+  `/reports` (shell branch), `/export` (pushed from the Settings Data card and
+  the Reports app bar), `/profile/:id` (`me` resolves
   to the caller's own person), `/settings`. Adult-only: `/vehicles`,
-  `/recurring`, `/pets`, `/budgets`, `/reports`. Detail routes are
+  `/recurring`, `/pets`, `/budgets`, `/reports`, `/export` (the reminder
+  routes are covered by the `/pets/` prefix; the receipts section is inline in
+  the transaction form, not a route). Detail routes are
   declared before the shell (and `/vehicles/new` before `/vehicles/:id`,
   `/pets/new` before `/pets/:id`). A
   household login with no linked person is held on `/claim` until it picks a
@@ -184,7 +216,24 @@ Supabase SQL Editor (user does this manually):
    behind `set_category_budget` / `set_overall_budget` / `set_budget_active`
    / `delete_budget`, narrows `budgets` SELECT to **adults only**, and adds
    the SECURITY DEFINER `monthly_totals(household, start, end)` aggregate
-   that the Reports trend uses instead of fetching >1000 transactions).
+   that the Reports trend uses instead of fetching >1000 transactions) →
+   17. receipts + pet reminders + exports (new `transaction_receipts` and
+   `pet_reminders` tables, both SELECT-only for **adults**; every write goes
+   through `request_receipt_upload`, `attach_receipt`, `delete_receipt`,
+   `list_orphan_receipts`, `complete_pet_reminder`, `delete_pet_reminder` —
+   `attach_receipt` re-checks the object really exists in `storage.objects`
+   (bucket `receipts`, exact path) and takes mime/size from the stored object,
+   `complete_pet_reminder` posts the optional expense into the matching pet
+   category and re-arms a repeating reminder server-side;
+   `delete_transaction`, `delete_fuel_log` and `archive_recurring_rule` were
+   recreated so they also return the receipt paths they orphaned; the private
+   `receipts` bucket (5 MiB, `image/jpeg,image/png,image/webp,application/pdf`)
+   plus three `storage.objects` policies — SELECT **household-scoped for
+   adults**, INSERT transaction-scoped, DELETE household-scoped for adults,
+   which is what keeps an orphaned object deletable after its transaction row
+   is gone; the whole storage block is wrapped in
+   `if exists (pg_namespace 'storage')` so the migration also runs on a bare
+   DB).
 
 Migration 11 is **frozen** (run green on the cloud DB together with the
 isolation test). Migration 12 is **frozen** too. Migration 13 is validated
@@ -198,7 +247,25 @@ runs it on the cloud next; after that it is frozen. Migration 16 is
 validated in Docker (all 16 files + extended isolation test section 11 +
 privilege matrix clean, plus both legacy-guard cases `category_id is null`
 aborts / category row kept) — the user runs it on the cloud next; after
-that it is frozen. Any further DB change must be a NEW migration file.
+that it is frozen. Migration 17 is validated in Docker two ways:
+`fresh17final` (fresh DB + the Supabase stub *with* the storage schema — all
+17 migration files, the full extended isolation test incl. sections 12/13 +
+the amendment-G block, and the privilege matrix with 0 violations) and
+`bare17final` (the stub *without* the storage schema — all 17 migration files
+still apply, because migration 17 wraps its whole storage block in
+`if exists (pg_namespace 'storage')`; the isolation test itself is not run
+there, since its receipts section asserts against `storage.buckets`, which only
+exists on Supabase). The user runs 17 on the cloud next; after that it is
+frozen. Any further DB change must be a NEW migration file.
+
+**Migration 17 deliberately does NOT revoke direct DELETE on `transactions`.**
+Doing so would make isolation-test sections 3d/4d (which assert that a child
+and an outsider delete 0 rows) raise `permission denied` instead of deleting
+nothing, and those `0 rows affected` results are the real assertion. So the
+`transactions_delete` RLS policy stays as a same-rule fallback, the app always
+goes through the `delete_transaction` RPC (which is what returns the receipt
+paths), and a direct delete can at worst orphan a storage object — healed by
+the Settings "clean up unused receipt files" sweep.
 
 Indexes: `household_id` on every table; `(household_id, date)` on
 transactions.
@@ -212,11 +279,14 @@ RLS design (full plain-language comments in migration 10):
   change only).
 - All 11 tables: RLS enabled; `anon` has zero access; RPCs granted to
   `authenticated` only; `seed_default_categories` executable by nobody
-  outside definer functions.
+  outside definer functions. (Migration 17 adds `transaction_receipts` +
+  `pet_reminders`, and three policies on `storage.objects`, with the same
+  `anon` = zero rule.)
 - SELECT: members see their household's rows. Children additionally see
   only their own `members` row and that person's transactions; they can
   read categories (needed to record spending). Vehicles, fuel logs,
-  maintenance reminders, recurring rules, pets and budgets are **adult-only —
+  maintenance reminders, recurring rules, pets, budgets (migration 16) and
+  **receipts + pet reminders** (migration 17) are **adult-only —
   a child gets zero SELECT access** to them.
 - INSERT/UPDATE/DELETE on `members`, `categories`, `vehicles`,
   `maintenance_items`, `recurring_rules`: owner/adult only.
@@ -225,8 +295,21 @@ RLS design (full plain-language comments in migration 10):
   SELECT-only for adults; every write goes through
   `set_category_budget` / `set_overall_budget` / `set_budget_active` /
   `delete_budget`, and the `monthly_totals` aggregate is a definer RPC.
+  `transaction_receipts` and `pet_reminders` (migration 17) are the same
+  shape: SELECT-only, every write behind an RPC.
 - `transactions` insert/update also require member/category/vehicle/recurring
   rows to belong to the same household.
+- Storage (`storage.objects`, migration 17, bucket `receipts`): the upload
+  path is minted server-side (`request_receipt_upload`) and re-validated by
+  `attach_receipt`, which also checks the object exists. SELECT and DELETE are
+  **household-scoped and adult-only** (`storage.foldername(name)` puts the
+  household id first: `household_id/transaction_id/<uuid>.<ext>`), INSERT is
+  transaction-scoped. The DELETE policy is scoped by household rather than by
+  transaction *on purpose*: Postgres only deletes rows the SELECT policy makes
+  visible, so a transaction-scoped SELECT would strand an orphaned object
+  forever. The storage DDL is inside
+  `if exists (pg_namespace 'storage')` so the migration also applies to a
+  plain Postgres (which is how it is Docker-tested).
 - `households` update/delete: owner only; no insert policy.
 - No INSERT/DELETE on `household_users`/`invites`: RPC-only.
 
@@ -462,5 +545,76 @@ owner can delete the leftover unlinked person from the Family tab.
   0 / >2-decimals rejected and exact minor units stored,
   `test/budgets_reports_layout_test.dart` 360/800/1854 × AR/EN × all roles,
   `test/budgets_reports_nav_test.dart`); analyze clean, web release build OK.
-- Phase 4b: receipts/attachments, CSV/PDF export, offline, pet reminders,
-  polish.
+- Phase 4b (done, awaiting approval): migration 17 + extended isolation test
+  (sections 12/13 + the amendment-G block; Docker-green on `fresh17g` — all
+  17 files + a storage stub — and `bare17` — no `storage` schema — plus the
+  privilege matrix). **Receipts**: attach up to 3 image/PDF receipts per
+  transaction via `request_receipt_upload` → client upload → `attach_receipt`
+  (which re-checks the object exists and reads mime/size from storage);
+  images picked with image_picker at 1600px/quality 80 and then **re-encoded
+  through the pure `image` package on a `compute` isolate**, which strips
+  EXIF/GPS and bakes the orientation; viewer via short-lived signed URLs;
+  the picker opens by itself after a NEW transaction is saved
+  (`/transactions/edit/:id?receipt=add`). **Deletes** all route through the
+  `delete_transaction` RPC (which returns the receipt paths), and
+  `delete_fuel_log`/`archive_recurring_rule` now return paths too, so the app
+  removes the orphaned objects itself; a Settings action sweeps anything left
+  over (`list_orphan_receipts`). **CSV export**: pure `csv_export.dart`
+  (RFC-4180 quoting, UTF-8 BOM, plain decimals, injection guard for cells
+  starting with `= + - @ \t \r`), filters by period/person/category, and
+  client-side `.range()` paging because PostgREST caps a response at ~1000
+  rows. **PDF summary**: built with the Cairo subset embedded (Arabic
+  contextual shaping), machine-checked in `test/pdf_summary_test.dart`, but
+  **gated off** behind `pdfExportEnabled = false` until the user eyeballs
+  `docs/phase4b/pdf-sample-ar.pdf` (amendment F — see
+  `docs/phase4b/README.md`). **Pet reminders**: vaccine/vet/other with a due
+  date and optional repeat, overdue/due-soon (14 days)/scheduled/done status
+  chips (icon + text, never colour alone), completing one may post a pet
+  expense and re-arms the repeat server-side; `complete_pet_reminder` with no
+  linked person raises `no_linked_person` and writes nothing. New error codes
+  (`invalid_transaction` / `invalid_receipt` / `invalid_mime` /
+  `limit_reached` / `invalid_reminder` / `no_pet_category`). Tests 359
+  (`test/csv_export_test.dart` byte-exact quoting + every injection prefix,
+  `test/export_pagination_test.dart` 1000-row paging,
+  `test/receipt_image_processor_test.dart` EXIF/GPS/orientation-6 strip,
+  `test/receipt_validation_test.dart`, `test/pet_reminder_status_test.dart`
+  (day clamping, 14-day window), `test/export_reconcile_test.dart`
+  (dashboard/CSV/PDF agree at 23,845.67), `test/pdf_summary_test.dart`
+  (decompressed CMap carries `FE8D FEDF FEE4 FEE0 FEA8 FEBA`, not the raw
+  letters), the layout sweeps `test/export_layout_test.dart` /
+  `test/receipt_section_layout_test.dart` /
+  `test/pet_reminders_layout_test.dart` (360/800/1854 × AR/EN × roles) and the
+  nav tests `test/export_nav_test.dart` / `test/pet_reminder_nav_test.dart`);
+  analyze clean, web release build OK.
+- Phase 4b excluded on purpose: offline mode and push notifications.
+
+### Phase 4b cloud checklist (what Docker cannot prove)
+
+Docker has no Supabase Storage, so these four things are only proven once
+migration 17 is applied on the cloud. Do them in this order, right after
+pasting migration 17 (step 18 of the manual list):
+
+1. **The bucket exists, is private, and has the right limits.** In the
+   dashboard: Storage → `receipts` → it must show *Private* (no public URL),
+   a 5 MiB file size limit and the allowed MIME list
+   `image/jpeg,image/png,image/webp,application/pdf`. Migration 17 should have
+   created it; if the storage schema rejected the insert, create it by hand
+   with exactly those settings and re-run only the policy part.
+2. **A signed URL works and expires.** Open a transaction → attach a photo →
+   tap the thumbnail. The image must render (that is the signed URL working).
+   Then reload the page after ~10 minutes; the same thumbnail must now fail
+   with "Could not open this receipt", not a leaked permanent URL.
+3. **Storage itself rejects bad uploads.** On an existing transaction, try
+   attaching a 6 MB photo and a `.zip`/`.txt` file. Both must fail with the
+   app's friendly message and *nothing* may appear in the bucket
+   (Storage → `receipts` → the folder stays empty for that transaction). This
+   is the one case the policies cannot cover: it is enforced by the bucket
+   limits, not RLS.
+4. **Cross-household and child lockout.** With two real households (or one
+   household + an incognito login): household B must not see household A's
+   receipts, and deleting B's transaction must not touch A's object (the
+   sweep in Settings reports "Nothing to clean up" for B). Signed in as a
+   child, the transaction form must show *no* receipts section content at all
+   (RLS returns zero rows), and the `/export` route must bounce back to the
+   dashboard.
+

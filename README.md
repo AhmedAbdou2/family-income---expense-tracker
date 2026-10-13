@@ -61,6 +61,9 @@ its own data.
    supabase/migrations/20261008000012_self_service_members.sql
    supabase/migrations/20261010000013_fuel_maintenance_recurring.sql
    supabase/migrations/20261011000014_pets_fixed_expenses.sql
+   supabase/migrations/20261012000015_archive_fixed_expenses.sql
+   supabase/migrations/20261012000016_budgets_reports.sql
+   supabase/migrations/20261013000017_receipts_exports_pet_reminders.sql
    ```
 
    Then run the isolation proof in the SQL Editor as well:
@@ -72,8 +75,11 @@ its own data.
    It creates two throwaway households, proves household B can select /
    insert / update / delete nothing of household A (including the
    self-service flows: claim, rename, role change, leave, account
-   removal, plus vehicles / fuel logs / maintenance / recurring rules and
-   pets / pet-linked expenses),
+   removal, plus vehicles / fuel logs / maintenance / recurring rules,
+   pets / pet-linked expenses, archived fixed expenses, budgets +
+   `monthly_totals`, and the Phase 4b tables: receipts (incl. deleting a
+   receipt file after its transaction row is gone), pet reminders and the
+   orphan sweep),
    prints `ALL RLS ISOLATION TESTS PASSED`, and **rolls everything
    back**.
 
@@ -83,9 +89,15 @@ its own data.
    `remove_household_login`. Migration 13 adds the fuel-log / maintenance
    / recurring-generation RPCs and a new `fuel_logs` table. Migration 14
    adds the `pets` table, a new `pet` category group, `transactions.pet_id`
-   and `recurring_rules.vehicle_id` / `pet_id` links. **Refresh
-   any open app tabs** after running them: browsers cache the old
-   function definitions.
+   and `recurring_rules.vehicle_id` / `pet_id` links. Migration 15 adds
+   archived fixed expenses (so deleting one never orphans its posted
+   transactions). Migration 16 adds budgets + the `monthly_totals`
+   aggregate. Migration 17 adds the receipt attachments (a **private**
+   `receipts` storage bucket + household-scoped storage policies),
+   pet reminders, and recreates `delete_transaction` / `delete_fuel_log` /
+   `archive_recurring_rule` so they hand back the receipt paths they
+   orphaned. **Refresh any open app tabs** after running them: browsers
+   cache the old function definitions.
 
    The header comment of `20261006000010_rls_grants.sql` explains every
    RLS policy in plain language. See `AGENTS.md` for the same summary.
@@ -131,13 +143,19 @@ lib/
     members/    people tab (add / rename / deactivate / delete)
     categories/ category list + editor (bilingual names, icon, color)
     transactions/ list + create/edit form, quick-add keypad
+    receipts/   image/PDF attachments per transaction (signed-URL viewer)
+    export/     CSV download + PDF monthly summary at /export
     vehicles/   vehicles, fuel log (+ L/100km & cost/km), maintenance
                 reminders, all car expenses
     recurring/  fixed commitments (weekly/monthly/yearly) that post due
                 transactions idempotently when an adult opens the app
-    settings/   language / theme / digits, invites, leave, sign out
+    pets/       pets, monthly spend, vaccine/vet reminders
+    budgets/    per-category + overall monthly limits, spent-based alerts
+    reports/    category donut, 6-month trend, spending per person
+    settings/   language / theme / digits, invites, data export, leave,
+                sign out
 supabase/
-  migrations/   13 ordered SQL migrations (run manually in SQL Editor)
+  migrations/   17 ordered SQL migrations (run manually in SQL Editor)
   tests/        RLS isolation test (rolls back)
 ```
 
@@ -162,6 +180,11 @@ supabase/
   transactions via `generate_recurring_transactions` (all
   `SECURITY DEFINER`, granted to `authenticated` only). `fuel_logs` has
   a SELECT policy only - direct writes are denied by RLS.
+- Receipts and pet reminders (Phase 4b) are the same shape: SELECT-only
+  tables for adults, every write behind an RPC. Receipt files live in a
+  **private** `receipts` bucket; the storage policies are household-scoped
+  and adult-only, the upload path is minted server-side, and the app only
+  ever shows a short-lived signed URL.
 - Referential integrity is enforced in the `transactions` policies: the
   referenced member/category/vehicle/recurring rule must live in the
   **same** household.
@@ -187,4 +210,4 @@ supabase/
 | 3 | Vehicles + fuel log (L/100km, cost/km), maintenance reminders, recurring fixed commitments (idempotent generator) | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
 | 3.5 | Profile screen + drawer/rail navigation, Pets, fixed commitments linked to vehicle/pet/person, dashboard fixed posted/due/remaining, "Make monthly fixed" | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
 | 4a | Budgets (per-category + overall monthly limits, spent-based alerts, pause/resume), Reports (category donut, 6-month income vs expenses, spending per person), dashboard alert card — all reconciling exactly with the dashboard | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
-| 4b | Receipts/attachments, CSV/PDF export, offline cache, pet reminders, polish | pending |
+| 4b | Receipts/attachments, CSV export + PDF monthly summary (PDF gated on a human check of the Arabic sample), pet reminders. Offline cache and push notifications deliberately out of scope | ✅ built, analyzed, tested, web release build OK — **awaiting approval** |
