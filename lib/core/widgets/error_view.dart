@@ -54,6 +54,7 @@ String errorMessage(BuildContext context, Object error) {
     AppErrorCode.limitReached => l10n.error_limit_reached,
     AppErrorCode.invalidReminder => l10n.error_invalid_reminder,
     AppErrorCode.noPetCategory => l10n.error_no_pet_category,
+    AppErrorCode.backupTooLarge => l10n.error_backup_too_large,
     AppErrorCode.unknown => l10n.error_unknown,
   };
 }

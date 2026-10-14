@@ -238,6 +238,23 @@ class SettingsScreen extends ConsumerWidget {
             ),
 
             // ------------------------------------------------------------
+            // Phase 5a: full household backup (owner only). The card itself
+            // says the archive is not encrypted - see docs/backup.md.
+            // ------------------------------------------------------------
+            if (isOwner) ...[
+              _SectionHeader(title: l10n.backup_section),
+              Card(
+                child: ListTile(
+                  leading:
+                      Icon(Icons.backup_outlined, color: scheme.primary),
+                  title: Text(l10n.backup_title),
+                  subtitle: Text(l10n.backup_card_hint),
+                  onTap: () => context.push('/backup'),
+                ),
+              ),
+            ],
+
+            // ------------------------------------------------------------
             // Invite codes
             // ------------------------------------------------------------
             _SectionHeader(title: l10n.invites_section),

@@ -6,6 +6,7 @@ import '../../features/auth/presentation/forgot_password_screen.dart';
 import '../../features/auth/presentation/providers.dart';
 import '../../features/auth/presentation/sign_in_screen.dart';
 import '../../features/auth/presentation/sign_up_screen.dart';
+import '../../features/backup/presentation/backup_screen.dart';
 import '../../features/budgets/presentation/budgets_screen.dart';
 import '../../features/categories/presentation/categories_screen.dart';
 import '../../features/household/domain/entities.dart';
@@ -77,6 +78,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         memberLoading: linked.isLoading,
         hasLinkedMember: linked.value ?? true,
         isAdult: membership.value?.role != MemberRole.child,
+        isOwner: membership.value?.role == MemberRole.owner,
       );
     },
     routes: [
@@ -205,6 +207,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/export',
         builder: (context, state) => const ExportScreen(),
+      ),
+      // Phase 5a: full household backup (owner only).
+      GoRoute(
+        path: '/backup',
+        builder: (context, state) => const BackupScreen(),
       ),
       GoRoute(
         path: '/profile/:id',

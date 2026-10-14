@@ -51,6 +51,7 @@ enum AppErrorCode {
   limitReached,
   invalidReminder,
   noPetCategory,
+  backupTooLarge,
   unknown,
 }
 
@@ -203,6 +204,8 @@ abstract final class ExceptionMapper {
         return const AppException(AppErrorCode.invalidReminder);
       case 'no_pet_category':
         return const AppException(AppErrorCode.noPetCategory);
+      case 'backup_too_large':
+        return const AppException(AppErrorCode.backupTooLarge);
     }
 
     final message = error.message.toLowerCase();

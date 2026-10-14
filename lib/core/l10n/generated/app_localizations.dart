@@ -3026,6 +3026,144 @@ abstract class AppLocalizations {
   /// **'Family income & expense tracker'**
   String get export_pdf_footer;
 
+  /// No description provided for @backup_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup'**
+  String get backup_section;
+
+  /// No description provided for @backup_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Full backup'**
+  String get backup_title;
+
+  /// No description provided for @backup_card_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Save a copy of all your household data as a ZIP. The file is not encrypted.'**
+  String get backup_card_hint;
+
+  /// No description provided for @backup_intro.
+  ///
+  /// In en, this message translates to:
+  /// **'This downloads one ZIP with your household\'s data and receipt files. It is a readable copy for you, not a restore.'**
+  String get backup_intro;
+
+  /// No description provided for @backup_included_title.
+  ///
+  /// In en, this message translates to:
+  /// **'What is included'**
+  String get backup_included_title;
+
+  /// No description provided for @backup_included_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Your household, people, logins, categories, vehicles, fuel logs, maintenance, fixed expenses, pets, reminders, transactions, budgets and receipt files.'**
+  String get backup_included_body;
+
+  /// No description provided for @backup_excluded_title.
+  ///
+  /// In en, this message translates to:
+  /// **'What is left out'**
+  String get backup_excluded_title;
+
+  /// No description provided for @backup_excluded_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite codes are never included: they are access credentials, not household data.'**
+  String get backup_excluded_body;
+
+  /// No description provided for @backup_unencrypted_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Not encrypted'**
+  String get backup_unencrypted_title;
+
+  /// No description provided for @backup_unencrypted_body.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is not encrypted. Anyone who opens it can read your data, so keep it somewhere safe.'**
+  String get backup_unencrypted_body;
+
+  /// No description provided for @backup_receipts_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No receipt files} one{1 receipt file} other{{count} receipt files}}'**
+  String backup_receipts_count(int count);
+
+  /// No description provided for @backup_receipts_size.
+  ///
+  /// In en, this message translates to:
+  /// **'Total size: {size}'**
+  String backup_receipts_size(String size);
+
+  /// No description provided for @backup_estimate_loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Working out the size…'**
+  String get backup_estimate_loading;
+
+  /// No description provided for @backup_download_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Download full backup (.zip)'**
+  String get backup_download_action;
+
+  /// No description provided for @backup_download_data_only_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Download data only (no receipt files)'**
+  String get backup_download_data_only_action;
+
+  /// No description provided for @backup_warn_title.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup is large'**
+  String get backup_warn_title;
+
+  /// No description provided for @backup_warn_body.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt files are large ({size}). The download may take a while. Continue?'**
+  String backup_warn_body(String size);
+
+  /// No description provided for @backup_warn_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get backup_warn_confirm;
+
+  /// No description provided for @backup_refuse_body.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt files ({size}) are above the single-file limit. Download the data only, without the receipt files.'**
+  String backup_refuse_body(String size);
+
+  /// No description provided for @backup_data_only_note.
+  ///
+  /// In en, this message translates to:
+  /// **'Data only: receipts are listed but their files are not downloaded.'**
+  String get backup_data_only_note;
+
+  /// No description provided for @backup_missing_receipts.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{All receipt files are included.} one{1 receipt file could not be downloaded and is marked as missing in the manifest.} other{{count} receipt files could not be downloaded and are marked as missing in the manifest.}}'**
+  String backup_missing_receipts(int count);
+
+  /// No description provided for @backup_working.
+  ///
+  /// In en, this message translates to:
+  /// **'Building your backup…'**
+  String get backup_working;
+
+  /// No description provided for @backup_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup saved.'**
+  String get backup_done;
+
   /// No description provided for @error_invalid_transaction.
   ///
   /// In en, this message translates to:
@@ -3061,6 +3199,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No pet category is available to record this expense.'**
   String get error_no_pet_category;
+
+  /// No description provided for @error_backup_too_large.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup is too large for one file. Use the data-only option.'**
+  String get error_backup_too_large;
 }
 
 class _AppLocalizationsDelegate

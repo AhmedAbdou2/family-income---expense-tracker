@@ -1666,6 +1666,107 @@ class AppLocalizationsEn extends AppLocalizations {
   String get export_pdf_footer => 'Family income & expense tracker';
 
   @override
+  String get backup_section => 'Backup';
+
+  @override
+  String get backup_title => 'Full backup';
+
+  @override
+  String get backup_card_hint =>
+      'Save a copy of all your household data as a ZIP. The file is not encrypted.';
+
+  @override
+  String get backup_intro =>
+      'This downloads one ZIP with your household\'s data and receipt files. It is a readable copy for you, not a restore.';
+
+  @override
+  String get backup_included_title => 'What is included';
+
+  @override
+  String get backup_included_body =>
+      'Your household, people, logins, categories, vehicles, fuel logs, maintenance, fixed expenses, pets, reminders, transactions, budgets and receipt files.';
+
+  @override
+  String get backup_excluded_title => 'What is left out';
+
+  @override
+  String get backup_excluded_body =>
+      'Invite codes are never included: they are access credentials, not household data.';
+
+  @override
+  String get backup_unencrypted_title => 'Not encrypted';
+
+  @override
+  String get backup_unencrypted_body =>
+      'This file is not encrypted. Anyone who opens it can read your data, so keep it somewhere safe.';
+
+  @override
+  String backup_receipts_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count receipt files',
+      one: '1 receipt file',
+      zero: 'No receipt files',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backup_receipts_size(String size) {
+    return 'Total size: $size';
+  }
+
+  @override
+  String get backup_estimate_loading => 'Working out the size…';
+
+  @override
+  String get backup_download_action => 'Download full backup (.zip)';
+
+  @override
+  String get backup_download_data_only_action =>
+      'Download data only (no receipt files)';
+
+  @override
+  String get backup_warn_title => 'This backup is large';
+
+  @override
+  String backup_warn_body(String size) {
+    return 'The receipt files are large ($size). The download may take a while. Continue?';
+  }
+
+  @override
+  String get backup_warn_confirm => 'Continue';
+
+  @override
+  String backup_refuse_body(String size) {
+    return 'The receipt files ($size) are above the single-file limit. Download the data only, without the receipt files.';
+  }
+
+  @override
+  String get backup_data_only_note =>
+      'Data only: receipts are listed but their files are not downloaded.';
+
+  @override
+  String backup_missing_receipts(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count receipt files could not be downloaded and are marked as missing in the manifest.',
+      one: '1 receipt file could not be downloaded and is marked as missing in the manifest.',
+      zero: 'All receipt files are included.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backup_working => 'Building your backup…';
+
+  @override
+  String get backup_done => 'Backup saved.';
+
+  @override
   String get error_invalid_transaction => 'This transaction no longer exists.';
 
   @override
@@ -1686,4 +1787,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get error_no_pet_category =>
       'No pet category is available to record this expense.';
+
+  @override
+  String get error_backup_too_large =>
+      'This backup is too large for one file. Use the data-only option.';
 }

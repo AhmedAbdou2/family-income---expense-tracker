@@ -1678,6 +1678,112 @@ class AppLocalizationsAr extends AppLocalizations {
   String get export_pdf_footer => 'تطبيق متابعة إيرادات ومصروفات الأسرة';
 
   @override
+  String get backup_section => 'النسخ الاحتياطي';
+
+  @override
+  String get backup_title => 'نسخة احتياطية كاملة';
+
+  @override
+  String get backup_card_hint =>
+      'احفظ نسخة من كل بيانات أسرتك في ملف ZIP. الملف غير مشفَّر.';
+
+  @override
+  String get backup_intro =>
+      'ينزّل هذا ملف ZIP واحدًا يحتوي بيانات أسرتك وملفات الإيصالات. إنها نسخة مقروءة لك، وليست استعادة.';
+
+  @override
+  String get backup_included_title => 'ما يتضمّنه الملف';
+
+  @override
+  String get backup_included_body =>
+      'أسرتك، والأشخاص، وبيانات الدخول، والتصنيفات، والسيارات، وسجلات الوقود، والصيانة، والمصروفات الثابتة، والحيوانات الأليفة، والتذكيرات، والعمليات، والميزانيات، وملفات الإيصالات.';
+
+  @override
+  String get backup_excluded_title => 'ما لا يتضمّنه';
+
+  @override
+  String get backup_excluded_body =>
+      'لا تُضمَّن رموز الدعوة أبدًا، لأنها بيانات دخول وليست بيانات الأسرة.';
+
+  @override
+  String get backup_unencrypted_title => 'غير مشفَّر';
+
+  @override
+  String get backup_unencrypted_body =>
+      'هذا الملف غير مشفَّر. أي شخص يفتحه يستطيع قراءة بياناتك، فاحفظه في مكان آمن.';
+
+  @override
+  String backup_receipts_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ملف إيصال',
+      many: '$count ملف إيصال',
+      few: '$count ملفات إيصالات',
+      two: 'ملفا إيصالات',
+      one: 'ملف إيصال واحد',
+      zero: 'لا توجد ملفات إيصالات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String backup_receipts_size(String size) {
+    return 'الحجم الكلي: $size';
+  }
+
+  @override
+  String get backup_estimate_loading => 'جارٍ حساب الحجم…';
+
+  @override
+  String get backup_download_action => 'تنزيل النسخة الكاملة (ZIP)';
+
+  @override
+  String get backup_download_data_only_action =>
+      'تنزيل البيانات فقط (بدون ملفات الإيصالات)';
+
+  @override
+  String get backup_warn_title => 'النسخة كبيرة';
+
+  @override
+  String backup_warn_body(String size) {
+    return 'ملفات الإيصالات كبيرة ($size). قد يستغرق التنزيل وقتًا طويلًا. هل تريد المتابعة؟';
+  }
+
+  @override
+  String get backup_warn_confirm => 'متابعة';
+
+  @override
+  String backup_refuse_body(String size) {
+    return 'حجم ملفات الإيصالات ($size) يتجاوز الحد المسموح لملف واحد. نزّل البيانات فقط بدون ملفات الإيصالات.';
+  }
+
+  @override
+  String get backup_data_only_note =>
+      'تنزيل البيانات فقط: تُدرَج الإيصالات في القائمة دون تنزيل ملفاتها.';
+
+  @override
+  String backup_missing_receipts(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تعذّر تنزيل $count ملف إيصال، وهي مُدرَجة كمفقودة في القائمة.',
+      many: 'تعذّر تنزيل $count ملف إيصال، وهي مُدرَجة كمفقودة في القائمة.',
+      few: 'تعذّر تنزيل $count ملفات إيصالات، وهي مُدرَجة كمفقودة في القائمة.',
+      two: 'تعذّر تنزيل ملفَي إيصال، وهما مُدرَجان كمفقودين في القائمة.',
+      one: 'تعذّر تنزيل ملف إيصال واحد، وهو مُدرَج كمفقود في القائمة.',
+      zero: 'تم تضمين كل ملفات الإيصالات.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backup_working => 'جارٍ إنشاء النسخة الاحتياطية…';
+
+  @override
+  String get backup_done => 'تم حفظ النسخة الاحتياطية.';
+
+  @override
   String get error_invalid_transaction => 'هذه العملية لم تعد موجودة.';
 
   @override
@@ -1697,4 +1803,8 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get error_no_pet_category =>
       'لا يوجد تصنيف للحيوانات لتسجيل هذا المصروف.';
+
+  @override
+  String get error_backup_too_large =>
+      'حجم هذه النسخة يتجاوز حد الملف الواحد. استخدم خيار البيانات فقط.';
 }

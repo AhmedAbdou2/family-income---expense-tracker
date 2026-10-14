@@ -43,4 +43,12 @@ for f in supabase/migrations/*.sql; do
   psql_run -d "$DB" -f - < "$f" >/dev/null
 done
 
+echo ">> backup table completeness check"
+# The registry is generated from the Dart source of truth
+# (lib/features/backup/domain/backup_tables.dart) so the exporter and this check
+# can never disagree. `\i` resolves relative to psql's cwd (the container), so
+# the two files are concatenated and piped instead.
+cat supabase/tests/support/backup_tables.generated.sql \
+    supabase/tests/support/check_backup_tables.sql | psql_run -d "$DB" -f -
+
 echo "MIGRATIONS OK on $DB ($MODE stub)"

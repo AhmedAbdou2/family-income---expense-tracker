@@ -28,6 +28,18 @@ bool _isAdultOnly(String location) {
   return false;
 }
 
+/// Routes only the household OWNER may open. The full backup exports every
+/// table, so it is narrower than the adult features above; an adult who is not
+/// the owner is sent back to the dashboard.
+const Set<String> ownerOnlyRoutes = {'/backup'};
+
+bool _isOwnerOnly(String location) {
+  for (final route in ownerOnlyRoutes) {
+    if (location == route || location.startsWith('$route/')) return true;
+  }
+  return false;
+}
+
 /// Decides where (if anywhere) the router should send the user.
 ///
 /// Flow:
@@ -45,6 +57,7 @@ String? appRedirect({
   bool memberLoading = false,
   bool hasLinkedMember = true,
   bool isAdult = true,
+  bool isOwner = true,
 }) {
   if (authLoading) {
     return location == splashRoute ? null : splashRoute;
@@ -71,6 +84,10 @@ String? appRedirect({
   }
 
   if (!isAdult && _isAdultOnly(location)) {
+    return '/';
+  }
+
+  if (!isOwner && _isOwnerOnly(location)) {
     return '/';
   }
 
