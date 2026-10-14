@@ -32,7 +32,7 @@ Flutter (Riverpod 3, go_router 18, Supabase) + Postgres with RLS.
 ```sh
 flutter gen-l10n        # only if .arb files changed
 flutter analyze         # must be clean
-flutter test            # must pass (359 tests)
+flutter test            # must pass (474 tests)
 flutter build web --release   # compile check; ~3-4 min
 ```
 
@@ -134,6 +134,22 @@ lib/features  auth/  domain (AuthRepository, SignUpOutcome), data
                    person bars), presentation (monthlyTotalsProvider,
                    reportDataProvider over the SAME month rows the dashboard
                    sums); adult-only)
+              backup/   domain (pure backup_tables.dart: exported/excluded
+                   table registry + `::text` casts + size limits +
+                   backupSchemaVersion; backup_archive.dart: row->JSON with
+                   money as `<col>_minor_units` ints and other numerics as
+                   exact decimal strings, data.json + manifest.json,
+                   backupSizeStatus; backup_zip.dart: data.json +
+                   manifest.json + receipts/<path>, unencrypted), data
+                   (backup_service.dart: collectBackupPages past the
+                   ~1000-row PostgREST cap, BackupEstimate/BackupOutcome;
+                   backup_repository_impl.dart: paged reads + Storage
+                   download), presentation (backup_screen.dart: estimate,
+                   unencrypted warning, warn >100 MiB / refuse >300 MiB with a
+                   data-only option, owner only), providers. The generator
+                   tool/gen_backup_tables_sql.dart renders the table registry
+                   into supabase/tests/support/backup_tables.generated.sql,
+                   which the Docker completeness check reads.
 ```
 
 - Budgets and Reports reconcile by construction: both read
@@ -163,7 +179,9 @@ lib/features  auth/  domain (AuthRepository, SignUpOutcome), data
   to the caller's own person), `/settings`. Adult-only: `/vehicles`,
   `/recurring`, `/pets`, `/budgets`, `/reports`, `/export` (the reminder
   routes are covered by the `/pets/` prefix; the receipts section is inline in
-  the transaction form, not a route). Detail routes are
+  the transaction form, not a route). **Owner-only**: `/backup` (pushed from the
+  Settings Backup card; `appRedirect` takes `isOwner` + `ownerOnlyRoutes`).
+  Detail routes are
   declared before the shell (and `/vehicles/new` before `/vehicles/:id`,
   `/pets/new` before `/pets/:id`). A
   household login with no linked person is held on `/claim` until it picks a
@@ -623,6 +641,39 @@ owner can delete the leftover unlinked person from the Family tab.
   nav tests `test/export_nav_test.dart` / `test/pet_reminder_nav_test.dart`);
   analyze clean, web release build OK.
 - Phase 4b excluded on purpose: offline mode and push notifications.
+- Phase 5a (done, awaiting approval): full household backup, **no migration**.
+  New `backup/` feature: the owner opens Settings → Backup and downloads one
+  unencrypted ZIP (`data.json` + `manifest.json` + `receipts/<path>`). Paged
+  reads (`collectBackupPages`, 1000/1001 boundary tested for **every** table) so
+  a >1000-row table is not truncated; money becomes `<col>_minor_units` ints
+  and other `numeric` columns stay exact decimal strings; receipts that fail to
+  download are recorded in the manifest, not fatal. Size is estimated from
+  `transaction_receipts.size_bytes`: warn >100 MiB, refuse >300 MiB with a
+  data-only fallback (the service re-checks the cap too, and a failure is caught
+  so it cannot crash the tab). `backupSchemaVersion` is pinned to the migration
+  count. Owner-only `/backup`: `appRedirect` gained `isOwner` +
+  `ownerOnlyRoutes` ({'/backup'}). One source of truth
+  (`lib/features/backup/domain/backup_tables.dart`) drives both the exporter and
+  a **real** Docker completeness check (`tool/gen_backup_tables_sql.dart` →
+  `supabase/tests/support/backup_tables.generated.sql`, read by
+  `tool/docker/validate.sh` via `check_backup_tables.sql`): every `public` base
+  table must be exported or explicitly excluded (with a reason), and every
+  `numeric` column of an exported table must be read as `::text`. Docker's 14
+  `public` tables: 13 exported (`households` — the only one without
+  `household_id`, filtered by `id` — `members`, `household_users`,
+  `categories`, `vehicles`, `pets`, `recurring_rules`, `transactions`,
+  `transaction_receipts`, `fuel_logs`, `maintenance_items`, `pet_reminders`,
+  `budgets`), 1 excluded (`invites` — bearer credentials, not household data).
+  Proofed both failure modes in Docker (an unregistered `goals` table aborts
+  with `household_id=true`; a new `transactions.tip numeric` aborts as a
+  float-read column). New ARB keys EN+AR, `AppErrorCode.backupTooLarge`,
+  `docs/backup.md` (in-app copy vs manual `pg_dump`, Storage objects excluded
+  from a dump, Free-plan caveat). Tests 474
+  (`test/backup_tables_test.dart` SQL-sync + schema version, `test/backup_pagination_test.dart`
+  every table, `test/backup_manifest_test.dart`, `test/backup_reconcile_test.dart`
+  23,845.67 + missing-receipt + hard-cap, `test/backup_layout_test.dart`
+  360/800/1854 × AR/EN × owner/adult/child, `test/backup_nav_test.dart` owner
+  guard + Settings card); analyze clean, web release build OK.
 
 ### Phase 4b cloud checklist (what Docker cannot prove)
 
@@ -663,4 +714,31 @@ pasting migration 17 (step 18 of the manual list):
    clean up*. Docker proves the RLS DELETE policy but not the Storage API path
    that sets `storage.allow_delete_query` — this is the end-to-end check that
    the guard does not block the app's own delete.
+
+### Phase 5a cloud checklist (what Docker cannot prove)
+
+The backup feature has no migration, so there is nothing to paste. Docker proves
+the paging, the completeness registry and the pure ZIP/JSON logic; these four
+things need a real household on the cloud:
+
+1. **A real backup round-trips.** As the owner: Settings → Backup → *Download
+   full backup*. The ZIP must open, `data.json` must list every table, and the
+   amount for a known transaction must equal the app's figure times 100
+   (minor units). Open `manifest.json`: `schema_version` must be 17 and `invites`
+   must appear under `excluded_tables` with a reason.
+2. **Receipt files are inside and open.** With at least one attached receipt,
+   the ZIP must contain `receipts/<household>/<transaction>/<uuid>.<ext>` and
+   the image/PDF must open. This is the only path that exercises the Storage API
+   download (Docker only proves the metadata read).
+3. **The guards fire for real roles.** As an adult who is not the owner, the
+   Settings card must be *absent* and typing `/backup` must bounce to the
+   dashboard; as a child, likewise (and the Data section is hidden entirely).
+   As the owner, the estimate line shows the true receipt count and total size
+   (compare with Storage → `receipts`).
+4. **The size decision is honest.** This needs a big household, so do not force
+   it: attach enough receipts to cross 100 MiB and confirm the warning dialog
+   appears, then (only if you want) cross 300 MiB and confirm the full button is
+   disabled while *data only* still works. The estimate comes from
+   `transaction_receipts.size_bytes`, so it matches the attachment sizes the app
+   recorded.
 

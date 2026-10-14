@@ -10,6 +10,8 @@ supabase/tests/support/stub_supabase.sql   # stub WITH the storage schema
 supabase/tests/support/stub_no_storage.sql # stub WITHOUT the storage schema
 supabase/tests/support/privcheck17.sql     # privilege matrix / grants audit
 supabase/tests/support/prove_delete_guard.sql # proof the delete guard is honest
+supabase/tests/support/backup_tables.generated.sql # GENERATED registry (do not edit)
+supabase/tests/support/check_backup_tables.sql     # backup completeness check
 tool/docker/validate.sh                    # build a fresh DB + all migrations
 ```
 
@@ -25,9 +27,23 @@ The scripts assume the container name `rls-pg` (override with
 ## Build a fresh DB and apply every migration
 
 ```sh
-tool/docker/validate.sh fresh17          # storage stub (default)
-tool/docker/validate.sh bare17 bare      # no storage schema
+tool/docker/validate.sh fresh18          # storage stub (default)
+tool/docker/validate.sh bare18 bare      # no storage schema
 ```
+
+`validate.sh` also runs the **backup completeness check** after the migrations:
+it loads the generated registry of exported/excluded tables and fails unless
+every `public` base table is either exported or explicitly excluded (with a
+reason), every registered table exists, and every `numeric` column of an
+exported table is read as `::text` (never as a float). The registry is generated
+from the Dart source of truth, so regenerate it after editing
+`lib/features/backup/domain/backup_tables.dart`:
+
+```sh
+dart run tool/gen_backup_tables_sql.dart
+```
+
+See `docs/backup.md` for the feature itself.
 
 ## Run the isolation test and the privilege matrix
 
