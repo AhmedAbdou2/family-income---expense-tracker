@@ -39,11 +39,10 @@ The Arabic sample sets `arabicDigits: true` (the Arabic-Indic numerals); the
 app's *default* is Western digits (`arabicDigits` defaults to `false` in
 Settings), and the PDF follows whatever the setting says.
 
-**Until that review happens the PDF action stays hidden from users**:
-`pdfExportEnabled` in `lib/features/export/presentation/export_screen.dart` is
-`false`, and `test/export_layout_test.dart` pins it that way. Flipping the
-constant to `true` is the whole wiring change; do it once the samples above look
-right (and update that test on purpose).
+The samples were reviewed and approved; the PDF action is wired in
+(`pdfExportEnabled` in `lib/features/export/presentation/export_screen.dart` is
+`true`, and `test/export_layout_test.dart` reflects that). The machine checks
+remain in place (Cairo embedding, contextual forms, RTL layout).
 
 ## What Docker cannot prove (cloud checklist)
 

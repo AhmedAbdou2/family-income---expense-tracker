@@ -40,15 +40,10 @@ final exportRepositoryProvider = Provider<ExportRepository>(
 const String cairoRegularAsset = 'assets/fonts/Cairo-Regular.ttf';
 const String cairoBoldAsset = 'assets/fonts/Cairo-Bold.ttf';
 
-/// AMENDMENT F gate: the PDF summary is implemented and machine-checked (the
-/// Cairo subset is embedded and the glyphs used are the Arabic *contextual*
-/// forms - see test/pdf_summary_test.dart), but the one thing a machine
-/// cannot judge is whether the rendered letters LOOK joined and read
-/// right-to-left. The sample committed at docs/phase4b/pdf-sample-ar.pdf is
-/// what a human reviews; until that review is signed off the action stays
-/// hidden from users, so we never ship a page that might be mojibake.
-/// Flip this to `true` to wire it in.
-const bool pdfExportEnabled = false;
+/// PDF export is wired on. The sample in docs/phase4b was reviewed and
+/// approved; the machine checks (Cairo embedding, contextual forms, RTL
+/// layout) still guard the output.
+const bool pdfExportEnabled = true;
 
 /// Adult-only export screen: pick a window + filters, then download the
 /// rows as CSV (Excel-safe) or a one-page PDF summary.
@@ -184,9 +179,12 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
         memberNames: _memberNames(),
       );
       final chosen = rows.isEmpty ? _filter.from : _filter.to;
-      final dayFormat = DateFormat.yMMMd(locale.toString());
-      final period =
-          '${dayFormat.format(_filter.from)} – ${dayFormat.format(_filter.to)}';
+      final period = buildPeriodText(
+        from: _filter.from,
+        to: _filter.to,
+        locale: locale.toString(),
+        arabicDigits: settings.arabicDigits,
+      );
       final bytes = await buildMonthSummaryPdf(
         labels: PdfSummaryLabels(
           title: l10n.export_pdf_title,

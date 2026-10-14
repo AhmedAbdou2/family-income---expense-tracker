@@ -92,8 +92,7 @@ lib/features  auth/  domain (AuthRepository, SignUpOutcome), data
                    `collectTransactionPages`, because PostgREST caps ~1000
                    rows), presentation (export_screen.dart at `/export`,
                    pdf_summary.dart buildMonthSummaryPdf with the Cairo subset
-                   embedded - GATED by `pdfExportEnabled`, see
-                   docs/phase4b/README.md)
+                   embedded (wired in; see docs/phase4b/README.md))
               vehicles/  domain (Vehicle, FuelType, FuelLog, MaintenanceItem,
                    FuelStats full-to-full, MaintenanceReminder), data,
                    presentation (vehiclesProvider, fuelLogsProvider(vehicleId),

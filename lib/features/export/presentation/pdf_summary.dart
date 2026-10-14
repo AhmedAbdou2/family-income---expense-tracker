@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import 'package:intl/intl.dart';
+
 import '../../../core/utils/money.dart';
 import '../domain/month_summary.dart';
 
@@ -214,4 +216,19 @@ Future<Uint8List> buildMonthSummaryPdf({
   );
 
   return document.save();
+}
+
+/// Builds the period text shown on the PDF summary and in exports.
+///
+/// Uses `DateFormat.yMMMd` for the locale, then converts digits to
+/// Arabic-Indic if [arabicDigits] is true.
+String buildPeriodText({
+  required DateTime from,
+  required DateTime to,
+  required String locale,
+  required bool arabicDigits,
+}) {
+  final f = DateFormat.yMMMd(locale);
+  final text = '${f.format(from)} – ${f.format(to)}';
+  return arabicDigits ? Money.toArabicIndic(text) : text;
 }

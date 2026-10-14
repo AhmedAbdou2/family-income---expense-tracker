@@ -127,16 +127,14 @@ void main() {
     expect(find.byIcon(Icons.person_outline_rounded), findsOneWidget);
     expect(find.byIcon(Icons.category_outlined), findsOneWidget);
     expect(find.text('Download CSV (Excel)'), findsOneWidget);
+    expect(find.text('Download PDF summary'), findsOneWidget);
+    expect(find.byIcon(Icons.picture_as_pdf_outlined), findsOneWidget);
   });
 
   testWidgets(
-      'AMENDMENT F: the PDF action stays hidden until the sample is approved',
+      'the PDF action is wired in (sample approved)',
       (tester) async {
-    // The gate is a single constant. If this test fails because someone
-    // flipped it, that is the prompt to confirm the Arabic sample in
-    // docs/phase4b renders with joined letters (see docs/phase4b/README.md)
-    // and then update this expectation on purpose.
-    expect(pdfExportEnabled, isFalse);
+    expect(pdfExportEnabled, isTrue);
 
     tester.view.physicalSize = const Size(800, 1000);
     tester.view.devicePixelRatio = 1.0;
@@ -147,7 +145,7 @@ void main() {
     );
     await _settle(tester);
 
-    expect(find.byIcon(Icons.picture_as_pdf_outlined), findsNothing);
+    expect(find.byIcon(Icons.picture_as_pdf_outlined), findsOneWidget);
   });
 
   testWidgets('the CSV action is enabled by default (the month so far)',
