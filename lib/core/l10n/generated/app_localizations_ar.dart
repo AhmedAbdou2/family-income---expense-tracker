@@ -1666,7 +1666,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get export_pdf_title => 'الملخص الشهري';
+  String get export_pdf_title => 'ملخص الشهر';
 
   @override
   String get export_household => 'الأسرة';

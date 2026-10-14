@@ -594,7 +594,7 @@
   "export_hint": "يفتح ملف CSV في إكسل أو Google Sheets، وملف PDF ملخص من صفحة واحدة.",
   "export_range_note": "الفترة: {from} – {to}",
   "@export_range_note": {"placeholders": {"from": {"type": "String"}, "to": {"type": "String"}}},
-  "export_pdf_title": "الملخص الشهري",
+  "export_pdf_title": "ملخص الشهر",
   "export_household": "الأسرة",
   "export_period": "الفترة",
   "export_pdf_footer": "تطبيق متابعة إيرادات ومصروفات الأسرة",
