@@ -151,11 +151,11 @@ void main() {
 
   group('Arabic summary', skip: _skip, () {
     test('the header title is at the right margin and complete', () {
-      final titleRow = _rowOf(ar, _find(ar, 'الملخص'))
+      final titleRow = _rowOf(ar, _find(ar, 'ملخص'))
         ..sort((a, b) => b.xMin.compareTo(a.xMin));
       final title = titleRow.map((w) => _normalize(w.text)).join(' ');
 
-      expect(title, 'الملخص الشهري',
+      expect(title, 'ملخص الشهر',
           reason: 'the full bold title must be laid out (no lost final letter)');
       expect(titleRow.first.xMax, greaterThan(595 - 80),
           reason: 'the title must start at the right margin');

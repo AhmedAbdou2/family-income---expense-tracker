@@ -15,7 +15,9 @@ import 'package:family_income_expense_tracker/features/transactions/domain/entit
 final sampleMonth = DateTime(2026, 6, 15);
 
 const sampleLabelsAr = PdfSummaryLabels(
-  title: 'الملخص الشهري',
+  // The app's real title (lib/core/l10n/app_ar.arb -> export_pdf_title). The
+  // sample must match the product, not a longer variant.
+  title: 'ملخص الشهر',
   householdLabel: 'الأسرة',
   periodLabel: 'الفترة',
   incomeLabel: 'الإيرادات',
@@ -99,7 +101,11 @@ Future<Uint8List> buildSamplePdf({required bool arabic}) async {
   final bold = File('assets/fonts/Cairo-Bold.ttf').readAsBytesSync();
   return buildMonthSummaryPdf(
     labels: arabic ? sampleLabelsAr : sampleLabelsEn,
-    householdName: arabic ? 'أسرة أحمد' : 'Ahmed Family',
+    // 'الشهري' ends in a YEH right after a non-joining REH, i.e. an *isolated*
+    // YEH (U+FEF1): the exact case the old font mapping broke. It keeps the
+    // rendered sample an honest check of the fix rather than one that hides
+    // it. See docs/phase4b/README.md.
+    householdName: arabic ? 'أسرة الشهري' : 'Ahmed Family',
     periodText: arabic ? 'يونيو ٢٠٢٦' : 'June 2026',
     summary: sampleSummary(arabic: arabic),
     currencyCode: Currency.label('EGP', locale: arabic ? 'ar' : 'en'),

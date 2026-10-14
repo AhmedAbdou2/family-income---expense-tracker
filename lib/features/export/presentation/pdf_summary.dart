@@ -6,6 +6,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:intl/intl.dart';
 
 import '../../../core/utils/money.dart';
+import '../domain/arabic_pdf_font.dart';
 import '../domain/month_summary.dart';
 
 /// Localized labels the summary sheet prints. Passing them in keeps this
@@ -85,8 +86,18 @@ Future<Uint8List> buildMonthSummaryPdf({
 
   final theme = (regularFont != null && boldFont != null)
       ? pw.ThemeData.withFont(
-          base: pw.Font.ttf(ByteData.sublistView(regularFont)),
-          bold: pw.Font.ttf(ByteData.sublistView(boldFont)),
+          // The pdf package rewrites Arabic letters to their legacy
+          // Presentation Forms-B code points, and Cairo carries no glyph for
+          // the isolated forms, so the widths collapse to zero and the letter
+          // overlaps its neighbour. `withArabicLetterForms` adds the missing
+          // forms to the embedded font (in memory only - the asset is
+          // untouched). See arabic_pdf_font.dart for the full story.
+          base: pw.Font.ttf(
+            ByteData.sublistView(withArabicLetterForms(regularFont)),
+          ),
+          bold: pw.Font.ttf(
+            ByteData.sublistView(withArabicLetterForms(boldFont)),
+          ),
         ).copyWith(defaultTextStyle: pw.TextStyle(wordSpacing: wordSpacing))
       : null;
 
